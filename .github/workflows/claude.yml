@@ -48,3 +48,5 @@ jobs:
           # or https://code.claude.com/docs/en/cli-reference for available options
           # claude_args: '--allowed-tools Bash(gh pr *)'
 
+          # Optional: add assignee trigger for issues
+          assignee_trigger: 'claude'
