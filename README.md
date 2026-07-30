@@ -14,7 +14,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 
 ## セットアップ
 
-Node.js のバージョンは `nodev` によって `.node-version` で固定されている。
+Node.js のバージョンは `nodenv` によって `.node-version` で固定されている。
 
 ```bash
 npm install
