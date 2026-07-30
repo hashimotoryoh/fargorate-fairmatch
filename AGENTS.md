@@ -83,6 +83,30 @@ Node.js のバージョンは `.node-version` に従うこと。
 
 Nuxt v4の公式が推奨する構成に原則として則ること。
 
+- `app/`: ページ・レイアウト・ミドルウェアなどクライアント側のコード
+- `server/`: Nitroのサーバールート（`server/api/`）と、そこから自動インポートされるユーティリティ（`server/utils/`）
+- `shared/`: `app/` と `server/` の双方から使う型やユーティリティ。`#shared/` エイリアスで参照する
+
+外部API（CSI・FargoRate）はブラウザから直接叩くとCORSで失敗するため、必ず `server/` 配下のサーバールート経由で呼ぶこと。
+
+### 認証
+
+ユーザーの認証はFargoRate ID（13桁の数値）のルックアップで行う。セッション管理には [Nuxt Auth Utils](https://github.com/atinux/nuxt-auth-utils) を使う。
+
+フローは次のとおり。
+
+1. ユーザーが `/lookup` でFargoRate IDを入力する
+2. CSIメンバーシップルックアップAPIをIDで検索し、姓名・リーグ・リージョン・チームを得る
+3. その姓名でFargoRateメンバーシップルックアップAPIを検索し、メンバーシップIDの一致で1件に絞ってレーティングと信頼度を得る
+4. 得られたプレイヤー情報をユーザーに見せ、本人かどうかを確認する
+5. 本人だと確認できたらセッションに保存する
+
+確認の確定時（`POST /api/auth/session`）にクライアントから受け取るのはFargoRate IDだけとし、セッションに保存する情報はサーバー側でルックアップし直した結果を使う。クライアントが任意の姓名やレーティングを自称できないようにするため、この方針を崩さないこと。
+
+未認証のユーザーは `app/middleware/auth.global.ts` によって全ページから `/lookup` へリダイレクトされる。サインアウトはNuxt Auth Utils内蔵の `DELETE /api/_auth/session` を使う。
+
+セッションの秘密鍵は環境変数 `NUXT_SESSION_PASSWORD` で与える。`.env.example` を参照すること。
+
 ### コード品質
 
 以下のツールでコード品質を担保している。全てのコーディングはそれらのルールに従うこと。

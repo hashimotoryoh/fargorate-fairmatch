@@ -11,6 +11,13 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [daisyUI](https://daisyui.com/)
+- [Nuxt Auth Utils](https://github.com/atinux/nuxt-auth-utils)
+
+## 認証
+
+ユーザーはFargoRate ID（13桁の数値）のルックアップを通して認証される。入力されたIDでCSIメンバーシップルックアップAPIから姓名を引き、その姓名でFargoRateメンバーシップルックアップAPIを検索してレーティングを得る。表示されたプレイヤーが本人であることをユーザーが確認するとサインインが完了する。
+
+未認証のユーザーは全てのページからルックアップページ `/lookup` へリダイレクトされる。
 
 ## セットアップ
 
@@ -19,6 +26,14 @@ Node.js のバージョンは `nodenv` によって `.node-version` で固定さ
 ```bash
 npm install
 ```
+
+環境変数を `.env.example` からコピーして用意する。
+
+```bash
+cp .env.example .env
+```
+
+`NUXT_SESSION_PASSWORD` はセッションクッキーの署名・暗号化に使う32文字以上の秘密鍵で、空のままでも開発サーバーの初回起動時に自動生成される。本番環境では明示的に設定すること。
 
 ## 開発サーバー
 
