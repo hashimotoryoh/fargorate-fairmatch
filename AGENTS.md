@@ -154,21 +154,54 @@ Node.js のバージョンは `.node-version` に従うこと。
 
 Nuxt v4の公式が推奨する構成に原則として則ること。
 
+外部APIへのアクセスや秘匿すべき処理はサーバールートに置き、コンポーネントからはコンポーザブル経由で呼び出す。コンポーネントに通信処理を直接書かないこと。
+
+### コーディング規約
+
+- Vueのコンポーネントは単一ファイルコンポーネントで書き、`<script setup lang="ts">` を用いたComposition APIとする。Options APIは使わない
+- ファイル内の並びは `<script>`、`<template>`、`<style>` の順とする
+- コンポーネント名はパスカルケースの複数語（例: `PlayerCard.vue`）とする
+- Nuxtの自動インポートを前提とし、`vue` や `#app` からの明示的なインポートは行わない
+- TypeScriptは `strict` が有効である。`any` や不要な型アサーションに頼らず、型を定義すること
+- コメントは「なぜそうしているか」を説明するために書く。コードを読めばわかることは書かない
+
+### スタイリング
+
+- 設定はCSSファーストで行う。`app/assets/css/main.css` の `@import` と `@plugin` が入口であり、`tailwind.config.js` は作成しないこと
+- daisyUIのコンポーネントクラス（`btn`、`card` など）を優先し、細かな調整をTailwindのユーティリティクラスで行う
+- スコープ付きの `<style>` は、ユーティリティクラスで表現できない場合に限って使う
+
 ### コード品質
 
 以下のツールでコード品質を担保している。全てのコーディングはそれらのルールに従うこと。
 
 - ESLint: `eslint.config.mjs` + `@nuxt/eslint` が生成する `.nuxt/eslint.config.mjs`
 - Prettier: `.prettierrc.json`
+- EditorConfig: `.editorconfig`
+
+変更をコミットする前に、次を実行して全て通ることを確認すること。
+
+```bash
+npm run lint
+npm run format
+```
+
+指摘があれば `npm run lint:fix` と `npm run format:fix` で修正し、再度上記を実行すること。
+
+型チェック専用のスクリプトは用意していない。型エラーは開発サーバーやエディタ、`npm run build` で確認すること。
 
 ### テスト
 
 現状テストコードの実装はない。Vitestを使ったテストの作成を予定している。
 
+テストを整備するまでの間は、変更内容を開発サーバーで動作確認し、その結果をPRに記載すること。
+
 ### CI
 
-GitHub Actionsのワークフロー `.github/workflows/ci.yml` で、`main` ブランチや全てのPRで次が担保されていることをチェックしている。
+GitHub Actionsで次のワークフローを運用している。
 
-- ESLint
-- Prettier
-- テスト（追加予定）
+- `.github/workflows/ci.yml`: `main` ブランチへのpushと全てのPRで、ESLintとPrettierのチェックを実行する。テストは追加予定
+- `.github/workflows/claude.yml`: IssueやPRのコメントで `@claude` に言及した際にClaude Codeを実行する
+- `.github/workflows/claude-code-review.yml`: ドラフトでないPRに対してコードレビューを実行する
+
+エージェントが作成したPRはCIの結果を確認し、失敗していれば原因を調べて修正すること。CIが落ちた状態で放置しないこと。
