@@ -96,7 +96,7 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 ### CI
 
-GitHub Actionsのワークフロー `.github/workflows/ci.yml`　で、`main` ブランチや全てのPRで次が担保されていることをチェックしている。
+GitHub Actionsのワークフロー `.github/workflows/ci.yml` で、`main` ブランチや全てのPRで次が担保されていることをチェックしている。
 
 - ESLint
 - Prettier
