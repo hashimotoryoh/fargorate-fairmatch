@@ -95,19 +95,58 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 - 一流のプロ: 700台
 - 世界トッププロ: 800台
 
+### 外部API
+
+利用する外部APIの調査結果は `docs/` にまとめている。実装前に必ず参照すること。
+
+- `docs/fargorate-membership-lookup-api.md`: FargoRateのプレイヤー検索
+- `docs/csi-membership-lookup-api.md`: CSIのメンバーシップ検索
+
+いずれも公開ドキュメントのある公式APIではなく、ブラウザの通信を調査して判明したエンドポイントである。次を前提に扱うこと。
+
+- 仕様が予告なく変わりうるため、レスポンスの形を信頼しすぎず、取得できなかった場合の挙動も実装すること
+- 呼び出しはブラウザから直接行わず、Nuxtのサーバールート（`server/api/`）を経由させること。CORSの制約を受けるうえ、リクエストの詳細をアプリ側に閉じ込められる
+- 不要なリクエストを繰り返さないこと。入力に応じて検索する場合はデバウンスやキャッシュを検討する
+- 読み取りのみに使う。レーティングを更新する用途では使わない
+
 ## 技術スタック
 
 - Nuxt v4
 - Vue 3
 - TypeScript
-- Tailwind CSS
-- daisyUI
+- Tailwind CSS v4
+- daisyUI v5
+
+パッケージマネージャーはnpmを使用する。`package-lock.json` を管理しているため、yarnやpnpmに置き換えないこと。依存を追加した場合は `package.json` と `package-lock.json` の両方をコミットすること。
 
 ## セットアップ
 
 Node.js のバージョンは `.node-version` に従うこと。
 
 セットアップ方法は人間にも案内する必要があるため `README.md` に記載している。そちらを参照すること。
+
+エージェントは作業を始める前に `npm install` を済ませておくこと。`postinstall` で `nuxt prepare` が走り、型定義やESLint設定を含む `.nuxt` が生成される。これがない状態ではESLintも型解決も正しく動作しない。`.nuxt` が失われている場合は `npx nuxt prepare` で再生成できる。
+
+## ディレクトリ構成
+
+- `app/`: アプリケーションのソース。Nuxt v4 の `srcDir`
+  - `app/app.vue`: ルートコンポーネント
+  - `app/layouts/`: レイアウト
+  - `app/pages/`: ページ。ファイル名がそのままルートになる
+  - `app/assets/css/main.css`: Tailwind CSS と daisyUI の読み込み口
+- `public/`: ビルドを経ずそのまま配信される静的ファイル
+- `docs/`: 外部APIの調査などのドキュメント
+- `.github/workflows/`: GitHub Actions のワークフロー
+
+次のディレクトリは必要になった時点で作成する。いずれもNuxtの規約に沿った配置とすること。
+
+- `app/components/`: コンポーネント。自動インポートの対象
+- `app/composables/`: コンポーザブル。自動インポートの対象
+- `app/utils/`: 汎用の関数。自動インポートの対象
+- `server/`: Nitroのサーバールート。プロジェクトルート直下に置く
+- `shared/`: クライアントとサーバーの双方から使う型やロジック。プロジェクトルート直下に置く
+
+`.nuxt` や `.output` は生成物であり、編集もコミットもしないこと。
 
 ## アーキテクチャ
 
