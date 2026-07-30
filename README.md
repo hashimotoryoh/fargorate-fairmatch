@@ -1,75 +1,49 @@
-# Nuxt Minimal Starter
+# FargoRate FairMatch
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+FargoRateを用いたビリヤード対戦を補助するウェブアプリ。対戦中のスコアの入力や、対戦成績の振り返りなどを補助する。
 
-## Setup
+このアプリは、ユーザーのFargoRateを公式システムからAPI経由で取得して扱うが、対戦結果をそのシステムには送信せずレーティングの更新は行わない。
 
-Make sure to install dependencies:
+## 技術スタック
+
+- [Nuxt v4](https://nuxt.com/)
+- [Vue 3](https://ja.vuejs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [daisyUI](https://daisyui.com/)
+
+## セットアップ
+
+Node.js のバージョンは `nodev` によって `.node-version` で固定されている。
 
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
+## 開発サーバー
 
-Start the development server on `http://localhost:3000`:
+`http://localhost:3000` で開発サーバーが起動する。（ポートが使用されている場合はインクリメントされる。）
 
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
-
-Build the application for production:
+## 本番ビルド
 
 ```bash
-# npm
 npm run build
 
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+# 本番ビルドのローカルでのプレビュー
+npm run preview
 ```
 
-Locally preview production build:
+## コード品質
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+# ESLint
+npm run lint
+npm run lint:fix
+# Prettier
+npm run format
+npm run format:fix
 ```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

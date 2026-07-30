@@ -73,9 +73,9 @@ Node.js のバージョンは `.node-version` に従うこと。
 
 Nuxt v4の公式が推奨する構成に原則として則ること。
 
-### コーディング規約
+### コード品質
 
-以下のツールでルールを設定している。全てのコーディングはそれらのルールに従うこと。
+以下のツールでコード品質を担保している。全てのコーディングはそれらのルールに従うこと。
 
 - ESLint: `eslint.config.mjs` + `@nuxt/eslint` が生成する `.nuxt/eslint.config.mjs`
 - Prettier: `.prettierrc.json`
