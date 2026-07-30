@@ -5,6 +5,8 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "generate": "nuxt generate",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -19,6 +21,7 @@
   "devDependencies": {
     "@nuxt/eslint": "^1.16.0",
     "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
     "typescript": "^6.0.3"
   }
 }
