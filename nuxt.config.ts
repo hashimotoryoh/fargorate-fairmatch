@@ -33,9 +33,6 @@ function resolveCommitSha(): string {
   }
 }
 
-// 個人のレーティングを含むため、検索エンジンに拾わせないページ。
-const PRIVATE_ROUTES = ['/dashboard', '/game', '/settings']
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -62,18 +59,9 @@ export default defineNuxtConfig({
       siteUrl: '',
     },
   },
-  // メタタグでの noindex に加えてヘッダーでも指示する。HTML以外のレスポンスや
-  // リダイレクトも対象になるため。
-  //
-  // なお保護ページに prerender や ISR/SWR のルートルールを付けてはならない。
+  // 保護ページに prerender や ISR/SWR のルートルールを足してはならない。
   // nuxt-auth-utils はプリレンダ・キャッシュ時にサーバー側のセッション取得を
   // 飛ばすため、ミドルウェアが認証済みユーザーを未認証と判定してしまう。
-  routeRules: Object.fromEntries(
-    PRIVATE_ROUTES.map((route) => [
-      route,
-      { headers: { 'x-robots-tag': 'noindex, nofollow' } },
-    ]),
-  ),
   vite: {
     plugins: [tailwindcss()],
   },

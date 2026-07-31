@@ -187,7 +187,9 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 - `app/middleware/auth.ts`: 未認証なら `/lookup` へ送る。保護対象のページに `definePageMeta({ middleware: 'auth' })` で付ける
 - `app/middleware/guest.ts`: 認証済みなら `/dashboard` へ送る。`/lookup` に付ける
 
-保護対象のパスを配列で持つグローバルミドルウェアにはしないこと。ページを追加するたびに配列の更新が必要になり、更新漏れがそのまま情報の露出になる。
+保護対象のパスをどこかに配列で列挙する形にはしないこと。グローバルミドルウェアであれ `routeRules` であれ、ページを追加するたびに更新が必要になり、更新漏れがそのまま情報の露出になる。保護に関わる指定はすべてページ側の `definePageMeta` から辿れる状態に保つこと。
+
+`auth.ts` はSSR時に `x-robots-tag: noindex, nofollow` も立てる。レイアウトの `noindex` メタタグは本文を返す応答にしか乗らず、未認証時のリダイレクトをカバーできないため。
 
 `auth.ts` は元の行き先を `redirect` クエリに残し、サインイン後にそこへ戻す。この値はURLから誰でも与えられるため、必ず `resolveRedirectPath()`（`app/utils/navigation.ts`）を通してから `navigateTo` に渡すこと。外部サイトへ誘導するオープンリダイレクトを防ぐため。
 
