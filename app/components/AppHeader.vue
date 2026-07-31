@@ -21,14 +21,22 @@ const localePath = useLocalePath()
       </NuxtLink>
     </div>
 
-    <nav v-if="showNav" class="navbar-end hidden sm:flex">
-      <ul class="menu menu-horizontal gap-1 px-1">
-        <li v-for="item in mainNavItems" :key="item.to">
-          <NuxtLink :to="localePath(item.to)" active-class="menu-active">
-            {{ $t(item.labelKey) }}
-          </NuxtLink>
-        </li>
-      </ul>
-    </nav>
+    <!--
+      言語の切り替えはどのページからも要るため、`navbar-end` 自体は `showNav`
+      によらず置き、その中でナビゲーションだけを出し分ける。
+    -->
+    <div class="navbar-end gap-2">
+      <nav v-if="showNav" class="hidden sm:block">
+        <ul class="menu menu-horizontal gap-1 px-1">
+          <li v-for="item in mainNavItems" :key="item.to">
+            <NuxtLink :to="localePath(item.to)" active-class="menu-active">
+              {{ $t(item.labelKey) }}
+            </NuxtLink>
+          </li>
+        </ul>
+      </nav>
+
+      <LocaleSwitcher />
+    </div>
   </header>
 </template>

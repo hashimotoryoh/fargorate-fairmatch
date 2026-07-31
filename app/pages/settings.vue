@@ -45,5 +45,20 @@ async function signOut() {
         </div>
       </div>
     </div>
+
+    <div class="card bg-base-200">
+      <div class="card-body gap-4">
+        <div>
+          <h2 class="card-title text-base">{{ $t('settings.language') }}</h2>
+          <p class="text-base-content/70 mt-1 text-sm">
+            {{ $t('settings.languageDescription') }}
+          </p>
+        </div>
+
+        <div class="card-actions">
+          <LocaleSwitcher />
+        </div>
+      </div>
+    </div>
   </div>
 </template>

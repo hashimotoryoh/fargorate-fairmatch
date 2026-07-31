@@ -24,6 +24,16 @@ describe('AppHeader', () => {
     expect(component.find('nav').exists()).toBe(false)
   })
 
+  // 言語の切り替えはどのページからも要る。ナビゲーションを出さない公開ページ
+  // でも消えないことを固定する。
+  it('ナビゲーションの有無によらず言語の切り替えを出す', async () => {
+    for (const showNav of [false, true]) {
+      const component = await mountSuspended(AppHeader, { props: { showNav } })
+
+      expect(component.find('select').exists()).toBe(true)
+    }
+  })
+
   it('show-nav を付けると主要ナビゲーションを出す', async () => {
     const component = await mountSuspended(AppHeader, {
       props: { showNav: true },
@@ -46,6 +56,6 @@ describe('AppHeader', () => {
     })
 
     expect(component.find('nav').classes()).toContain('hidden')
-    expect(component.find('nav').classes()).toContain('sm:flex')
+    expect(component.find('nav').classes()).toContain('sm:block')
   })
 })
