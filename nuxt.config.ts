@@ -37,11 +37,19 @@ function resolveCommitSha(): string {
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/eslint', 'nuxt-auth-utils'],
+  modules: ['@nuxt/content', '@nuxt/eslint', 'nuxt-auth-utils'],
   typescript: {
     strict: true,
   },
   css: ['@/assets/css/main.css'],
+  content: {
+    experimental: {
+      // Nuxt Content は既定で better-sqlite3 を要求し、無ければ対話的に
+      // インストールを促す。Node.js 22.5 以降に同梱の `node:sqlite` を使えば
+      // ネイティブ依存を足さずに済み、CIでもビルドが止まらない。
+      sqliteConnector: 'native',
+    },
+  },
   app: {
     head: {
       htmlAttrs: { lang: 'ja' },
