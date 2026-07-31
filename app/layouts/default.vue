@@ -1,5 +1,16 @@
 <template>
-  <div class="container mx-auto p-4">
-    <slot />
+  <!--
+    min-h-dvh と flex-1 の組み合わせで、コンテンツが短くてもフッターが
+    画面の最下部に張り付く。dvh を使うのはモバイルSafariのアドレスバーの
+    伸縮でフッターがはみ出すのを避けるため。
+  -->
+  <div class="flex min-h-dvh flex-col">
+    <AppHeader />
+
+    <main class="container mx-auto w-full flex-1 p-4">
+      <slot />
+    </main>
+
+    <AppFooter />
   </div>
 </template>
