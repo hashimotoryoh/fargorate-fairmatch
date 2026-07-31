@@ -13,9 +13,24 @@ const shortCommitSha = computed(() => commitSha.slice(0, 7))
       3カラムの1つ目を空にすることで、中央のセルがビューポートに対して中央に来る。
     -->
     <div
-      class="text-base-content/70 container mx-auto flex flex-col items-center gap-1 p-4 text-xs sm:grid sm:grid-cols-3"
+      class="text-base-content/70 container mx-auto flex flex-col items-center gap-1 p-4 text-xs sm:grid sm:grid-cols-3 sm:items-center"
     >
-      <span class="hidden sm:block" />
+      <!--
+        3カラムの1つ目は中央のセルをビューポート中央に置くための余白でもある。
+        法的なページへの導線はどのページからも辿れる必要があるため、ここに置く。
+      -->
+      <nav
+        class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-start"
+      >
+        <NuxtLink
+          v-for="item in legalNavItems"
+          :key="item.to"
+          class="link link-hover"
+          :to="item.to"
+        >
+          {{ item.label }}
+        </NuxtLink>
+      </nav>
 
       <!--
         要素間の間隔は gap で作る。テンプレート上の改行はコンパイル時に
