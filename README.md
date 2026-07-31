@@ -81,6 +81,34 @@ npm run format:fix
 
 型チェック専用のスクリプトは用意していない。型エラーは開発サーバーやエディタ、`npm run build` で確認する。
 
+## テスト
+
+[Vitest](https://vitest.dev/) でテストを実行する。
+
+```bash
+# 全て実行する
+npm run test
+
+# 変更を監視して実行し続ける
+npm run test:watch
+
+# カバレッジを測る
+npm run test:coverage
+```
+
+テストは2つのプロジェクトに分かれている。片方だけを実行したい場合は `--project` で選ぶ。
+
+| プロジェクト | 置き場所      | 実行環境         | 対象                                       |
+| ------------ | ------------- | ---------------- | ------------------------------------------ |
+| `unit`       | `tests/unit/` | 素のNode         | 純粋なロジック、サーバールート、規約の検査 |
+| `nuxt`       | `tests/nuxt/` | Nuxtのランタイム | コンポーネント、レイアウト、ページ         |
+
+```bash
+npm run test -- --project unit
+```
+
+外部APIへは実通信しない。CSIとFargoRateの応答はテスト側で差し替えている。
+
 ## ライセンス
 
 [MIT License](LICENSE)

@@ -149,6 +149,11 @@ Node.js のバージョンは `.node-version` に従うこと。
   - `shared/types/`: 双方から使う型定義
   - `shared/utils/`: 双方から使う関数。`app/` と `server/` の両方へ自動インポートされる
 - `public/`: ビルドを経ずそのまま配信される静的ファイル
+- `tests/`: Vitestのテスト。プロジェクトルート直下に置く
+  - `tests/unit/`: 素のNode環境で動くテスト。純粋なロジックとサーバールート
+  - `tests/nuxt/`: Nuxtのランタイムを立ち上げるテスト。コンポーネントとページ
+  - `tests/helpers/`: テストから使う補助。フィクスチャやh3のハンドラー呼び出し
+  - `tests/setup/`: テストの前処理。Nitroの自動インポートの補完
 - `docs/`: 外部APIの調査などのドキュメント
 - `.github/workflows/`: GitHub Actions のワークフロー
 
@@ -252,15 +257,36 @@ npm run format
 
 ### テスト
 
-現状テストコードの実装はない。Vitestを使ったテストの作成を予定している。
+Vitestでテストを書く。実行方法は `README.md` に記載している。
 
-テストを整備するまでの間は、変更内容を開発サーバーで動作確認し、その結果をPRに記載すること。
+テストは2つのプロジェクトに分かれており、設定は `vitest.config.ts` にまとめてある。書く対象に応じて置き場所を選ぶこと。
+
+- `unit`: 素のNode環境。純粋なロジックと、Nitroのサーバールートをh3のハンドラーとして直接叩く機能テストを置く
+- `nuxt`: Nuxtのランタイムを立ち上げる環境。コンポーネントやページの描画・操作を確かめるUIテストを置く。起動が重いため、Nuxtのランタイムを要さないものは `unit` に置くこと
+
+ファイル名は `*.spec.ts` とし、テスト対象と同じ階層構造で並べること。ディレクトリ名は変えないこと。Nuxtが生成する `tsconfig.app.json` は `tests/nuxt/**/*` を含むため、この名前であればエディタでNuxtの型と自動インポートが解決される。
+
+方針は次のとおり。
+
+- テスト名は日本語で、何が保証されているかを書く。「正しく動く」ではなく「未認証ならルックアップページへ送る」のように、期待する挙動そのものを書くこと
+- 外部APIへは決して実通信しないこと。`tests/setup/nitro-auto-imports.ts` が `$fetch` を既定で失敗させてあるので、テストごとに `vi.stubGlobal` で差し替える
+- サーバールートは `tests/helpers/h3.ts` の `callHandler` でWeb標準のリクエストとして叩く。`readBody` の解釈や `createError` の応答への変換まで含めて確かめるため、ハンドラーを関数として直接呼ばないこと
+- 認証やリダイレクトの制限は、緩めた場合にテストが落ちる形で書くこと。オープンリダイレクトの防止やセッションへの保存内容は、壊れても画面上は正常に見えてしまう
+- `tests/unit/repository/` にはリポジトリの規約そのものを守るテストを置いている。保護ページの宣言漏れやガイドのシンボリックリンクなど、レビューで見落とすと影響の大きいものが対象である
+
+`server/` のコードはNitroの自動インポートに依存しており、素のNode環境では未定義になる。テストのためにソースへインポート文を足すのではなく、`tests/setup/nitro-auto-imports.ts` に名前を足して解決すること。
+
+変更をコミットする前に、次を実行して通ることを確認すること。
+
+```bash
+npm run test
+```
 
 ### CI
 
 GitHub Actionsで次のワークフローを運用している。
 
-- `.github/workflows/ci.yml`: `main` ブランチへのpushと全てのPRで、ESLintとPrettierのチェックを実行する。テストは追加予定
+- `.github/workflows/ci.yml`: `main` ブランチへのpushと全てのPRで、ESLintとPrettierのチェックとVitestのテストを実行する
 - `.github/workflows/claude.yml`: Issue・PRのコメントやレビュー、Issueの本文・タイトルで `@claude` に言及した際にClaude Codeを実行する
 - `.github/workflows/claude-code-review.yml`: ドラフトでないPRに対してコードレビューを実行する
 
