@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { PlayerProfile } from '#shared/types/player'
 
+definePageMeta({ middleware: 'guest' })
+
+const route = useRoute()
 const { fetch: refreshSession } = useUserSession()
 
 const fargorateId = ref('')
@@ -47,7 +50,7 @@ async function lookup() {
   }
 }
 
-// 本人だと確認できたので認証を確定し、トップページへ移動する。
+// 本人だと確認できたので認証を確定し、元々開こうとしていたページへ移動する。
 async function confirm() {
   pending.value = true
   errorMessage.value = ''
@@ -58,7 +61,7 @@ async function confirm() {
       body: { fargorateId: fargorateId.value },
     })
     await refreshSession()
-    await navigateTo('/')
+    await navigateTo(resolveRedirectPath(route.query.redirect))
   } catch (error) {
     errorMessage.value = toErrorMessage(
       error,
