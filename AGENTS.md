@@ -133,7 +133,14 @@ Node.js のバージョンは `.node-version` に従うこと。
   - `app/app.vue`: ルートコンポーネント
   - `app/layouts/`: レイアウト
   - `app/pages/`: ページ。ファイル名がそのままルートになる
+  - `app/middleware/`: ルートミドルウェア。`.global.ts` の接尾辞で全ルートに適用される
   - `app/assets/css/main.css`: Tailwind CSS と daisyUI の読み込み口
+- `server/`: Nitroのサーバールート。プロジェクトルート直下に置く
+  - `server/api/`: APIのエンドポイント。ファイル名の `.post.ts` などがHTTPメソッドに対応する
+  - `server/utils/`: サーバールートから自動インポートされるユーティリティ
+- `shared/`: クライアントとサーバーの双方から使う型やロジック。プロジェクトルート直下に置く
+  - `shared/types/`: 双方から使う型定義
+  - `shared/utils/`: 双方から使う関数。`app/` と `server/` の両方へ自動インポートされる
 - `public/`: ビルドを経ずそのまま配信される静的ファイル
 - `docs/`: 外部APIの調査などのドキュメント
 - `.github/workflows/`: GitHub Actions のワークフロー
@@ -143,8 +150,6 @@ Node.js のバージョンは `.node-version` に従うこと。
 - `app/components/`: コンポーネント。自動インポートの対象
 - `app/composables/`: コンポーザブル。自動インポートの対象
 - `app/utils/`: 汎用の関数。自動インポートの対象
-- `server/`: Nitroのサーバールート。プロジェクトルート直下に置く
-- `shared/`: クライアントとサーバーの双方から使う型やロジック。プロジェクトルート直下に置く
 
 `.nuxt` や `.output` は生成物であり、編集もコミットもしないこと。
 
@@ -155,6 +160,26 @@ Node.js のバージョンは `.node-version` に従うこと。
 Nuxt v4の公式が推奨する構成に原則として則ること。
 
 外部APIへのアクセスや秘匿すべき処理はサーバールートに置き、コンポーネントからはコンポーザブル経由で呼び出す。コンポーネントに通信処理を直接書かないこと。
+
+`app/` と `server/` の双方から使う型やユーティリティは `shared/` に置き、`#shared/` エイリアスで参照する。
+
+### 認証
+
+ユーザーの認証はFargoRate ID（13桁の数値）のルックアップで行う。セッション管理には [Nuxt Auth Utils](https://github.com/atinux/nuxt-auth-utils) を使う。
+
+フローは次のとおり。
+
+1. ユーザーが `/lookup` でFargoRate IDを入力する
+2. CSIメンバーシップルックアップAPIをIDで検索し、姓名・リーグ・リージョン・チームを得る
+3. その姓名でFargoRateメンバーシップルックアップAPIを検索し、メンバーシップIDの一致で1件に絞ってレーティングと信頼度を得る
+4. 得られたプレイヤー情報をユーザーに見せ、本人かどうかを確認する
+5. 本人だと確認できたらセッションに保存する
+
+確認の確定時（`POST /api/auth/session`）にクライアントから受け取るのはFargoRate IDだけとし、セッションに保存する情報はサーバー側でルックアップし直した結果を使う。クライアントが任意の姓名やレーティングを自称できないようにするため、この方針を崩さないこと。
+
+未認証のユーザーは `app/middleware/auth.global.ts` によって全ページから `/lookup` へリダイレクトされる。サインアウトはNuxt Auth Utils内蔵の `DELETE /api/_auth/session` を使う。
+
+セッションの秘密鍵は環境変数 `NUXT_SESSION_PASSWORD` で与える。`.env.example` を参照すること。
 
 ### コーディング規約
 
