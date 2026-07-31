@@ -13,6 +13,9 @@ export default defineContentConfig({
       type: 'page',
       source: '*.md',
       schema: z.object({
+        // `page` 型が備える description は任意項目だが、メタタグに必ず出したい
+        // ため必須にする。フロントマターに無ければビルド時に気づける。
+        description: z.string(),
         // 改訂した日。ページに「最終更新日」として出す。
         updatedAt: z.string(),
       }),
