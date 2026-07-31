@@ -140,6 +140,7 @@ Node.js のバージョンは `.node-version` に従うこと。
   - `server/utils/`: サーバールートから自動インポートされるユーティリティ
 - `shared/`: クライアントとサーバーの双方から使う型やロジック。プロジェクトルート直下に置く
   - `shared/types/`: 双方から使う型定義
+  - `shared/utils/`: 双方から使う関数。`app/` と `server/` の両方へ自動インポートされる
 - `public/`: ビルドを経ずそのまま配信される静的ファイル
 - `docs/`: 外部APIの調査などのドキュメント
 - `.github/workflows/`: GitHub Actions のワークフロー

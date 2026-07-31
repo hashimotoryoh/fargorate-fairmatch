@@ -7,9 +7,6 @@ import type {
 const CSI_LOOKUP_URL = 'https://csibbm.com/Public/_MembershipLookupWeeksPlayed'
 const FARGORATE_LOOKUP_URL = 'https://dashboard.fargorate.com/api/indexsearch'
 
-/** FargoRate ID は13桁の数値。 */
-export const FARGORATE_ID_PATTERN = /^\d{13}$/
-
 /**
  * CSIメンバーシップルックアップAPIをFargoRate IDで検索する。
  * IDでの検索なので、ヒットしても最大1件。
@@ -110,10 +107,7 @@ export async function lookupPlayerProfile(
 export function readFargorateId(body: { fargorateId?: unknown }): string {
   const fargorateId = body?.fargorateId
 
-  if (
-    typeof fargorateId !== 'string' ||
-    !FARGORATE_ID_PATTERN.test(fargorateId)
-  ) {
+  if (typeof fargorateId !== 'string' || !isValidFargorateId(fargorateId)) {
     throw createError({
       statusCode: 400,
       statusMessage: 'fargorateId must be a 13-digit number',

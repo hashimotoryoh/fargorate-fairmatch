@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import type { PlayerProfile } from '#shared/types/player'
 
-// FargoRate ID は13桁の数値。
-const FARGORATE_ID_PATTERN = /^\d{13}$/
-
 const { fetch: refreshSession } = useUserSession()
 
 const fargorateId = ref('')
@@ -26,7 +23,7 @@ function toErrorMessage(error: unknown, notFoundMessage: string) {
 }
 
 async function lookup() {
-  if (!FARGORATE_ID_PATTERN.test(fargorateId.value)) {
+  if (!isValidFargorateId(fargorateId.value)) {
     errorMessage.value = 'FargoRate IDは13桁の数字で入力してください。'
     return
   }
