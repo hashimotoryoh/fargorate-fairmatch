@@ -5,8 +5,8 @@ const { path } = defineProps<{
 }>()
 
 // ドキュメントごとにキーを分けないと、別のページの取得結果を使い回してしまう。
-const { data: document } = await useAsyncData(`legal:${path}`, () =>
-  queryCollection('legal').path(path).first(),
+const { data: document } = await useAsyncData(`document:${path}`, () =>
+  queryCollection('documents').path(path).first(),
 )
 
 // 本文はMarkdownにあるため、ファイルを消したり名前を変えたりすると空になる。

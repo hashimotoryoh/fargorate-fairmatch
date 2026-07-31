@@ -18,21 +18,23 @@ function documentSource(name: string): string {
 }
 
 /**
- * プライバシーポリシーと利用規約の本文は `content/` のMarkdownにあり、ページは
- * `LegalDocument` にパスを渡すだけである。名前がずれると本文を引けず、ページが
- * 404になる。取り違えは表示するまで気づけないため、対応を機械的に確かめる。
+ * Markdownで管理するドキュメントの本文は `content/` にあり、ページは
+ * `MarkdownDocument` にパスを渡すだけである。名前がずれると本文を引けず、
+ * ページが404になる。取り違えは表示するまで気づけないため、対応を機械的に確かめる。
  */
-describe('法的なドキュメント', () => {
+describe('Markdownで管理するドキュメント', () => {
   const names = documentNames()
 
   it('プライバシーポリシーと利用規約が揃っている', () => {
-    expect(names).toEqual(expect.arrayContaining(['privacy', 'terms']))
+    expect(names).toEqual(
+      expect.arrayContaining(['privacy-policy', 'terms-conditions']),
+    )
   })
 
   it.each(names)('%s のページが同じ名前のMarkdownを指している', (name) => {
     const page = readFileSync(join(PAGES_DIR, `${name}.vue`), 'utf8')
 
-    expect(page).toContain(`<LegalDocument path="/${name}" />`)
+    expect(page).toContain(`<MarkdownDocument path="/${name}" />`)
   })
 
   /**

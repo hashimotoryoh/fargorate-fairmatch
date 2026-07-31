@@ -39,12 +39,12 @@ export const mainNavItems: NavItem[] = [
 ]
 
 /**
- * プライバシーポリシーと利用規約への導線。フッターから出すため、
- * 認証の有無によらずどのページからも辿れる。本文は `content/` のMarkdownにある。
+ * フッターに出すドキュメントへの導線。認証の有無によらずどのページからも
+ * 辿れる。本文は `content/` のMarkdownにある。
  */
-export const legalNavItems: Pick<NavItem, 'to' | 'label'>[] = [
-  { to: '/privacy', label: 'プライバシーポリシー' },
-  { to: '/terms', label: '利用規約' },
+export const documentNavItems: Pick<NavItem, 'to' | 'label'>[] = [
+  { to: '/privacy-policy', label: 'プライバシーポリシー' },
+  { to: '/terms-conditions', label: '利用規約' },
 ]
 
 /** サインイン後の既定の遷移先。 */

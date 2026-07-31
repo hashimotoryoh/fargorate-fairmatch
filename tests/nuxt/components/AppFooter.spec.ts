@@ -33,10 +33,12 @@ describe('AppFooter', () => {
   it('プライバシーポリシーと利用規約へのリンクを出す', async () => {
     const component = await mountSuspended(AppFooter)
 
-    expect(component.find('a[href="/privacy"]').text()).toBe(
+    expect(component.find('a[href="/privacy-policy"]').text()).toBe(
       'プライバシーポリシー',
     )
-    expect(component.find('a[href="/terms"]').text()).toBe('利用規約')
+    expect(component.find('a[href="/terms-conditions"]').text()).toBe(
+      '利用規約',
+    )
   })
 
   // 外部サイトを新しいタブで開くため、逆参照を渡さない指定を必ず添える。

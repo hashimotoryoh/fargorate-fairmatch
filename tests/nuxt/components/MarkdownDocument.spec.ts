@@ -1,13 +1,13 @@
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import LegalDocument from '../../../app/components/LegalDocument.vue'
+import MarkdownDocument from '../../../app/components/MarkdownDocument.vue'
 
 const { queryCollectionMock, firstMock, createErrorMock } = vi.hoisted(() => {
   const firstMock = vi.fn()
 
   return {
     firstMock,
-    // `queryCollection('legal').path('/privacy').first()` の連鎖を模す。
+    // `queryCollection('documents').path('/privacy-policy').first()` の連鎖を模す。
     queryCollectionMock: vi.fn(() => ({
       path: vi.fn(() => ({ first: firstMock })),
     })),
@@ -22,8 +22,8 @@ mockNuxtImport('createError', () => createErrorMock)
 
 function createDocument(overrides: Record<string, unknown> = {}) {
   return {
-    id: 'legal/privacy.md',
-    path: '/privacy',
+    id: 'documents/privacy-policy.md',
+    path: '/privacy-policy',
     title: 'プライバシーポリシー',
     description: '扱う情報の説明。',
     updatedAt: '2026-07-31',
@@ -32,15 +32,15 @@ function createDocument(overrides: Record<string, unknown> = {}) {
   }
 }
 
-describe('LegalDocument', () => {
+describe('MarkdownDocument', () => {
   beforeEach(() => {
     firstMock.mockReset()
     firstMock.mockResolvedValue(createDocument())
   })
 
   it('フロントマターの見出しとMarkdownの本文を出す', async () => {
-    const component = await mountSuspended(LegalDocument, {
-      props: { path: '/privacy' },
+    const component = await mountSuspended(MarkdownDocument, {
+      props: { path: '/privacy-policy' },
     })
 
     expect(component.find('h1').text()).toBe('プライバシーポリシー')
@@ -51,10 +51,12 @@ describe('LegalDocument', () => {
     const pathMock = vi.fn(() => ({ first: firstMock }))
     queryCollectionMock.mockReturnValueOnce({ path: pathMock })
 
-    await mountSuspended(LegalDocument, { props: { path: '/terms' } })
+    await mountSuspended(MarkdownDocument, {
+      props: { path: '/terms-conditions' },
+    })
 
-    expect(queryCollectionMock).toHaveBeenCalledWith('legal')
-    expect(pathMock).toHaveBeenCalledWith('/terms')
+    expect(queryCollectionMock).toHaveBeenCalledWith('documents')
+    expect(pathMock).toHaveBeenCalledWith('/terms-conditions')
   })
 
   /**
@@ -62,8 +64,8 @@ describe('LegalDocument', () => {
    * 指定しないとUTCの0時が前日として出る環境があるため、日付がずれないことも見る。
    */
   it('最終更新日を日本語の表記で出す', async () => {
-    const component = await mountSuspended(LegalDocument, {
-      props: { path: '/privacy' },
+    const component = await mountSuspended(MarkdownDocument, {
+      props: { path: '/privacy-policy' },
     })
     const time = component.find('time')
 
@@ -73,8 +75,8 @@ describe('LegalDocument', () => {
 
   // 本文は Tailwind Typography の prose に任せている。
   it('本文を prose で囲む', async () => {
-    const component = await mountSuspended(LegalDocument, {
-      props: { path: '/privacy' },
+    const component = await mountSuspended(MarkdownDocument, {
+      props: { path: '/privacy-policy' },
     })
 
     expect(component.find('.prose').exists()).toBe(true)
@@ -88,7 +90,7 @@ describe('LegalDocument', () => {
     firstMock.mockResolvedValue(null)
 
     // useAsyncData の結果はキーごとに使い回されるため、他のテストと別のパスを使う。
-    const component = await mountSuspended(LegalDocument, {
+    const component = await mountSuspended(MarkdownDocument, {
       props: { path: '/removed' },
     }).catch(() => null)
 

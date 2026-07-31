@@ -189,7 +189,7 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 確認の確定時（`POST /api/auth/session`）にクライアントから受け取るのはFargoRate IDだけとし、セッションに保存する情報はサーバー側でルックアップし直した結果を使う。クライアントが任意の姓名やレーティングを自称できないようにするため、この方針を崩さないこと。
 
-認証なしでアクセスできるのは `/`、`/lookup`、`/privacy`、`/terms` の4つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
+認証なしでアクセスできるのは `/`、`/lookup`、`/privacy-policy`、`/terms-conditions` の4つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
 
 - `app/middleware/auth.ts`: 未認証なら `/lookup` へ送る。保護対象のページに `definePageMeta({ middleware: 'auth' })` で付ける
 - `app/middleware/guest.ts`: 認証済みなら `/dashboard` へ送る。`/lookup` に付ける
@@ -210,24 +210,29 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 レイアウトは2つある。ヘッダーとフッターは共通で、`AppHeader` と `AppFooter` を両者から使う。
 
-- `default`: 公開ページ（`/`、`/lookup`、`/privacy`、`/terms`）用
+- `default`: 公開ページ（`/`、`/lookup`、`/privacy-policy`、`/terms-conditions`）用
 - `authenticated`: 認証ページ（`/dashboard`、`/game`、`/settings`）用。スマホ幅でのみ `AppDock` を出し、デスクトップ幅ではヘッダーにナビゲーションを出す
 
 `authenticated` には `noindex` をまとめて指定してある。保護ページとこのレイアウトが1対1に対応するため、ページごとに書くより追加漏れが起きない。保護ページを追加する際は `definePageMeta({ middleware: 'auth', layout: 'authenticated' })` を付けること。
 
 ヘッダーのナビゲーションの有無は `showNav` の props で制御する。`useUserSession()` の `loggedIn` を見てはならない。`/` は認証済みでも紹介ページのままにする方針であり、ナビゲーションの有無は認証状態ではなくレイアウトの都合で決まるため。
 
-### プライバシーポリシーと利用規約
+### Markdownで管理するドキュメント
 
-この2ページの本文は [Nuxt Content](https://content.nuxt.com/) で管理し、実体は `content/` のMarkdownに置く。文面の改訂をコードの変更と切り離すためである。文面だけを直す場合はMarkdownのみを変更し、Vueのコードには触れないこと。
+文面が主体で、改訂がアプリの挙動と関係しないページは [Nuxt Content](https://content.nuxt.com/) で管理し、実体を `content/` のMarkdownに置く。文面の改訂をコードの変更と切り離すためである。文面だけを直す場合はMarkdownのみを変更し、Vueのコードには触れないこと。
 
-- `content/privacy.md` が `/privacy`、`content/terms.md` が `/terms` に対応する。ファイル名がそのままルートになる
-- ページ（`app/pages/privacy.vue`、`app/pages/terms.vue`）は `LegalDocument` にパスを渡すだけの薄いものに保つ
+現在あるのはプライバシーポリシー（`/privacy-policy`）と利用規約（`/terms-conditions`）だが、同じ仕組みで別のドキュメントも足せる。特定のドキュメントに寄った名前を付けないこと。
+
+- `content/privacy-policy.md` が `/privacy-policy` に対応する。ファイル名がそのままルートになる
+- ページ（`app/pages/privacy-policy.vue` など）は `MarkdownDocument` にパスを渡すだけの薄いものに保つ
 - フロントマターには `title`・`description`・`updatedAt` を書く。`title` は見出しとタイトルタグ、`description` はメタタグ、`updatedAt` は最終更新日の表示に使う
 - 見出しは `##` から始める。ページの `h1` は `title` から出しているため、本文に `#` を書くと見出しが重なる
 - 文面を改訂したら `updatedAt` も改めること
+- フッターに出す場合は `app/utils/navigation.ts` の `documentNavItems` に足す
 
-コレクションは `content.config.ts` の `legal` 一つだけである。用途の異なるコンテンツを足す場合は、`content/` 直下ではなくサブディレクトリを切り、コレクションを分けること。
+ドキュメントを追加する際は、Markdownとページに加えて、公開ページであれば `tests/unit/repository/page-protection.spec.ts` の `PUBLIC_PAGES` も更新すること。
+
+コレクションは `content.config.ts` の `documents` 一つだけである。`type: 'page'` が備える `description` は本来任意項目だが、メタタグに必ず出すためスキーマで必須にしてある。用途の異なるコンテンツを足す場合は、`content/` 直下ではなくサブディレクトリを切り、コレクションを分けること。
 
 データベースの接続には Node.js 同梱の `node:sqlite` を使う設定にしてある（`nuxt.config.ts` の `content.experimental.sqliteConnector`）。既定のままでは `better-sqlite3` のインストールを対話的に促され、CIのビルドが止まるため、この指定を外さないこと。
 

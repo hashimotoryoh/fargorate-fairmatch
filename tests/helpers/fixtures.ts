@@ -32,6 +32,21 @@ export function createFargoRatePlayer(
   }
 }
 
+/**
+ * `documents` コレクションが返すドキュメント。Markdownの解析結果そのままの形で、
+ * `body` は ContentRenderer が受け取れる最小の構造にしてある。
+ */
+export function createDocument(path: string, title: string) {
+  return {
+    id: `documents${path}.md`,
+    path,
+    title,
+    description: `${title}の説明。`,
+    updatedAt: '2026-07-31',
+    body: { type: 'minimal', value: [['p', {}, `${title}の本文。`]] },
+  }
+}
+
 export function createPlayerProfile(
   overrides: Partial<PlayerProfile> = {},
 ): PlayerProfile {
