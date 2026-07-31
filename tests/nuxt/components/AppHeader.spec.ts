@@ -2,6 +2,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import AppHeader from '../../../app/components/AppHeader.vue'
 import { mainNavItems } from '../../../app/utils/navigation'
+import { jaMessage } from '../../helpers/i18n'
 
 describe('AppHeader', () => {
   it('サイト名からトップページへ戻れる', async () => {
@@ -30,7 +31,7 @@ describe('AppHeader', () => {
     const links = component.findAll('nav a')
 
     expect(links.map((link) => link.text())).toEqual(
-      mainNavItems.map((item) => item.label),
+      mainNavItems.map((item) => jaMessage(item.labelKey)),
     )
     expect(links.map((link) => link.attributes('href'))).toEqual(
       mainNavItems.map((item) => item.to),

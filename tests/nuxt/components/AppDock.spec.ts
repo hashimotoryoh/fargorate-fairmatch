@@ -2,6 +2,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import AppDock from '../../../app/components/AppDock.vue'
 import { mainNavItems } from '../../../app/utils/navigation'
+import { jaMessage } from '../../helpers/i18n'
 
 describe('AppDock', () => {
   it('ヘッダーと同じ主要ナビゲーションを並べる', async () => {
@@ -12,7 +13,7 @@ describe('AppDock', () => {
       mainNavItems.map((item) => item.to),
     )
     expect(links.map((link) => link.text())).toEqual(
-      mainNavItems.map((item) => item.label),
+      mainNavItems.map((item) => jaMessage(item.labelKey)),
     )
   })
 

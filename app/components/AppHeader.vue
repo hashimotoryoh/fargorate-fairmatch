@@ -2,6 +2,8 @@
 // ナビゲーションの有無はセッションではなくレイアウトの都合で決まる。
 // `/` は認証済みでも紹介ページのままなので、ここで `loggedIn` を見てはいけない。
 const { showNav = false } = defineProps<{ showNav?: boolean }>()
+
+const localePath = useLocalePath()
 </script>
 
 <template>
@@ -11,7 +13,7 @@ const { showNav = false } = defineProps<{ showNav?: boolean }>()
   >
     <div class="navbar-start">
       <NuxtLink
-        to="/"
+        :to="localePath('/')"
         class="btn btn-ghost gap-2 px-2 text-sm font-bold sm:text-base"
       >
         <AppLogo class="text-primary size-7 shrink-0" />
@@ -22,8 +24,8 @@ const { showNav = false } = defineProps<{ showNav?: boolean }>()
     <nav v-if="showNav" class="navbar-end hidden sm:flex">
       <ul class="menu menu-horizontal gap-1 px-1">
         <li v-for="item in mainNavItems" :key="item.to">
-          <NuxtLink :to="item.to" active-class="menu-active">
-            {{ item.label }}
+          <NuxtLink :to="localePath(item.to)" active-class="menu-active">
+            {{ $t(item.labelKey) }}
           </NuxtLink>
         </li>
       </ul>

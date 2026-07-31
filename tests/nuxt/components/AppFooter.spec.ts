@@ -2,6 +2,8 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { useRuntimeConfig } from '#imports'
 import { afterEach, describe, expect, it } from 'vitest'
 import AppFooter from '../../../app/components/AppFooter.vue'
+import { documentNavItems } from '../../../app/utils/navigation'
+import { jaMessage } from '../../helpers/i18n'
 
 const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairmatch'
 const COMMIT_SHA = '0123456789abcdef0123456789abcdef01234567'
@@ -33,12 +35,11 @@ describe('AppFooter', () => {
   it('プライバシーポリシーと利用規約へのリンクを出す', async () => {
     const component = await mountSuspended(AppFooter)
 
-    expect(component.find('a[href="/privacy-policy"]').text()).toBe(
-      'プライバシーポリシー',
-    )
-    expect(component.find('a[href="/terms-conditions"]').text()).toBe(
-      '利用規約',
-    )
+    for (const item of documentNavItems) {
+      expect(component.find(`a[href="${item.to}"]`).text()).toBe(
+        jaMessage(item.labelKey),
+      )
+    }
   })
 
   // 外部サイトを新しいタブで開くため、逆参照を渡さない指定を必ず添える。

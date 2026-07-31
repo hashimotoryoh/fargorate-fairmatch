@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const localePath = useLocalePath()
+</script>
+
 <template>
   <!--
     ドックはスマホ幅だけで使う。`sm:hidden` は Tailwind の utilities レイヤー、
@@ -7,7 +11,7 @@
     <NuxtLink
       v-for="item in mainNavItems"
       :key="item.to"
-      :to="item.to"
+      :to="localePath(item.to)"
       active-class="dock-active"
     >
       <svg
@@ -26,7 +30,7 @@
           stroke-linejoin="round"
         />
       </svg>
-      <span class="dock-label">{{ item.label }}</span>
+      <span class="dock-label">{{ $t(item.labelKey) }}</span>
     </NuxtLink>
   </nav>
 </template>
