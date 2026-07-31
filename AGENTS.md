@@ -70,6 +70,11 @@ MarkdownもPrettierの整形対象であるため、ドキュメントを変更�
 
 - `.env` および `.env.*` は `.gitignore` の対象である。認証情報やトークンをコードやドキュメントに直接書かないこと
 - `docs/` 配下の外部API調査メモには、実在するプレイヤーの氏名やメンバーシップ番号が例として含まれる。新たに調査結果を追記する場合は、Cookieや認証ヘッダーなどのセッション情報を残さないこと
+- `public/img/fargorate-id-*.png` は本人以外の顔が写り込んだスクリーンショットである。扱いは後述の「スクリーンショットを使った案内」に従うこと
+
+### ライセンス
+
+MITライセンスで公開している。`LICENSE` はライセンスの定型文であり、英語の原文をそのまま置くこと。ライセンスを変更する場合は `LICENSE`、`package.json` の `license`、フッターの表記（`app/components/AppFooter.vue`）の3か所を揃えること。
 
 ## アプリケーション概要
 
@@ -131,9 +136,11 @@ Node.js のバージョンは `.node-version` に従うこと。
 
 - `app/`: アプリケーションのソース。Nuxt v4 の `srcDir`
   - `app/app.vue`: ルートコンポーネント
+  - `app/components/`: コンポーネント。自動インポートの対象
   - `app/layouts/`: レイアウト
   - `app/pages/`: ページ。ファイル名がそのままルートになる
   - `app/middleware/`: ルートミドルウェア。`.global.ts` の接尾辞で全ルートに適用される
+  - `app/utils/`: 汎用の関数。自動インポートの対象
   - `app/assets/css/main.css`: Tailwind CSS と daisyUI の読み込み口
 - `server/`: Nitroのサーバールート。プロジェクトルート直下に置く
   - `server/api/`: APIのエンドポイント。ファイル名の `.post.ts` などがHTTPメソッドに対応する
@@ -145,11 +152,9 @@ Node.js のバージョンは `.node-version` に従うこと。
 - `docs/`: 外部APIの調査などのドキュメント
 - `.github/workflows/`: GitHub Actions のワークフロー
 
-次のディレクトリは必要になった時点で作成する。いずれもNuxtの規約に沿った配置とすること。
+次のディレクトリは必要になった時点で作成する。Nuxtの規約に沿った配置とすること。
 
-- `app/components/`: コンポーネント。自動インポートの対象
 - `app/composables/`: コンポーザブル。自動インポートの対象
-- `app/utils/`: 汎用の関数。自動インポートの対象
 
 `.nuxt` や `.output` は生成物であり、編集もコミットもしないこと。
 
@@ -177,9 +182,39 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 確認の確定時（`POST /api/auth/session`）にクライアントから受け取るのはFargoRate IDだけとし、セッションに保存する情報はサーバー側でルックアップし直した結果を使う。クライアントが任意の姓名やレーティングを自称できないようにするため、この方針を崩さないこと。
 
-未認証のユーザーは `app/middleware/auth.global.ts` によって全ページから `/lookup` へリダイレクトされる。サインアウトはNuxt Auth Utils内蔵の `DELETE /api/_auth/session` を使う。
+認証なしでアクセスできるのは `/` と `/lookup` の2つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
+
+- `app/middleware/auth.ts`: 未認証なら `/lookup` へ送る。保護対象のページに `definePageMeta({ middleware: 'auth' })` で付ける
+- `app/middleware/guest.ts`: 認証済みなら `/dashboard` へ送る。`/lookup` に付ける
+
+保護対象のパスをどこかに配列で列挙する形にはしないこと。グローバルミドルウェアであれ `routeRules` であれ、ページを追加するたびに更新が必要になり、更新漏れがそのまま情報の露出になる。保護に関わる指定はすべてページ側の `definePageMeta` から辿れる状態に保つこと。
+
+`auth.ts` はSSR時に `x-robots-tag: noindex, nofollow` も立てる。レイアウトの `noindex` メタタグは本文を返す応答にしか乗らず、未認証時のリダイレクトをカバーできないため。
+
+`auth.ts` は元の行き先を `redirect` クエリに残し、サインイン後にそこへ戻す。この値はURLから誰でも与えられるため、必ず `resolveRedirectPath()`（`app/utils/navigation.ts`）を通してから `navigateTo` に渡すこと。外部サイトへ誘導するオープンリダイレクトを防ぐため。
+
+保護ページには `prerender` や ISR・SWR のルートルールを付けないこと。Nuxt Auth Utils はプリレンダやキャッシュの際にサーバー側のセッション取得を飛ばすため、ミドルウェアが認証済みのユーザーを未認証と判定してしまう。
+
+サインアウトはNuxt Auth Utils内蔵の `DELETE /api/_auth/session` を使う。
 
 セッションの秘密鍵は環境変数 `NUXT_SESSION_PASSWORD` で与える。`.env.example` を参照すること。
+
+### レイアウト
+
+レイアウトは2つある。ヘッダーとフッターは共通で、`AppHeader` と `AppFooter` を両者から使う。
+
+- `default`: 公開ページ（`/`、`/lookup`）用
+- `authenticated`: 認証ページ（`/dashboard`、`/game`、`/settings`）用。スマホ幅でのみ `AppDock` を出し、デスクトップ幅ではヘッダーにナビゲーションを出す
+
+`authenticated` には `noindex` をまとめて指定してある。保護ページとこのレイアウトが1対1に対応するため、ページごとに書くより追加漏れが起きない。保護ページを追加する際は `definePageMeta({ middleware: 'auth', layout: 'authenticated' })` を付けること。
+
+ヘッダーのナビゲーションの有無は `showNav` の props で制御する。`useUserSession()` の `loggedIn` を見てはならない。`/` は認証済みでも紹介ページのままにする方針であり、ナビゲーションの有無は認証状態ではなくレイアウトの都合で決まるため。
+
+### スクリーンショットを使った案内
+
+`public/img/fargorate-id-*.png` には本人以外の顔が写り込んでいる。`ScreenshotFigure` で必要な範囲だけを切り出して使い、**顔がDOMに存在しない範囲までクロップすること**。切り出し範囲を変更する際は必ず写り込みがないことを確認すること。
+
+ぼかしで隠す方法は採らない。`backdrop-filter` は祖先の `opacity` の影響を受け、モーダルはまさに `opacity` を遷移させるため、環境によっては素通しになりうる。
 
 ### コーディング規約
 

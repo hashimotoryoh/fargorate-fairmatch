@@ -1,6 +1,18 @@
 <script setup lang="ts">
 import type { PlayerProfile } from '#shared/types/player'
 
+definePageMeta({ middleware: 'guest' })
+
+useSeoMeta({
+  title: 'FargoRate IDでサインイン',
+  description:
+    'FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。IDの調べ方も画面上で案内します。',
+  ogTitle: 'FargoRate IDでサインイン | FargoRate FairMatch',
+  ogDescription:
+    'FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。',
+})
+
+const route = useRoute()
 const { fetch: refreshSession } = useUserSession()
 
 const fargorateId = ref('')
@@ -47,7 +59,7 @@ async function lookup() {
   }
 }
 
-// 本人だと確認できたので認証を確定し、トップページへ移動する。
+// 本人だと確認できたので認証を確定し、元々開こうとしていたページへ移動する。
 async function confirm() {
   pending.value = true
   errorMessage.value = ''
@@ -58,7 +70,7 @@ async function confirm() {
       body: { fargorateId: fargorateId.value },
     })
     await refreshSession()
-    await navigateTo('/')
+    await navigateTo(resolveRedirectPath(route.query.redirect))
   } catch (error) {
     errorMessage.value = toErrorMessage(
       error,
@@ -78,86 +90,74 @@ function reject() {
 </script>
 
 <template>
-  <div class="mx-auto max-w-md">
-    <h1 class="mb-4 text-xl font-bold">ルックアップ</h1>
+  <!-- ヘッダーとフッターを除いた領域の中央にフォームを置く。 -->
+  <div class="grid min-h-[calc(100dvh-14rem)] place-items-center">
+    <div class="card bg-base-200 w-full max-w-md">
+      <div class="card-body gap-4">
+        <div>
+          <h1 class="text-xl font-bold">サインイン</h1>
+          <p class="text-base-content/70 mt-1 text-sm">
+            FargoRate IDであなたの情報を探します。
+          </p>
+        </div>
 
-    <div v-if="errorMessage" role="alert" class="alert alert-error mb-4">
-      {{ errorMessage }}
-    </div>
+        <div v-if="errorMessage" role="alert" class="alert alert-error">
+          {{ errorMessage }}
+        </div>
 
-    <form
-      v-if="step === 'input'"
-      class="flex flex-col gap-4"
-      @submit.prevent="lookup"
-    >
-      <p class="text-sm">FargoRate ID（13桁の数字）を入力してください。</p>
-
-      <input
-        v-model.trim="fargorateId"
-        class="input input-bordered w-full"
-        type="text"
-        inputmode="numeric"
-        maxlength="13"
-        placeholder="9900006315553"
-        required
-      />
-
-      <button class="btn btn-primary" type="submit" :disabled="pending">
-        <span v-if="pending" class="loading loading-spinner" />
-        検索する
-      </button>
-    </form>
-
-    <div v-else-if="candidate" class="flex flex-col gap-4">
-      <p class="text-sm">このプレイヤーはあなたですか？</p>
-
-      <table class="table">
-        <tbody>
-          <tr>
-            <th>名前</th>
-            <td>{{ candidate.firstName }} {{ candidate.lastName }}</td>
-          </tr>
-          <tr>
-            <th>リーグ</th>
-            <td>{{ candidate.leagueName ?? '-' }}</td>
-          </tr>
-          <tr>
-            <th>リージョン</th>
-            <td>{{ candidate.region ?? '-' }}</td>
-          </tr>
-          <tr>
-            <th>チーム</th>
-            <td>{{ candidate.teamNames ?? '-' }}</td>
-          </tr>
-          <tr>
-            <th>レーティング</th>
-            <td>{{ candidate.effectiveRating }}</td>
-          </tr>
-          <tr>
-            <th>信頼度</th>
-            <td>{{ candidate.robustness }}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="flex gap-2">
-        <button
-          class="btn btn-primary flex-1"
-          type="button"
-          :disabled="pending"
-          @click="confirm"
+        <form
+          v-if="step === 'input'"
+          class="flex flex-col gap-4"
+          @submit.prevent="lookup"
         >
-          <span v-if="pending" class="loading loading-spinner" />
-          はい、これは私です
-        </button>
-        <button
-          class="btn flex-1"
-          type="button"
-          :disabled="pending"
-          @click="reject"
-        >
-          いいえ
-        </button>
+          <label class="floating-label">
+            <span>FargoRate ID（13桁の数字）</span>
+            <input
+              v-model.trim="fargorateId"
+              class="input input-bordered w-full"
+              type="text"
+              inputmode="numeric"
+              maxlength="13"
+              placeholder="9900006315553"
+              required
+            />
+          </label>
+
+          <div class="text-center">
+            <LookupGuideModal />
+          </div>
+
+          <button class="btn btn-primary" type="submit" :disabled="pending">
+            <span v-if="pending" class="loading loading-spinner" />
+            検索する
+          </button>
+        </form>
+
+        <div v-else-if="candidate" class="flex flex-col gap-4">
+          <p class="text-sm">このプレイヤーはあなたですか？</p>
+
+          <PlayerProfileTable :player="candidate" />
+
+          <div class="flex gap-2">
+            <button
+              class="btn btn-primary flex-1"
+              type="button"
+              :disabled="pending"
+              @click="confirm"
+            >
+              <span v-if="pending" class="loading loading-spinner" />
+              はい、これは私です
+            </button>
+            <button
+              class="btn flex-1"
+              type="button"
+              :disabled="pending"
+              @click="reject"
+            >
+              いいえ
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

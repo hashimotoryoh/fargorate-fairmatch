@@ -3,6 +3,12 @@ import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
   {
+    // AIコーディングエージェントが作業用のgit worktreeを掘る場所であり、
+    // リポジトリのソースではない。中身は別チェックアウトの複製なので、
+    // 走査すると同じファイルを二重に検査したうえ .nuxt の解決にも失敗する。
+    ignores: ['.claude/**'],
+  },
+  {
     files: ['**/*.d.ts'],
     rules: {
       // モジュール拡張で既存のインターフェースへ型を合成するため、
