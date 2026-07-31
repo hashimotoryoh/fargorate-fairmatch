@@ -2,6 +2,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import PlayerProfileTable from '../../../app/components/PlayerProfileTable.vue'
 import { createPlayerProfile } from '../../helpers/fixtures'
+import { jaMessage } from '../../helpers/i18n'
 
 describe('PlayerProfileTable', () => {
   it('レーティングと信頼度を独立した数値として見せる', async () => {
@@ -10,8 +11,8 @@ describe('PlayerProfileTable', () => {
     })
     const values = component.findAll('.stat-value').map((node) => node.text())
 
-    expect(component.text()).toContain('レーティング')
-    expect(component.text()).toContain('信頼度')
+    expect(component.text()).toContain(jaMessage('player.rating'))
+    expect(component.text()).toContain(jaMessage('player.robustness'))
     expect(values).toEqual(['523', '412'])
   })
 
@@ -62,7 +63,7 @@ describe('PlayerProfileTable', () => {
       props: { player: createPlayerProfile() },
     })
 
-    expect(component.text()).not.toContain('FargoRate ID')
+    expect(component.text()).not.toContain(jaMessage('player.fargorateId'))
     expect(component.text()).not.toContain('9900001234567')
   })
 
@@ -73,7 +74,7 @@ describe('PlayerProfileTable', () => {
     const rows = component.findAll('tbody tr')
 
     expect(rows).toHaveLength(5)
-    expect(rows[0]?.text()).toContain('FargoRate ID')
+    expect(rows[0]?.text()).toContain(jaMessage('player.fargorateId'))
     expect(rows[0]?.text()).toContain('9900001234567')
   })
 })

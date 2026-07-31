@@ -1,49 +1,7 @@
 <script setup lang="ts">
-import type { ScreenshotRect } from './ScreenshotFigure.vue'
+const { locale } = useI18n()
 
-type GuideStep = {
-  title: string
-  src: string
-  alt: string
-  crop: ScreenshotRect
-  highlight: ScreenshotRect
-}
-
-/** 案内に使うスクリーンショットの原寸の幅。3枚とも同じ。 */
-const SCREENSHOT_WIDTH = 1260
-
-/**
- * 座標は元画像の原寸ピクセル。
- *
- * クロップ範囲は本人以外の顔が写り込まない位置に取ってある。00と01は右上に、
- * 02は上半分にプロフィール写真があるため、範囲を変える場合は写り込まないことを
- * 必ず確認すること。ぼかしで隠す方法は採っていない。backdrop-filter は祖先の
- * opacity の影響を受け、モーダルはまさに opacity を遷移させるため、環境に
- * よっては素通しになりうる。
- */
-const steps: GuideStep[] = [
-  {
-    title: '左上のメニューを開く',
-    src: '/img/fargorate-id-00.png',
-    alt: 'FargoRateアプリのホーム画面。左上にハンバーガーメニューがある。',
-    crop: { x: 0, y: 170, width: 960, height: 420 },
-    highlight: { x: 76, y: 279, width: 100, height: 90 },
-  },
-  {
-    title: '「プレイヤーカード」を開く',
-    src: '/img/fargorate-id-01.png',
-    alt: 'FargoRateアプリのメニュー。先頭にプレイヤーカードの項目がある。',
-    crop: { x: 0, y: 620, width: 960, height: 500 },
-    highlight: { x: 8, y: 710, width: 944, height: 168 },
-  },
-  {
-    title: '一番下の13桁の数字を読む',
-    src: '/img/fargorate-id-02.png',
-    alt: 'FargoRateアプリのプレイヤーカード。バーコードの下に13桁の数字がある。',
-    crop: { x: 0, y: 1860, width: 1260, height: 660 },
-    highlight: { x: 340, y: 2360, width: 575, height: 110 },
-  },
-]
+const steps = computed(() => lookupGuideScreenshots(locale.value))
 
 const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 </script>
@@ -54,14 +12,14 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
     type="button"
     @click="dialog?.showModal()"
   >
-    FargoRate IDの確認方法
+    {{ $t('lookupGuide.trigger') }}
   </button>
 
   <dialog ref="dialog" class="modal">
     <div class="modal-box max-w-2xl">
-      <h2 class="text-lg font-bold">FargoRate IDの確認方法</h2>
+      <h2 class="text-lg font-bold">{{ $t('lookupGuide.heading') }}</h2>
       <p class="text-base-content/70 mt-2 text-sm">
-        FargoRateアプリで次の手順をたどると、13桁のFargoRate IDを確認できます。
+        {{ $t('lookupGuide.lead') }}
       </p>
 
       <!--
@@ -73,12 +31,12 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
         <li v-for="(step, index) in steps" :key="step.src">
           <p class="mb-2 flex items-center gap-2 font-medium">
             <span class="badge badge-primary badge-sm">{{ index + 1 }}</span>
-            {{ step.title }}
+            {{ $t(`lookupGuide.steps.${step.key}.title`) }}
           </p>
           <ScreenshotFigure
             :src="step.src"
-            :alt="step.alt"
-            :natural-width="SCREENSHOT_WIDTH"
+            :alt="$t(`lookupGuide.steps.${step.key}.alt`)"
+            :natural-width="step.naturalWidth"
             :crop="step.crop"
             :highlight="step.highlight"
           />
@@ -87,13 +45,13 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 
       <div class="modal-action">
         <form method="dialog">
-          <button class="btn">閉じる</button>
+          <button class="btn">{{ $t('lookupGuide.close') }}</button>
         </form>
       </div>
     </div>
 
     <form method="dialog" class="modal-backdrop">
-      <button>閉じる</button>
+      <button>{{ $t('lookupGuide.close') }}</button>
     </form>
   </dialog>
 </template>

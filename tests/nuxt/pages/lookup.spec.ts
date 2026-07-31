@@ -7,6 +7,7 @@ import { createError } from 'h3'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, type VueWrapper } from '@vue/test-utils'
 import LookupPage from '../../../app/pages/lookup.vue'
+import { jaMessage } from '../../helpers/i18n'
 import { FARGORATE_ID, createPlayerProfile } from '../../helpers/fixtures'
 
 const {
@@ -62,16 +63,18 @@ describe('サインインページ', () => {
     const component = await mountSuspended(LookupPage)
     const input = component.find('input[type="text"]')
 
-    expect(component.text()).toContain('サインイン')
+    expect(component.text()).toContain(jaMessage('lookup.heading'))
     expect(input.attributes('inputmode')).toBe('numeric')
     expect(input.attributes('maxlength')).toBe('13')
-    expect(component.find('button[type="submit"]').text()).toContain('検索する')
+    expect(component.find('button[type="submit"]').text()).toContain(
+      jaMessage('lookup.submit'),
+    )
   })
 
   it('IDの調べ方への導線を置く', async () => {
     const component = await mountSuspended(LookupPage)
 
-    expect(component.text()).toContain('FargoRate IDの確認方法')
+    expect(component.text()).toContain(jaMessage('lookupGuide.trigger'))
   })
 
   // 形式が明らかに不正なうちは、外部APIまで問い合わせない。
@@ -82,7 +85,7 @@ describe('サインインページ', () => {
 
     expect(lookupHandler).not.toHaveBeenCalled()
     expect(component.find('[role="alert"]').text()).toContain(
-      'FargoRate IDは13桁の数字で入力してください。',
+      jaMessage('lookup.errors.invalidId'),
     )
   })
 
@@ -92,7 +95,7 @@ describe('サインインページ', () => {
     await fillAndSubmit(component, FARGORATE_ID)
 
     expect(lookupHandler).toHaveBeenCalledTimes(1)
-    expect(component.text()).toContain('このプレイヤーはあなたですか？')
+    expect(component.text()).toContain(jaMessage('lookup.confirmQuestion'))
     expect(component.text()).toContain('Taro Yamada')
     expect(component.text()).toContain('523')
     expect(component.find('form').exists()).toBe(false)
@@ -114,7 +117,7 @@ describe('サインインページ', () => {
     await fillAndSubmit(component, FARGORATE_ID)
 
     expect(component.find('[role="alert"]').text()).toContain(
-      'そのFargoRate IDのプレイヤーは見つかりませんでした。',
+      jaMessage('lookup.errors.notFound'),
     )
     expect(component.find('form').exists()).toBe(true)
   })
@@ -128,7 +131,7 @@ describe('サインインページ', () => {
     await fillAndSubmit(component, FARGORATE_ID)
 
     expect(component.find('[role="alert"]').text()).toContain(
-      '通信に失敗しました。',
+      jaMessage('lookup.errors.unexpected'),
     )
   })
 
@@ -199,7 +202,7 @@ describe('サインインページ', () => {
     )
 
     expect(component.find('[role="alert"]').text()).toContain(
-      'FargoRate IDは13桁の数字で入力してください。',
+      jaMessage('lookup.errors.invalidId'),
     )
     expect(navigateToMock).not.toHaveBeenCalled()
   })
@@ -212,7 +215,7 @@ describe('サインインページ', () => {
     await component.vm.$nextTick()
 
     expect(component.find('form').exists()).toBe(true)
-    expect(component.text()).not.toContain('このプレイヤーはあなたですか？')
+    expect(component.text()).not.toContain(jaMessage('lookup.confirmQuestion'))
   })
 
   it('やり直したときに前の失敗を残さない', async () => {

@@ -3,13 +3,14 @@ import type { PlayerProfile } from '#shared/types/player'
 
 definePageMeta({ middleware: 'guest' })
 
+const { t } = useI18n()
+
+// ロケールを切り替えたときに追随させるため、値ではなくゲッターで渡す。
 useSeoMeta({
-  title: 'FargoRate IDでサインイン',
-  description:
-    'FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。IDの調べ方も画面上で案内します。',
-  ogTitle: 'FargoRate IDでサインイン | FargoRate FairMatch',
-  ogDescription:
-    'FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。',
+  title: () => t('seo.lookup.title'),
+  description: () => t('seo.lookup.description'),
+  ogTitle: () => t('seo.lookup.ogTitle'),
+  ogDescription: () => t('seo.lookup.ogDescription'),
 })
 
 const route = useRoute()
@@ -22,21 +23,23 @@ const candidate = ref<PlayerProfile | null>(null)
 const pending = ref(false)
 const errorMessage = ref('')
 
-function toErrorMessage(error: unknown, notFoundMessage: string) {
+// サーバールートは英語のstatusMessageしか返さないため、表示する文言は
+// ステータスコードからこちらで組み立てる。
+function toErrorMessage(error: unknown) {
   const statusCode = (error as { statusCode?: number }).statusCode
 
   if (statusCode === 404) {
-    return notFoundMessage
+    return t('lookup.errors.notFound')
   }
   if (statusCode === 400) {
-    return 'FargoRate IDは13桁の数字で入力してください。'
+    return t('lookup.errors.invalidId')
   }
-  return '通信に失敗しました。しばらくしてからもう一度お試しください。'
+  return t('lookup.errors.unexpected')
 }
 
 async function lookup() {
   if (!isValidFargorateId(fargorateId.value)) {
-    errorMessage.value = 'FargoRate IDは13桁の数字で入力してください。'
+    errorMessage.value = t('lookup.errors.invalidId')
     return
   }
 
@@ -50,10 +53,7 @@ async function lookup() {
     })
     step.value = 'confirm'
   } catch (error) {
-    errorMessage.value = toErrorMessage(
-      error,
-      'そのFargoRate IDのプレイヤーは見つかりませんでした。',
-    )
+    errorMessage.value = toErrorMessage(error)
   } finally {
     pending.value = false
   }
@@ -72,10 +72,7 @@ async function confirm() {
     await refreshSession()
     await navigateTo(resolveRedirectPath(route.query.redirect))
   } catch (error) {
-    errorMessage.value = toErrorMessage(
-      error,
-      'そのFargoRate IDのプレイヤーは見つかりませんでした。',
-    )
+    errorMessage.value = toErrorMessage(error)
   } finally {
     pending.value = false
   }
@@ -95,9 +92,9 @@ function reject() {
     <div class="card bg-base-200 w-full max-w-md">
       <div class="card-body gap-4">
         <div>
-          <h1 class="text-xl font-bold">サインイン</h1>
+          <h1 class="text-xl font-bold">{{ $t('lookup.heading') }}</h1>
           <p class="text-base-content/70 mt-1 text-sm">
-            FargoRate IDであなたの情報を探します。
+            {{ $t('lookup.lead') }}
           </p>
         </div>
 
@@ -111,7 +108,7 @@ function reject() {
           @submit.prevent="lookup"
         >
           <label class="floating-label">
-            <span>FargoRate ID（13桁の数字）</span>
+            <span>{{ $t('lookup.idLabel') }}</span>
             <input
               v-model.trim="fargorateId"
               class="input input-bordered w-full"
@@ -129,12 +126,12 @@ function reject() {
 
           <button class="btn btn-primary" type="submit" :disabled="pending">
             <span v-if="pending" class="loading loading-spinner" />
-            検索する
+            {{ $t('lookup.submit') }}
           </button>
         </form>
 
         <div v-else-if="candidate" class="flex flex-col gap-4">
-          <p class="text-sm">このプレイヤーはあなたですか？</p>
+          <p class="text-sm">{{ $t('lookup.confirmQuestion') }}</p>
 
           <PlayerProfileTable :player="candidate" />
 
@@ -146,7 +143,7 @@ function reject() {
               @click="confirm"
             >
               <span v-if="pending" class="loading loading-spinner" />
-              はい、これは私です
+              {{ $t('lookup.confirm') }}
             </button>
             <button
               class="btn flex-1"
@@ -154,7 +151,7 @@ function reject() {
               :disabled="pending"
               @click="reject"
             >
-              いいえ
+              {{ $t('lookup.reject') }}
             </button>
           </div>
         </div>
