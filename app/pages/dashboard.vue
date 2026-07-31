@@ -1,7 +1,11 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth', layout: 'authenticated' })
 
-useSeoMeta({ title: 'ダッシュボード' })
+const { t } = useI18n()
+const localePath = useLocalePath()
+
+// ロケールを切り替えたときに追随させるため、値ではなくゲッターで渡す。
+useSeoMeta({ title: () => t('seo.dashboard.title') })
 
 const { user } = useUserSession()
 </script>
@@ -9,14 +13,16 @@ const { user } = useUserSession()
 <template>
   <div class="mx-auto flex max-w-2xl flex-col gap-6">
     <div>
-      <h1 class="text-xl font-bold">ダッシュボード</h1>
+      <h1 class="text-xl font-bold">{{ $t('dashboard.heading') }}</h1>
       <p class="text-base-content/70 mt-1 text-sm">
-        FargoRateから取得したあなたの情報です。
+        {{ $t('dashboard.lead') }}
       </p>
     </div>
 
     <PlayerProfileTable v-if="user" :player="user" show-fargorate-id />
 
-    <NuxtLink to="/game" class="btn btn-primary">ゲームを始める</NuxtLink>
+    <NuxtLink :to="localePath('/game')" class="btn btn-primary">
+      {{ $t('dashboard.startGame') }}
+    </NuxtLink>
   </div>
 </template>

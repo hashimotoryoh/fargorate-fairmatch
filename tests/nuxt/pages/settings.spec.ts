@@ -3,6 +3,7 @@ import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 import SettingsPage from '../../../app/pages/settings.vue'
+import { jaMessage } from '../../helpers/i18n'
 import { createPlayerProfile } from '../../helpers/fixtures'
 
 // セッションはテンプレートで自動アンラップされる ref として渡す必要がある。
@@ -29,7 +30,7 @@ describe('設定ページ', () => {
   it('サインイン中のプレイヤーを姓名とFargoRate IDで示す', async () => {
     const component = await mountSuspended(SettingsPage)
 
-    expect(component.find('h1').text()).toBe('設定')
+    expect(component.find('h1').text()).toBe(jaMessage('settings.heading'))
     expect(component.text()).toContain('Taro Yamada')
     expect(component.text()).toContain('9900001234567')
   })
@@ -39,7 +40,8 @@ describe('設定ページ', () => {
 
     const component = await mountSuspended(SettingsPage)
 
-    expect(component.text()).not.toContain('としてサインインしています')
+    expect(component.text()).not.toContain('Taro Yamada')
+    expect(component.text()).not.toContain('9900001234567')
     expect(component.find('button').exists()).toBe(true)
   })
 

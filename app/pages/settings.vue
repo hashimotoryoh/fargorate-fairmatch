@@ -1,7 +1,11 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth', layout: 'authenticated' })
 
-useSeoMeta({ title: '設定' })
+const { t } = useI18n()
+const localePath = useLocalePath()
+
+// ロケールを切り替えたときに追随させるため、値ではなくゲッターで渡す。
+useSeoMeta({ title: () => t('seo.settings.title') })
 
 const { user, clear } = useUserSession()
 const signingOut = ref(false)
@@ -11,7 +15,7 @@ async function signOut() {
 
   try {
     await clear()
-    await navigateTo('/')
+    await navigateTo(localePath('/'))
   } finally {
     signingOut.value = false
   }
@@ -20,15 +24,22 @@ async function signOut() {
 
 <template>
   <div class="mx-auto flex max-w-2xl flex-col gap-6">
-    <h1 class="text-xl font-bold">設定</h1>
+    <h1 class="text-xl font-bold">{{ $t('settings.heading') }}</h1>
 
     <div class="card bg-base-200">
       <div class="card-body gap-4">
         <div>
-          <h2 class="card-title text-base">アカウント</h2>
+          <h2 class="card-title text-base">{{ $t('settings.account') }}</h2>
+          <!--
+            姓名とIDの並び順は言語で変わるため、文の組み立てごと翻訳に任せる。
+          -->
           <p v-if="user" class="text-base-content/70 mt-1 text-sm">
-            {{ user.firstName }} {{ user.lastName }}（{{ user.fargorateId }}）
-            としてサインインしています。
+            {{
+              $t('settings.signedInAs', {
+                name: `${user.firstName} ${user.lastName}`,
+                fargorateId: user.fargorateId,
+              })
+            }}
           </p>
         </div>
 
@@ -40,7 +51,7 @@ async function signOut() {
             @click="signOut"
           >
             <span v-if="signingOut" class="loading loading-spinner" />
-            サインアウト
+            {{ $t('settings.signOut') }}
           </button>
         </div>
       </div>

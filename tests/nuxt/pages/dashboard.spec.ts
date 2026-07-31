@@ -2,6 +2,7 @@ import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 import DashboardPage from '../../../app/pages/dashboard.vue'
+import { jaMessage } from '../../helpers/i18n'
 import { createPlayerProfile } from '../../helpers/fixtures'
 
 // セッションはテンプレートで自動アンラップされる ref として渡す必要がある。
@@ -18,7 +19,7 @@ describe('ダッシュボードページ', () => {
   it('セッションのプレイヤー情報をFargoRate IDごと見せる', async () => {
     const component = await mountSuspended(DashboardPage)
 
-    expect(component.find('h1').text()).toBe('ダッシュボード')
+    expect(component.find('h1').text()).toBe(jaMessage('dashboard.heading'))
     expect(component.text()).toContain('Taro Yamada')
     expect(component.text()).toContain('523')
     expect(component.text()).toContain('FargoRate ID')
@@ -30,7 +31,7 @@ describe('ダッシュボードページ', () => {
     const link = component.find('a[href="/game"]')
 
     expect(link.exists()).toBe(true)
-    expect(link.text()).toBe('ゲームを始める')
+    expect(link.text()).toBe(jaMessage('dashboard.startGame'))
   })
 
   // セッションの復元が済むまで `user` は null になりうる。
