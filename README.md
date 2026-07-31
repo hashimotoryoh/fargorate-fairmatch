@@ -12,6 +12,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 - [Tailwind CSS](https://tailwindcss.com/)
 - [daisyUI](https://daisyui.com/)
 - [Nuxt Auth Utils](https://github.com/atinux/nuxt-auth-utils)
+- [Nuxt Content](https://content.nuxt.com/)
 
 ## ページ
 
@@ -19,11 +20,26 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 | ------------ | -------------------------------- | ---- |
 | `/`          | アプリの紹介                     | 不要 |
 | `/lookup`    | FargoRate IDでのサインイン       | 不要 |
+| `/privacy`   | プライバシーポリシー             | 不要 |
+| `/terms`     | 利用規約                         | 不要 |
 | `/dashboard` | 自分のレーティングなどの表示     | 必要 |
 | `/game`      | 種目を選んで新しいゲームを始める | 必要 |
 | `/settings`  | サインアウトなどの設定           | 必要 |
 
-検索エンジンにインデックスさせるのは `/` と `/lookup` のみで、これは認証なしでアクセスできるページと一致する。
+検索エンジンにインデックスさせるのは認証の要らないページのみで、これは認証なしでアクセスできるページと一致する。
+
+## プライバシーポリシーと利用規約
+
+この2ページの本文は Nuxt Content で管理しており、実体は `content/` のMarkdownである。文面だけを直したい場合はMarkdownを編集すればよく、Vueのコードには触れなくてよい。
+
+| ファイル             | ルート     |
+| -------------------- | ---------- |
+| `content/privacy.md` | `/privacy` |
+| `content/terms.md`   | `/terms`   |
+
+ファイル名がそのままルートになる。フロントマターには `title`・`description`・`updatedAt` を書く。`title` はページの見出しとタイトルタグに、`description` はメタタグに、`updatedAt` は最終更新日の表示に使う。本文の見出しは `##` から始め、`#` は使わない。
+
+Nuxt Content はビルド時にMarkdownをSQLiteのデータベースへ書き出す。データベースの接続には Node.js 同梱の `node:sqlite` を使う設定にしてあるため、`better-sqlite3` などのネイティブモジュールを別途入れる必要はない。
 
 ## 認証
 
