@@ -1,0 +1,164 @@
+{
+  "locale": {
+    "switchLabel": "言語を切り替える"
+  },
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "game": "ゲーム",
+    "settings": "設定"
+  },
+  "document": {
+    "privacyPolicy": "プライバシーポリシー",
+    "termsConditions": "利用規約",
+    "updatedAt": "最終更新日:"
+  },
+  "footer": {
+    "commitTitle": "コミット {sha} で動作しています"
+  },
+  "player": {
+    "fargorateId": "FargoRate ID",
+    "name": "名前",
+    "league": "リーグ",
+    "region": "リージョン",
+    "team": "チーム",
+    "rating": "レーティング",
+    "robustness": "信頼度"
+  },
+  "seo": {
+    "index": {
+      "title": "FargoRateで対戦を記録する",
+      "description": "FargoRateのレーティングをもとに、ビリヤードの対戦スコアの入力と振り返りを補助するウェブアプリ。FargoRate IDだけで使い始められます。",
+      "ogTitle": "FargoRate FairMatch",
+      "ogDescription": "FargoRateのレーティングをもとに、ビリヤードの対戦スコアの入力と振り返りを補助するウェブアプリ。"
+    },
+    "lookup": {
+      "title": "FargoRate IDでサインイン",
+      "description": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。IDの調べ方も画面上で案内します。",
+      "ogTitle": "FargoRate IDでサインイン | FargoRate FairMatch",
+      "ogDescription": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。"
+    },
+    "dashboard": {
+      "title": "ダッシュボード"
+    },
+    "game": {
+      "title": "ゲーム"
+    },
+    "settings": {
+      "title": "設定"
+    }
+  },
+  "index": {
+    "lead": "FargoRateを用いたビリヤード対戦を補助するウェブアプリです。対戦中のスコアの入力や、対戦成績の振り返りを手助けします。",
+    "start": "FargoRate IDで始める",
+    "featuresHeading": "できること",
+    "features": {
+      "record": {
+        "title": "スコアを手元で記録する",
+        "description": "対戦中のスコアをその場で入力できます。紙やチョークに頼らず、いま何対何なのかを取り違えません。"
+      },
+      "review": {
+        "title": "対戦成績を振り返る",
+        "description": "積み上がった対戦の結果をあとから見返せます。誰とどれくらい戦って、どう転んだのかがわかります。"
+      },
+      "rating": {
+        "title": "FargoRateの数値をそのまま使う",
+        "description": "レーティングと信頼度をFargoRateの公式システムから取得します。自己申告ではないので、初対面同士でも実力の目安を共有できます。"
+      }
+    },
+    "aboutHeading": "FargoRateとは",
+    "aboutBody": "世界中のポケットビリヤードプレイヤーの強さを、同じ基準で数値化して表すレーティングシステムです。対戦の勝敗と得点差を積み上げて算出されるため、国や地域、リーグをまたいでも同じ尺度で強さを比べられます。提携しているリーグや大会の結果が送られると自動で更新されます。",
+    "ratingTable": {
+      "level": "目安",
+      "range": "レーティング",
+      "note": "対象"
+    },
+    "ratingGuide": {
+      "beginner": {
+        "level": "初級者",
+        "range": "100 〜 300台",
+        "note": "カジュアルなプレイヤー"
+      },
+      "intermediate": {
+        "level": "中級者",
+        "range": "400 〜 500台",
+        "note": "一般的なアマチュアリーグプレイヤー"
+      },
+      "advanced": {
+        "level": "上級者",
+        "range": "600台",
+        "note": "アマチュアの上位層"
+      },
+      "professional": {
+        "level": "プロ",
+        "range": "700台以上",
+        "note": "一流のプロと世界トッププロ"
+      }
+    },
+    "gettingStartedHeading": "はじめかた",
+    "gettingStartedBody": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力するだけです。パスワードの登録は要りません。IDの調べ方は入力画面で案内します。",
+    "gettingStartedNote": "このアプリはFargoRateからレーティングを取得しますが、対戦結果を公式システムへ送信することはありません。ここでの記録によってあなたのレーティングが変わることはありません。"
+  },
+  "lookup": {
+    "heading": "サインイン",
+    "lead": "FargoRate IDであなたの情報を探します。",
+    "idLabel": "FargoRate ID（13桁の数字）",
+    "submit": "検索する",
+    "confirmQuestion": "このプレイヤーはあなたですか？",
+    "confirm": "はい、これは私です",
+    "reject": "いいえ",
+    "errors": {
+      "invalidId": "FargoRate IDは13桁の数字で入力してください。",
+      "notFound": "そのFargoRate IDのプレイヤーは見つかりませんでした。",
+      "unexpected": "通信に失敗しました。しばらくしてからもう一度お試しください。"
+    }
+  },
+  "lookupGuide": {
+    "trigger": "FargoRate IDの確認方法",
+    "heading": "FargoRate IDの確認方法",
+    "lead": "FargoRateアプリで次の手順をたどると、13桁のFargoRate IDを確認できます。",
+    "steps": {
+      "menu": {
+        "title": "左上のメニューを開く",
+        "alt": "FargoRateアプリのホーム画面。左上にハンバーガーメニューがある。"
+      },
+      "playerCard": {
+        "title": "「プレイヤーカード」を開く",
+        "alt": "FargoRateアプリのメニュー。先頭にプレイヤーカードの項目がある。"
+      },
+      "number": {
+        "title": "一番下の13桁の数字を読む",
+        "alt": "FargoRateアプリのプレイヤーカード。バーコードの下に13桁の数字がある。"
+      }
+    },
+    "close": "閉じる"
+  },
+  "dashboard": {
+    "heading": "ダッシュボード",
+    "lead": "FargoRateから取得したあなたの情報です。",
+    "startGame": "ゲームを始める"
+  },
+  "game": {
+    "heading": "ゲーム",
+    "lead": "種目を選んで新しいゲームを始めます。",
+    "typeLegend": "種目",
+    "types": {
+      "9ball": {
+        "label": "9ボール",
+        "description": "1番から9番までを順番に落とし、9番を先に落とした方が取得する。"
+      },
+      "8ball": {
+        "label": "8ボール",
+        "description": "自分の組の7個を落としきってから8番を落とした方が取得する。"
+      }
+    },
+    "start": "ゲームを開始する（準備中）"
+  },
+  "settings": {
+    "heading": "設定",
+    "account": "アカウント",
+    "signedInAs": "{name}（{fargorateId}）としてサインインしています。",
+    "signOut": "サインアウト",
+    "language": "言語",
+    "languageDescription": "画面の表示に使う言語を選びます。"
+  }
+}
