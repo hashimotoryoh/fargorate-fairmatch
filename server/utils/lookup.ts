@@ -48,11 +48,28 @@ async function fetchFargoRatePlayer(fargorateId: string, query: string) {
 }
 
 /**
+ * レーティングは数値ではなく文字列で返るため、数値へ変換する。
+ *
+ * 外部APIの仕様は予告なく変わりうるので、数値として解釈できない値は弾く。
+ * `Number('')` は `NaN` ではなく `0` になるため、空文字は個別に判定している。
+ */
+function parseRating(value: unknown): number | null {
+  if (typeof value !== 'string' || value.trim() === '') {
+    return null
+  }
+
+  const parsed = Number(value)
+
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+/**
  * FargoRate IDからプレイヤー情報を引く。
  *
  * CSI側で姓名を引き当て、その姓名でFargoRate側を検索してレーティングを得る。
- * どちらかで該当が無ければ `null` を返す。外部APIとの通信自体に失敗した場合は
- * 「見つからない」と区別するため 502 を投げる。
+ * どちらかで該当が無ければ `null` を返す。外部APIに到達できなかった場合や、
+ * 期待する形のレスポンスが得られなかった場合は「見つからない」と区別するため
+ * 502 を投げる。
  */
 export async function lookupPlayerProfile(
   fargorateId: string,
@@ -88,6 +105,17 @@ export async function lookupPlayerProfile(
     return null
   }
 
+  const effectiveRating = parseRating(player.effectiveRating)
+  const robustness = parseRating(player.robustness)
+
+  if (effectiveRating === null || robustness === null) {
+    throw createError({
+      statusCode: 502,
+      statusMessage:
+        'The FargoRate membership lookup API returned an unexpected rating',
+    })
+  }
+
   return {
     fargorateId,
     firstName: member.FirstName,
@@ -95,8 +123,8 @@ export async function lookupPlayerProfile(
     leagueName: member.LeagueName,
     region: member.Region,
     teamNames: member.TeamNames,
-    effectiveRating: Number(player.effectiveRating),
-    robustness: Number(player.robustness),
+    effectiveRating,
+    robustness,
   }
 }
 
