@@ -26,6 +26,21 @@ describe('AppFooter', () => {
     expect(license.text()).toBe('MIT License')
   })
 
+  /**
+   * プライバシーポリシーと利用規約はどのページからも辿れる必要がある。
+   * フッターは両方のレイアウトから使うため、ここに導線があれば全ページを賄える。
+   */
+  it('プライバシーポリシーと利用規約へのリンクを出す', async () => {
+    const component = await mountSuspended(AppFooter)
+
+    expect(component.find('a[href="/privacy-policy"]').text()).toBe(
+      'プライバシーポリシー',
+    )
+    expect(component.find('a[href="/terms-conditions"]').text()).toBe(
+      '利用規約',
+    )
+  })
+
   // 外部サイトを新しいタブで開くため、逆参照を渡さない指定を必ず添える。
   it('外部リンクに rel="noopener" を付ける', async () => {
     const component = await mountSuspended(AppFooter)

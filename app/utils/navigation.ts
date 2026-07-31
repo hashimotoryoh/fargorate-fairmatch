@@ -38,6 +38,15 @@ export const mainNavItems: NavItem[] = [
   },
 ]
 
+/**
+ * フッターに出すドキュメントへの導線。認証の有無によらずどのページからも
+ * 辿れる。本文は `content/` のMarkdownにある。
+ */
+export const documentNavItems: Pick<NavItem, 'to' | 'label'>[] = [
+  { to: '/privacy-policy', label: 'プライバシーポリシー' },
+  { to: '/terms-conditions', label: '利用規約' },
+]
+
 /** サインイン後の既定の遷移先。 */
 const DEFAULT_AFTER_SIGN_IN = '/dashboard'
 

@@ -9,7 +9,7 @@ const PAGES_DIR = fileURLToPath(new URL('../../../app/pages', import.meta.url))
  * 認証なしでアクセスできるページ。検索エンジンに開放するページと一致する。
  * ここを増やすことは公開範囲を広げることなので、意図せず増えないよう明示する。
  */
-const PUBLIC_PAGES = ['index', 'lookup']
+const PUBLIC_PAGES = ['index', 'lookup', 'privacy-policy', 'terms-conditions']
 
 function pageNames(): string[] {
   return readdirSync(PAGES_DIR)
