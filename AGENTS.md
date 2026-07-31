@@ -201,7 +201,7 @@ npm run format
 GitHub Actionsで次のワークフローを運用している。
 
 - `.github/workflows/ci.yml`: `main` ブランチへのpushと全てのPRで、ESLintとPrettierのチェックを実行する。テストは追加予定
-- `.github/workflows/claude.yml`: IssueやPRのコメントで `@claude` に言及した際にClaude Codeを実行する
+- `.github/workflows/claude.yml`: Issue・PRのコメントやレビュー、Issueの本文・タイトルで `@claude` に言及した際にClaude Codeを実行する
 - `.github/workflows/claude-code-review.yml`: ドラフトでないPRに対してコードレビューを実行する
 
 エージェントが作成したPRはCIの結果を確認し、失敗していれば原因を調べて修正すること。CIが落ちた状態で放置しないこと。
