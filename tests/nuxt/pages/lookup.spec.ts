@@ -3,6 +3,7 @@ import {
   mountSuspended,
   registerEndpoint,
 } from '@nuxt/test-utils/runtime'
+import { useNuxtApp } from '#imports'
 import { createError } from 'h3'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, type VueWrapper } from '@vue/test-utils'
@@ -41,6 +42,18 @@ function notFound() {
   throw createError({ statusCode: 404, statusMessage: 'Player not found' })
 }
 
+/**
+ * ロケールを切り替える。
+ *
+ * `setLocale` は自身もそのロケールのURLへの遷移を起こすため、
+ * 落ち着かせてから navigateTo の記録を消す。
+ */
+async function useLocale(code: 'ja' | 'en') {
+  await useNuxtApp().$i18n.setLocale(code)
+  await flushPromises()
+  navigateToMock.mockClear()
+}
+
 /** 送信して、読み込み中の表示が消える（＝処理が終わる）まで待つ。 */
 async function fillAndSubmit(component: VueWrapper, value: string) {
   await component.find('input[type="text"]').setValue(value)
@@ -52,8 +65,9 @@ async function fillAndSubmit(component: VueWrapper, value: string) {
 }
 
 describe('サインインページ', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
+    await useLocale('ja')
     routeQuery.redirect = undefined
     lookupHandler.mockReturnValue(createPlayerProfile())
     sessionHandler.mockReturnValue(createPlayerProfile())
@@ -170,6 +184,38 @@ describe('サインインページ', () => {
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
 
     expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
+  })
+
+  /**
+   * `resolveRedirectPath` はロケールを知らない純粋な関数に保っている。
+   * ロケールの付与はページ側の責任であり、落とすと英語で始めた人が日本語の
+   * ダッシュボードに着く。
+   */
+  it('英語で見ているときは英語のページへ戻す', async () => {
+    await useLocale('en')
+
+    const component = await mountSuspended(LookupPage)
+    await fillAndSubmit(component, FARGORATE_ID)
+
+    await component.findAll('button')[0]?.trigger('click')
+    await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
+
+    expect(navigateToMock).toHaveBeenCalledWith('/en/dashboard')
+  })
+
+  // `redirect` には auth ミドルウェアがロケール付きのパスを入れる。
+  // ページ側で改めて通しても二重には付かない。
+  it('ロケールを含む redirect をそのまま使う', async () => {
+    routeQuery.redirect = '/en/game'
+    await useLocale('en')
+
+    const component = await mountSuspended(LookupPage)
+    await fillAndSubmit(component, FARGORATE_ID)
+
+    await component.findAll('button')[0]?.trigger('click')
+    await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
+
+    expect(navigateToMock).toHaveBeenCalledWith('/en/game')
   })
 
   it('確定に失敗したら移動せずに知らせる', async () => {

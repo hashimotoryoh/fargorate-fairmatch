@@ -14,6 +14,7 @@ useSeoMeta({
 })
 
 const route = useRoute()
+const localePath = useLocalePath()
 const { fetch: refreshSession } = useUserSession()
 
 const fargorateId = ref('')
@@ -70,7 +71,10 @@ async function confirm() {
       body: { fargorateId: fargorateId.value },
     })
     await refreshSession()
-    await navigateTo(resolveRedirectPath(route.query.redirect))
+    // `resolveRedirectPath` はロケールを知らない純粋な関数に保つ。オープン
+    // リダイレクトの判定と、ロケールの付与を混ぜないため、ここで通す。
+    // 既にロケールを含むパスを渡しても二重には付かない。
+    await navigateTo(localePath(resolveRedirectPath(route.query.redirect)))
   } catch (error) {
     errorMessage.value = toErrorMessage(error)
   } finally {

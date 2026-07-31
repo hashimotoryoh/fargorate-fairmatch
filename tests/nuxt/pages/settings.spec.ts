@@ -1,4 +1,5 @@
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import { useNuxtApp } from '#imports'
 import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
@@ -20,9 +21,22 @@ mockNuxtImport('useUserSession', () => () => ({
 }))
 mockNuxtImport('navigateTo', () => navigateToMock)
 
+/**
+ * ロケールを切り替える。
+ *
+ * `setLocale` は自身もそのロケールのURLへの遷移を起こすため、
+ * 落ち着かせてから navigateTo の記録を消す。
+ */
+async function useLocale(code: 'ja' | 'en') {
+  await useNuxtApp().$i18n.setLocale(code)
+  await flushPromises()
+  navigateToMock.mockClear()
+}
+
 describe('設定ページ', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
+    await useLocale('ja')
     session.user = ref(createPlayerProfile())
     clearMock.mockResolvedValue(undefined)
   })
@@ -53,6 +67,18 @@ describe('設定ページ', () => {
 
     expect(clearMock).toHaveBeenCalledTimes(1)
     expect(navigateToMock).toHaveBeenCalledWith('/')
+  })
+
+  // サインアウトでロケールを落とすと、英語で使っていた人が日本語のトップに着く。
+  it('英語で見ているときは英語のトップページへ移動する', async () => {
+    await useLocale('en')
+
+    const component = await mountSuspended(SettingsPage)
+
+    await component.find('button').trigger('click')
+    await flushPromises()
+
+    expect(navigateToMock).toHaveBeenCalledWith('/en')
   })
 
   // 二度押しで破棄と移動が重ならないよう、処理中はボタンを無効にする。

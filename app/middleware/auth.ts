@@ -16,5 +16,10 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // サインインを終えたあとに元のページへ戻せるよう、行き先を残しておく。
-  return navigateTo({ path: '/lookup', query: { redirect: to.fullPath } })
+  // 送り先はロケールを保つ。英語で読んでいた人を日本語のページへ送ると、
+  // サインインの手前で読めない画面に突き当たる。
+  return navigateTo({
+    path: useLocalePath()('/lookup'),
+    query: { redirect: to.fullPath },
+  })
 })
