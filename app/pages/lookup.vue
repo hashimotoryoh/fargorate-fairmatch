@@ -3,6 +3,15 @@ import type { PlayerProfile } from '#shared/types/player'
 
 definePageMeta({ middleware: 'guest' })
 
+useSeoMeta({
+  title: 'FargoRate IDでサインイン',
+  description:
+    'FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。IDの調べ方も画面上で案内します。',
+  ogTitle: 'FargoRate IDでサインイン | FargoRate FairMatch',
+  ogDescription:
+    'FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。',
+})
+
 const route = useRoute()
 const { fetch: refreshSession } = useUserSession()
 
