@@ -114,34 +114,7 @@ function reject() {
     <div v-else-if="candidate" class="flex flex-col gap-4">
       <p class="text-sm">このプレイヤーはあなたですか？</p>
 
-      <table class="table">
-        <tbody>
-          <tr>
-            <th>名前</th>
-            <td>{{ candidate.firstName }} {{ candidate.lastName }}</td>
-          </tr>
-          <tr>
-            <th>リーグ</th>
-            <td>{{ candidate.leagueName ?? '-' }}</td>
-          </tr>
-          <tr>
-            <th>リージョン</th>
-            <td>{{ candidate.region ?? '-' }}</td>
-          </tr>
-          <tr>
-            <th>チーム</th>
-            <td>{{ candidate.teamNames ?? '-' }}</td>
-          </tr>
-          <tr>
-            <th>レーティング</th>
-            <td>{{ candidate.effectiveRating }}</td>
-          </tr>
-          <tr>
-            <th>信頼度</th>
-            <td>{{ candidate.robustness }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <PlayerProfileTable :player="candidate" />
 
       <div class="flex gap-2">
         <button
