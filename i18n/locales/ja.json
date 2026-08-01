@@ -113,6 +113,7 @@
     "errors": {
       "invalidId": "FargoRate IDは13桁の数字で入力してください。",
       "notFound": "そのFargoRate IDのプレイヤーは見つかりませんでした。",
+      "recaptchaFailed": "ロボットではないことを確認できませんでした。しばらくしてからもう一度お試しください。",
       "unexpected": "通信に失敗しました。しばらくしてからもう一度お試しください。"
     }
   },

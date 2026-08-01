@@ -113,6 +113,7 @@
     "errors": {
       "invalidId": "Enter your FargoRate ID as 13 digits.",
       "notFound": "No player was found for that FargoRate ID.",
+      "recaptchaFailed": "We couldn't verify that you're not a robot. Please wait a moment and try again.",
       "unexpected": "The request failed. Please wait a moment and try again."
     }
   },

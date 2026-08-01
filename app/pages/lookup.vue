@@ -18,6 +18,7 @@ const localePath = useLocalePath()
 const { fetch: refreshSession } = useUserSession()
 const { recentAccounts, addRecentAccount, removeRecentAccount } =
   useRecentAccounts()
+const { execute: executeRecaptcha } = useRecaptcha()
 
 const fargorateId = ref('')
 // 'input' はID入力、'confirm' は本人確認のステップ。
@@ -42,6 +43,9 @@ function toErrorMessage(error: unknown) {
   if (statusCode === 400) {
     return t('lookup.errors.invalidId')
   }
+  if (statusCode === 422) {
+    return t('lookup.errors.recaptchaFailed')
+  }
   return t('lookup.errors.unexpected')
 }
 
@@ -55,9 +59,10 @@ async function lookup() {
   errorMessage.value = ''
 
   try {
+    const recaptchaToken = await executeRecaptcha('lookup')
     candidate.value = await $fetch<PlayerProfile>('/api/lookup', {
       method: 'POST',
-      body: { fargorateId: fargorateId.value },
+      body: { fargorateId: fargorateId.value, recaptchaToken },
     })
     step.value = 'confirm'
   } catch (error) {

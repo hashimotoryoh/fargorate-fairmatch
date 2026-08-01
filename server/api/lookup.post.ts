@@ -1,9 +1,17 @@
 /**
  * FargoRate IDからプレイヤー情報を引く。確認画面に見せるためのもので、
  * この時点ではまだ認証は行わない。該当が無ければ 404 を返す。
+ *
+ * 外部APIへの総当たりを防ぐため、reCAPTCHA v3 の検証をここで行う。
+ * `auth/session` 側には付けていない。ただし「最近使用したアカウント」からの
+ * 直接サインイン（`selectRecentAccount`）は、ここを経由せず`auth/session`を
+ * 直接呼ぶ。既に本人確認済みのIDをlocalStorageから再利用するだけの経路であり、
+ * 総当たりの手段としては使えないため許容している。
  */
 export default defineEventHandler(async (event) => {
-  const fargorateId = readFargorateId(await readBody(event))
+  const body = await readBody(event)
+  const fargorateId = readFargorateId(body)
+  await verifyRecaptchaToken(body?.recaptchaToken, 'lookup')
   const profile = await lookupPlayerProfile(fargorateId)
 
   if (!profile) {

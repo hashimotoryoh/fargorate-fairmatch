@@ -192,6 +192,8 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 確認の確定時（`POST /api/auth/session`）にクライアントから受け取るのはFargoRate IDだけとし、セッションに保存する情報はサーバー側でルックアップし直した結果を使う。クライアントが任意の姓名やレーティングを自称できないようにするため、この方針を崩さないこと。
 
+CSI・FargoRateの両APIは非公式で利用制約が不明なため、`POST /api/lookup`（IDを送って外部APIへ問い合わせる最初の関門）ではreCAPTCHA v3のスコア判定を通してから `lookupPlayerProfile` を呼ぶ（`server/utils/recaptcha.ts` の `verifyRecaptchaToken`）。クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。`POST /api/auth/session` は `lookup` を通過した画面遷移でしか呼ばれないため、reCAPTCHAは付けていない。
+
 認証なしでアクセスできるのは `/`、`/lookup`、`/privacy-policy`、`/terms-conditions` の4つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
 
 - `app/middleware/auth.ts`: 未認証なら `/lookup` へ送る。保護対象のページに `definePageMeta({ middleware: 'auth' })` で付ける
