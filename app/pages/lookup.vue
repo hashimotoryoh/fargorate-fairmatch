@@ -88,7 +88,7 @@ async function completeSignIn(id: string, account: RecentAccount) {
 // 本人だと確認できたので認証を確定する。
 async function confirm() {
   if (!candidate.value) return
-  await completeSignIn(fargorateId.value, candidate.value)
+  await completeSignIn(candidate.value.fargorateId, candidate.value)
 }
 
 // 過去に本人確認したアカウントは、選んだ時点で本人だとわかっているため、

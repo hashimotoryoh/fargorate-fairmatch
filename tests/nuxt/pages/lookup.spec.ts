@@ -4,7 +4,7 @@ import {
   registerEndpoint,
 } from '@nuxt/test-utils/runtime'
 import { useNuxtApp } from '#imports'
-import { createError } from 'h3'
+import { createError, readBody } from 'h3'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, type VueWrapper } from '@vue/test-utils'
 import LookupPage from '../../../app/pages/lookup.vue'
@@ -162,6 +162,27 @@ describe('サインインページ', () => {
     expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
   })
 
+  // 入力欄の値ではなく、ルックアップで得たプレイヤーのIDでサインインを確定する。
+  // 状態が食い違った場合に、ユーザーが確認していない別IDでサインインしないため。
+  it('確認画面ではルックアップで得たプレイヤーのIDでサインインを確定する', async () => {
+    const candidateId = '9900009999999'
+    lookupHandler.mockReturnValue(
+      createPlayerProfile({ fargorateId: candidateId }),
+    )
+    sessionHandler.mockImplementation(async (event) => {
+      expect(await readBody(event)).toEqual({ fargorateId: candidateId })
+      return createPlayerProfile({ fargorateId: candidateId })
+    })
+
+    const component = await mountSuspended(LookupPage)
+    await fillAndSubmit(component, FARGORATE_ID)
+
+    await component.findAll('button')[0]?.trigger('click')
+    await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
+
+    expect(sessionHandler).toHaveBeenCalledTimes(1)
+  })
+
   it('元々開こうとしていたページへ戻す', async () => {
     routeQuery.redirect = '/game'
 
@@ -312,6 +333,24 @@ describe('サインインページ', () => {
     expect(component.text()).toContain(jaMessage('lookup.recentAccounts.label'))
     expect(component.text()).toContain('Taro Yamada (523)')
     expect(component.text()).not.toContain(FARGORATE_ID)
+  })
+
+  // 保存形式が想定より多件数になっていても、表示件数の上限（直近5件）を崩さない。
+  it('保存件数が上限を超えていても直近5件までしかサジェストしない', async () => {
+    const accounts = Array.from({ length: 7 }, (_, i) => ({
+      fargorateId: String(9900000000000 + i),
+      firstName: 'Player',
+      lastName: `${i}`,
+      effectiveRating: 400 + i,
+    }))
+    localStorage.setItem('fairmatch:recentAccounts', JSON.stringify(accounts))
+
+    const component = await mountSuspended(LookupPage)
+
+    const removeButtons = component.findAll(
+      `[aria-label="${jaMessage('lookup.recentAccounts.remove')}"]`,
+    )
+    expect(removeButtons).toHaveLength(5)
   })
 
   // 選んだ時点で本人だとわかっているため、IDの入力や確認画面を経由しない。

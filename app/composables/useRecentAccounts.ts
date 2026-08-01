@@ -27,7 +27,8 @@ function readStoredAccounts(): RecentAccount[] {
     const raw = localStorage.getItem(STORAGE_KEY)
     const parsed: unknown = raw ? JSON.parse(raw) : []
     if (!Array.isArray(parsed)) return []
-    return parsed.filter(isRecentAccount)
+    // 保存形式が想定より多件数になっていても、表示件数の上限を崩さない。
+    return parsed.filter(isRecentAccount).slice(0, MAX_ENTRIES)
   } catch {
     // 壊れた値やプライベートブラウジングでの例外は無視し、サジェストなしで進める。
     return []
