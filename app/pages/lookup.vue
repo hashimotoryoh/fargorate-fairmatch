@@ -16,7 +16,8 @@ useSeoMeta({
 const route = useRoute()
 const localePath = useLocalePath()
 const { fetch: refreshSession } = useUserSession()
-const { recentIds, addRecentId, removeRecentId } = useRecentFargorateIds()
+const { recentAccounts, addRecentAccount, removeRecentAccount } =
+  useRecentAccounts()
 
 const fargorateId = ref('')
 // 'input' はID入力、'confirm' は本人確認のステップ。
@@ -71,7 +72,9 @@ async function confirm() {
       method: 'POST',
       body: { fargorateId: fargorateId.value },
     })
-    addRecentId(fargorateId.value)
+    if (candidate.value) {
+      addRecentAccount(candidate.value)
+    }
     await refreshSession()
     // `resolveRedirectPath` はロケールを知らない純粋な関数に保つ。オープン
     // リダイレクトの判定と、ロケールの付与を混ぜないため、ここで通す。
@@ -127,25 +130,31 @@ function reject() {
           </label>
 
           <div
-            v-if="recentIds.length"
+            v-if="recentAccounts.length"
             class="flex flex-wrap items-center gap-2"
           >
             <span class="text-base-content/70 text-xs">
-              {{ $t('lookup.recentIds.label') }}
+              {{ $t('lookup.recentAccounts.label') }}
             </span>
-            <div v-for="id in recentIds" :key="id" class="join">
+            <div
+              v-for="account in recentAccounts"
+              :key="account.fargorateId"
+              class="join"
+            >
               <button
                 type="button"
-                class="btn btn-outline btn-xs join-item font-mono"
-                @click="fargorateId = id"
+                class="btn btn-outline btn-xs join-item"
+                @click="fargorateId = account.fargorateId"
               >
-                {{ id }}
+                {{ account.firstName }} {{ account.lastName }} ({{
+                  account.effectiveRating
+                }})
               </button>
               <button
                 type="button"
                 class="btn btn-outline btn-xs join-item"
-                :aria-label="$t('lookup.recentIds.remove')"
-                @click="removeRecentId(id)"
+                :aria-label="$t('lookup.recentAccounts.remove')"
+                @click="removeRecentAccount(account.fargorateId)"
               >
                 ✕
               </button>

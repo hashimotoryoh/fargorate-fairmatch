@@ -102,8 +102,8 @@
     "heading": "Sign in",
     "lead": "We will look up your information by FargoRate ID.",
     "idLabel": "FargoRate ID (13 digits)",
-    "recentIds": {
-      "label": "Recently used:",
+    "recentAccounts": {
+      "label": "Recently used accounts:",
       "remove": "Remove suggestion"
     },
     "submit": "Search",

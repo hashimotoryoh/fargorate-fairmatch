@@ -278,34 +278,59 @@ describe('サインインページ', () => {
     expect(component.find('[role="alert"]').exists()).toBe(false)
   })
 
-  it('過去に本人確認したIDが無ければサジェストを出さない', async () => {
+  const SECOND_ACCOUNT = {
+    fargorateId: '9900007654321',
+    firstName: 'Jiro',
+    lastName: 'Suzuki',
+    effectiveRating: 400,
+  }
+
+  it('過去に本人確認したアカウントが無ければサジェストを出さない', async () => {
     const component = await mountSuspended(LookupPage)
 
-    expect(component.text()).not.toContain(jaMessage('lookup.recentIds.label'))
+    expect(component.text()).not.toContain(
+      jaMessage('lookup.recentAccounts.label'),
+    )
   })
 
-  it('過去に本人確認したIDがあればサジェストとして出す', async () => {
+  // 生のFargoRate IDではなく、名前とレーティングでサジェストする。
+  it('過去に本人確認したアカウントを名前とレーティングでサジェストする', async () => {
     localStorage.setItem(
-      'fairmatch:recentFargorateIds',
-      JSON.stringify([FARGORATE_ID]),
+      'fairmatch:recentAccounts',
+      JSON.stringify([
+        {
+          fargorateId: FARGORATE_ID,
+          firstName: 'Taro',
+          lastName: 'Yamada',
+          effectiveRating: 523,
+        },
+      ]),
     )
 
     const component = await mountSuspended(LookupPage)
 
-    expect(component.text()).toContain(jaMessage('lookup.recentIds.label'))
-    expect(component.text()).toContain(FARGORATE_ID)
+    expect(component.text()).toContain(jaMessage('lookup.recentAccounts.label'))
+    expect(component.text()).toContain('Taro Yamada (523)')
+    expect(component.text()).not.toContain(FARGORATE_ID)
   })
 
-  it('サジェストを選ぶと入力欄にIDを反映する', async () => {
+  it('サジェストを選ぶと入力欄にFargoRate IDを反映する', async () => {
     localStorage.setItem(
-      'fairmatch:recentFargorateIds',
-      JSON.stringify([FARGORATE_ID]),
+      'fairmatch:recentAccounts',
+      JSON.stringify([
+        {
+          fargorateId: FARGORATE_ID,
+          firstName: 'Taro',
+          lastName: 'Yamada',
+          effectiveRating: 523,
+        },
+      ]),
     )
 
     const component = await mountSuspended(LookupPage)
     await component
       .findAll('button')
-      .find((button) => button.text() === FARGORATE_ID)
+      .find((button) => button.text() === 'Taro Yamada (523)')
       ?.trigger('click')
 
     const input = component.find('input[type="text"]')
@@ -315,40 +340,50 @@ describe('サインインページ', () => {
 
   it('サジェストを個別に削除できる', async () => {
     localStorage.setItem(
-      'fairmatch:recentFargorateIds',
-      JSON.stringify([FARGORATE_ID, '9900007654321']),
+      'fairmatch:recentAccounts',
+      JSON.stringify([
+        {
+          fargorateId: FARGORATE_ID,
+          firstName: 'Taro',
+          lastName: 'Yamada',
+          effectiveRating: 523,
+        },
+        SECOND_ACCOUNT,
+      ]),
     )
 
     const component = await mountSuspended(LookupPage)
     const removeButtons = component.findAll(
-      `[aria-label="${jaMessage('lookup.recentIds.remove')}"]`,
+      `[aria-label="${jaMessage('lookup.recentAccounts.remove')}"]`,
     )
     expect(removeButtons).toHaveLength(2)
 
     await removeButtons[0]?.trigger('click')
 
-    expect(component.text()).not.toContain(FARGORATE_ID)
-    expect(component.text()).toContain('9900007654321')
+    expect(component.text()).not.toContain('Taro Yamada (523)')
+    expect(component.text()).toContain('Jiro Suzuki (400)')
     expect(
-      JSON.parse(localStorage.getItem('fairmatch:recentFargorateIds') ?? '[]'),
-    ).toEqual(['9900007654321'])
+      JSON.parse(localStorage.getItem('fairmatch:recentAccounts') ?? '[]'),
+    ).toEqual([SECOND_ACCOUNT])
   })
 
   it('最後のサジェストを削除すると一覧ごと消える', async () => {
     localStorage.setItem(
-      'fairmatch:recentFargorateIds',
-      JSON.stringify([FARGORATE_ID]),
+      'fairmatch:recentAccounts',
+      JSON.stringify([SECOND_ACCOUNT]),
     )
 
     const component = await mountSuspended(LookupPage)
     await component
-      .find(`[aria-label="${jaMessage('lookup.recentIds.remove')}"]`)
+      .find(`[aria-label="${jaMessage('lookup.recentAccounts.remove')}"]`)
       .trigger('click')
 
-    expect(component.text()).not.toContain(jaMessage('lookup.recentIds.label'))
+    expect(component.text()).not.toContain(
+      jaMessage('lookup.recentAccounts.label'),
+    )
   })
 
-  it('本人だと確認すると次回のためにIDを記憶する', async () => {
+  it('本人だと確認すると次回のために名前とレーティングを記憶する', async () => {
     const component = await mountSuspended(LookupPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
@@ -356,7 +391,14 @@ describe('サインインページ', () => {
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
 
     expect(
-      JSON.parse(localStorage.getItem('fairmatch:recentFargorateIds') ?? '[]'),
-    ).toEqual([FARGORATE_ID])
+      JSON.parse(localStorage.getItem('fairmatch:recentAccounts') ?? '[]'),
+    ).toEqual([
+      {
+        fargorateId: FARGORATE_ID,
+        firstName: 'Taro',
+        lastName: 'Yamada',
+        effectiveRating: 523,
+      },
+    ])
   })
 })
