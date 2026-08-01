@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PlayerProfile } from '#shared/types/player'
+import type { RecentAccount } from '../composables/useRecentAccounts'
 
 definePageMeta({ middleware: 'guest' })
 
