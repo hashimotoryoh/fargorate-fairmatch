@@ -13,6 +13,12 @@ type RecaptchaVerifyResponse = {
  *
  * `action` はクライアント側で `execute()` に渡した値と一致するかを見て、
  * 他の画面向けに取得したトークンの使い回しを防ぐ。
+ *
+ * Googleが公開しているテスト用キーでは、この `action` の検証が常に失敗する
+ * （hostname・actionの検証をスキップする特殊なキーであるため）。ローカル
+ * 開発では `localhost` をドメインに加えた自分のキーを使うこと
+ * （`.env.example` 参照）。この一致チェック自体を外すのは誤った対処なので
+ * 行わないこと。
  */
 export async function verifyRecaptchaToken(
   token: unknown,
