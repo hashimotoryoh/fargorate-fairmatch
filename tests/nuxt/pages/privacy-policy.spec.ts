@@ -16,7 +16,7 @@ const { queryCollectionMock } = vi.hoisted(() => ({
 mockNuxtImport('queryCollection', () => queryCollectionMock)
 
 describe('プライバシーポリシーのページ', () => {
-  it('content/privacy-policy.md の本文を出す', async () => {
+  it('privacy-policy のドキュメントの本文を出す', async () => {
     const component = await mountSuspended(PrivacyPolicyPage)
 
     expect(component.find('h1').text()).toBe('/privacy-policy のドキュメント')

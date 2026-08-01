@@ -4,9 +4,19 @@ const { path } = defineProps<{
   path: string
 }>()
 
+const { locale } = useI18n()
+
 // ドキュメントごとにキーを分けないと、別のページの取得結果を使い回してしまう。
-const { data: document } = await useAsyncData(`document:${path}`, () =>
-  queryCollection('documents').path(path).first(),
+// ロケールごとに別の文面なので、キーにもロケールを含める。
+const { data: document } = await useAsyncData(
+  () => `document:${locale.value}:${path}`,
+  () =>
+    // コレクション名でロケールを分けている。スキーマは全ロケールで同じなので、
+    // 型は代表の1つで表せる。
+    queryCollection(`documents_${locale.value}` as 'documents_ja')
+      .path(path)
+      .first(),
+  { watch: [locale] },
 )
 
 // 本文はMarkdownにあるため、ファイルを消したり名前を変えたりすると空になる。
@@ -26,10 +36,10 @@ useSeoMeta({
   ogDescription: document.value.description,
 })
 
-// フロントマターのISO形式の日付を和暦表記に直す。タイムゾーンを指定しないと
-// UTCの0時が前日として表示される環境がある。
+// フロントマターのISO形式の日付を、表示中の言語の表記に直す。タイムゾーンを
+// 指定しないと、UTCの0時が前日として表示される環境がある。
 const updatedAtLabel = computed(() =>
-  new Intl.DateTimeFormat('ja-JP', {
+  new Intl.DateTimeFormat(locale.value, {
     dateStyle: 'long',
     timeZone: 'UTC',
   }).format(new Date(document.value!.updatedAt)),
@@ -41,7 +51,7 @@ const updatedAtLabel = computed(() =>
     <header class="flex flex-col gap-1">
       <h1 class="text-2xl font-bold">{{ document.title }}</h1>
       <p class="text-base-content/60 text-sm">
-        最終更新日:
+        {{ $t('document.updatedAt') }}
         <time :datetime="document.updatedAt">{{ updatedAtLabel }}</time>
       </p>
     </header>
