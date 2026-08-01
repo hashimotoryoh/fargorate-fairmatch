@@ -62,19 +62,17 @@ async function lookup() {
   }
 }
 
-// 本人だと確認できたので認証を確定し、元々開こうとしていたページへ移動する。
-async function confirm() {
+// 認証を確定し、アカウントを記憶したうえで元々開こうとしていたページへ移動する。
+async function completeSignIn(id: string, account: RecentAccount) {
   pending.value = true
   errorMessage.value = ''
 
   try {
     await $fetch('/api/auth/session', {
       method: 'POST',
-      body: { fargorateId: fargorateId.value },
+      body: { fargorateId: id },
     })
-    if (candidate.value) {
-      addRecentAccount(candidate.value)
-    }
+    addRecentAccount(account)
     await refreshSession()
     // `resolveRedirectPath` はロケールを知らない純粋な関数に保つ。オープン
     // リダイレクトの判定と、ロケールの付与を混ぜないため、ここで通す。
@@ -85,6 +83,18 @@ async function confirm() {
   } finally {
     pending.value = false
   }
+}
+
+// 本人だと確認できたので認証を確定する。
+async function confirm() {
+  if (!candidate.value) return
+  await completeSignIn(fargorateId.value, candidate.value)
+}
+
+// 過去に本人確認したアカウントは、選んだ時点で本人だとわかっているため、
+// 確認画面を経由せず直接サインインする。
+async function selectRecentAccount(account: RecentAccount) {
+  await completeSignIn(account.fargorateId, account)
 }
 
 // 本人ではなかったので、ID入力からやり直す。
@@ -144,7 +154,8 @@ function reject() {
               <button
                 type="button"
                 class="btn btn-outline btn-xs join-item"
-                @click="fargorateId = account.fargorateId"
+                :disabled="pending"
+                @click="selectRecentAccount(account)"
               >
                 {{ account.firstName }} {{ account.lastName }} ({{
                   account.effectiveRating
@@ -154,6 +165,7 @@ function reject() {
                 type="button"
                 class="btn btn-outline btn-xs join-item"
                 :aria-label="$t('lookup.recentAccounts.remove')"
+                :disabled="pending"
                 @click="removeRecentAccount(account.fargorateId)"
               >
                 ✕

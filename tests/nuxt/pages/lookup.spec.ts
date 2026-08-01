@@ -314,7 +314,8 @@ describe('サインインページ', () => {
     expect(component.text()).not.toContain(FARGORATE_ID)
   })
 
-  it('サジェストを選ぶと入力欄にFargoRate IDを反映する', async () => {
+  // 選んだ時点で本人だとわかっているため、IDの入力や確認画面を経由しない。
+  it('サジェストを選ぶと確認画面を経ずに直接サインインする', async () => {
     localStorage.setItem(
       'fairmatch:recentAccounts',
       JSON.stringify([
@@ -332,10 +333,35 @@ describe('サインインページ', () => {
       .findAll('button')
       .find((button) => button.text() === 'Taro Yamada (523)')
       ?.trigger('click')
+    await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
+
+    expect(lookupHandler).not.toHaveBeenCalled()
+    expect(sessionHandler).toHaveBeenCalledTimes(1)
+    expect(refreshSessionMock).toHaveBeenCalledTimes(1)
+    expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
 
     const input = component.find('input[type="text"]')
       .element as HTMLInputElement
-    expect(input.value).toBe(FARGORATE_ID)
+    expect(input.value).toBe('')
+  })
+
+  it('サジェストでの直接サインインに失敗したら知らせる', async () => {
+    sessionHandler.mockImplementation(notFound)
+    localStorage.setItem(
+      'fairmatch:recentAccounts',
+      JSON.stringify([SECOND_ACCOUNT]),
+    )
+
+    const component = await mountSuspended(LookupPage)
+    await component
+      .findAll('button')
+      .find((button) => button.text() === 'Jiro Suzuki (400)')
+      ?.trigger('click')
+    await vi.waitFor(() =>
+      expect(component.find('[role="alert"]').exists()).toBe(true),
+    )
+
+    expect(navigateToMock).not.toHaveBeenCalled()
   })
 
   it('サジェストを個別に削除できる', async () => {

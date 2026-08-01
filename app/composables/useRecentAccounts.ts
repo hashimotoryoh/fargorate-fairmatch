@@ -55,7 +55,7 @@ export function useRecentAccounts() {
     recentAccounts.value = readStoredAccounts()
   })
 
-  function addRecentAccount(profile: PlayerProfile) {
+  function addRecentAccount(profile: RecentAccount) {
     const account: RecentAccount = {
       fargorateId: profile.fargorateId,
       firstName: profile.firstName,
