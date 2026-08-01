@@ -89,6 +89,8 @@ cp .env.example .env
 
 この値はコミットハッシュと同じくビルド時に解決する。実行時に渡しても反映されないため、ビルドを行う環境で設定すること。
 
+`NUXT_PUBLIC_RECAPTCHA_SITE_KEY` と `NUXT_RECAPTCHA_SECRET_KEY` は `/lookup` のBot対策に使う reCAPTCHA v3 のキー。開発中はGoogle公式のテスト用キー（`.env.example` に記載）を使えばよい。
+
 フッターに表示するコミットハッシュはビルド時に解決する。ホスティングが渡す環境変数（`VERCEL_GIT_COMMIT_SHA` や `GITHUB_SHA` など）があればそれを使い、無ければローカルの `git rev-parse` にフォールバックする。どちらも得られない場合はバージョン表示自体を省く。
 
 ## 開発サーバー

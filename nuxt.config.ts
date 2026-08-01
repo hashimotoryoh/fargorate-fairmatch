@@ -115,12 +115,17 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
+    // reCAPTCHA v3 のシークレットキー。サーバー側での検証にのみ使うため public
+    // には置かない。
+    recaptchaSecretKey: '',
     public: {
       commitSha: resolveCommitSha(),
       repositoryUrl: REPOSITORY_URL,
       // OGP や canonical で必要な絶対URLの組み立てに使う。
       // 未設定のうちは絶対URLを作れないため、該当するメタを出力しない。
       siteUrl: SITE_URL,
+      // reCAPTCHA v3 のサイトキー。クライアント側のスクリプト読み込みに使う。
+      recaptchaSiteKey: '',
     },
   },
   // 保護ページに prerender や ISR/SWR のルートルールを足してはならない。
