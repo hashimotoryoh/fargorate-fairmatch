@@ -194,6 +194,8 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 CSI・FargoRateの両APIは非公式で利用制約が不明なため、`POST /api/lookup`（IDを送って外部APIへ問い合わせる最初の関門）ではreCAPTCHA v3のスコア判定を通してから `lookupPlayerProfile` を呼ぶ（`server/utils/recaptcha.ts` の `verifyRecaptchaToken`）。クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。`POST /api/auth/session` は `lookup` を通過した画面遷移でしか呼ばれないため、reCAPTCHAは付けていない。
 
+Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり、このアプリでは使えない。v2の `siteverify` の応答には `score` も `action` も含まれず、スコア判定で必ず落ちるためである。v3用のテストキーは公開されていないので、ローカル開発でも `localhost` をドメインに加えた自分のv3キーを使うこと。検証が通らないことを理由に `score` や `action` のチェックを緩めてはならない。
+
 認証なしでアクセスできるのは `/`、`/lookup`、`/privacy-policy`、`/terms-conditions` の4つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
 
 - `app/middleware/auth.ts`: 未認証なら `/lookup` へ送る。保護対象のページに `definePageMeta({ middleware: 'auth' })` で付ける

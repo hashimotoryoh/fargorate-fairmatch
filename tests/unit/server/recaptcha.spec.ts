@@ -2,8 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { verifyRecaptchaToken } from '../../../server/utils/recaptcha'
 
 const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
-// server/utils/recaptcha.ts の GOOGLE_TEST_SECRET_KEY と同じ値。
-const GOOGLE_TEST_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
 
 type MockedResponse = unknown | (() => never)
 
@@ -68,19 +66,14 @@ describe('verifyRecaptchaToken', () => {
     ).rejects.toMatchObject({ statusCode: 422 })
   })
 
-  // Googleが公開しているテスト用キーはhostname・actionの検証を常にスキップ
-  // するため、このキーが設定されている間はactionの一致を見ない。本番で
-  // このキーが使われていない限り、常にactionの検証が効く。
-  it('Googleのテスト用シークレットキーが設定されていればactionが一致しなくても通す', async () => {
-    vi.stubGlobal('useRuntimeConfig', () => ({
-      recaptchaSecretKey: GOOGLE_TEST_SECRET_KEY,
-      public: { recaptchaSiteKey: 'test-site-key' },
-    }))
-    stubFetch(verifyResponse({ action: 'other' }))
+  // v2のキーを設定すると、応答は success:true でも score を含まない形になる。
+  // スコア不明を「人間」と誤って扱わないこと。
+  it('応答に score が無ければ 422 を投げる', async () => {
+    stubFetch({ success: true, challenge_ts: '2026-08-01T00:00:00Z' })
 
     await expect(
       verifyRecaptchaToken('valid-token', 'lookup'),
-    ).resolves.toBeUndefined()
+    ).rejects.toMatchObject({ statusCode: 422 })
   })
 
   it.each([

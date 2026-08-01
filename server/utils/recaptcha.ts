@@ -2,11 +2,6 @@ const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
 // Googleが目安として示す既定値。0.0（Bot寄り）〜1.0（人間寄り）。
 const RECAPTCHA_SCORE_THRESHOLD = 0.5
 
-// Googleが公開しているreCAPTCHA v3のテスト用シークレットキー
-// （`.env.example` 参照）。常にsuccess:trueとスコア0.9を返すが、
-// hostname・actionの検証を常にスキップする特殊なキーである。
-const GOOGLE_TEST_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
-
 type RecaptchaVerifyResponse = {
   success: boolean
   score?: number
@@ -17,14 +12,13 @@ type RecaptchaVerifyResponse = {
  * reCAPTCHA v3 のトークンをGoogleのAPIで検証する。
  *
  * `action` はクライアント側で `execute()` に渡した値と一致するかを見て、
- * 他の画面向けに取得したトークンの使い回しを防ぐ。ただしGoogleのテスト用
- * シークレットキーが設定されている場合はこの検証を行わない。テスト用キーは
- * hostname・actionの検証を常にスキップするため、そのまま適用するとローカル
- * 開発でこのキーを使うたびに一致チェックだけが常に失敗してしまうため。
+ * 他の画面向けに取得したトークンの使い回しを防ぐ。
  *
- * `NODE_ENV` のような環境変数ではなく実際に設定されているキーの値で判定する
- * ことで、本番でこのテスト用キーが使われていない限り、デプロイ方法によらず
- * 常にactionの検証が効く。
+ * `score` と `action` はv3の応答にのみ含まれる。Googleが公開している
+ * テストキーはv2用であり、これを設定すると応答に `score` が無いまま
+ * `success: true` が返るため、ここのスコア判定で必ず落ちる。v3のテスト用
+ * キーは公開されていないので、ローカル開発でも `localhost` をドメインに
+ * 加えた自分のv3キーを使うこと（`.env.example` 参照）。
  */
 export async function verifyRecaptchaToken(
   token: unknown,
@@ -64,11 +58,9 @@ export async function verifyRecaptchaToken(
     })
   }
 
-  const shouldCheckAction = recaptchaSecretKey !== GOOGLE_TEST_SECRET_KEY
-
   if (
     !result.success ||
-    (shouldCheckAction && result.action !== action) ||
+    result.action !== action ||
     (result.score ?? 0) < RECAPTCHA_SCORE_THRESHOLD
   ) {
     throw createError({
