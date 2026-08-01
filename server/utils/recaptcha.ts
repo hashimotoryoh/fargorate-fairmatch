@@ -2,6 +2,11 @@ const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
 // Googleが目安として示す既定値。0.0（Bot寄り）〜1.0（人間寄り）。
 const RECAPTCHA_SCORE_THRESHOLD = 0.5
 
+// Googleが公開しているreCAPTCHA v3のテスト用シークレットキー
+// （`.env.example` 参照）。常にsuccess:trueとスコア0.9を返すが、
+// hostname・actionの検証を常にスキップする特殊なキーである。
+const GOOGLE_TEST_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+
 type RecaptchaVerifyResponse = {
   success: boolean
   score?: number
@@ -12,10 +17,14 @@ type RecaptchaVerifyResponse = {
  * reCAPTCHA v3 のトークンをGoogleのAPIで検証する。
  *
  * `action` はクライアント側で `execute()` に渡した値と一致するかを見て、
- * 他の画面向けに取得したトークンの使い回しを防ぐ。ただしこの検証は本番でのみ
- * 行う。Googleが公開しているテスト用キー（`.env.example` 参照）は
- * hostname・actionの検証を常にスキップする特殊なキーで、ローカル開発でも
- * 引き続きこのキーを使えるようにするため。
+ * 他の画面向けに取得したトークンの使い回しを防ぐ。ただしGoogleのテスト用
+ * シークレットキーが設定されている場合はこの検証を行わない。テスト用キーは
+ * hostname・actionの検証を常にスキップするため、そのまま適用するとローカル
+ * 開発でこのキーを使うたびに一致チェックだけが常に失敗してしまうため。
+ *
+ * `NODE_ENV` のような環境変数ではなく実際に設定されているキーの値で判定する
+ * ことで、本番でこのテスト用キーが使われていない限り、デプロイ方法によらず
+ * 常にactionの検証が効く。
  */
 export async function verifyRecaptchaToken(
   token: unknown,
@@ -55,7 +64,7 @@ export async function verifyRecaptchaToken(
     })
   }
 
-  const shouldCheckAction = process.env.NODE_ENV === 'production'
+  const shouldCheckAction = recaptchaSecretKey !== GOOGLE_TEST_SECRET_KEY
 
   if (
     !result.success ||

@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { verifyRecaptchaToken } from '../../../server/utils/recaptcha'
 
 const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
+// server/utils/recaptcha.ts の GOOGLE_TEST_SECRET_KEY と同じ値。
+const GOOGLE_TEST_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
 
 type MockedResponse = unknown | (() => never)
 
@@ -58,11 +60,7 @@ describe('verifyRecaptchaToken', () => {
     ).rejects.toMatchObject({ statusCode: 422 })
   })
 
-  // Googleが公開しているテスト用キーはhostname・actionの検証を常にスキップ
-  // するため、ローカル開発でもそのキーを使い続けられるよう本番でのみ厳格に
-  // 検証する。
-  it('本番でactionが一致しなければ 422 を投げる', async () => {
-    vi.stubEnv('NODE_ENV', 'production')
+  it('actionが一致しなければ 422 を投げる', async () => {
     stubFetch(verifyResponse({ action: 'other' }))
 
     await expect(
@@ -70,7 +68,14 @@ describe('verifyRecaptchaToken', () => {
     ).rejects.toMatchObject({ statusCode: 422 })
   })
 
-  it('本番以外ではactionが一致しなくても通す', async () => {
+  // Googleが公開しているテスト用キーはhostname・actionの検証を常にスキップ
+  // するため、このキーが設定されている間はactionの一致を見ない。本番で
+  // このキーが使われていない限り、常にactionの検証が効く。
+  it('Googleのテスト用シークレットキーが設定されていればactionが一致しなくても通す', async () => {
+    vi.stubGlobal('useRuntimeConfig', () => ({
+      recaptchaSecretKey: GOOGLE_TEST_SECRET_KEY,
+      public: { recaptchaSiteKey: 'test-site-key' },
+    }))
     stubFetch(verifyResponse({ action: 'other' }))
 
     await expect(
@@ -82,19 +87,14 @@ describe('verifyRecaptchaToken', () => {
     ['未指定', undefined],
     ['空文字', ''],
     ['文字列以外', 123],
-  ])(
-    'トークンが%sなら外部APIを呼ばずに 422 を投げる',
-    async (_label, token) => {
-      const fetchMock = stubFetch(verifyResponse())
+  ])('トークンが%sなら外部APIを呼ばずに 422 を投げる', async (_label, token) => {
+    const fetchMock = stubFetch(verifyResponse())
 
-      await expect(verifyRecaptchaToken(token, 'lookup')).rejects.toMatchObject(
-        {
-          statusCode: 422,
-        },
-      )
-      expect(fetchMock).not.toHaveBeenCalled()
-    },
-  )
+    await expect(verifyRecaptchaToken(token, 'lookup')).rejects.toMatchObject({
+      statusCode: 422,
+    })
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
 
   it('外部APIに到達できなければ 502 を投げる', async () => {
     stubFetch(() => {
