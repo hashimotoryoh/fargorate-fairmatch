@@ -384,6 +384,34 @@ describe('サインインページ', () => {
     expect(input.value).toBe('')
   })
 
+  // サジェストは古いスナップショットの可能性があるため、サーバーが
+  // 再ルックアップした最新の情報で記憶を上書きする。
+  it('サジェストからのサインインでは、サーバーが返した最新の情報を記憶する', async () => {
+    localStorage.setItem(
+      'fairmatch:recentAccounts',
+      JSON.stringify([SECOND_ACCOUNT]),
+    )
+    sessionHandler.mockReturnValue(
+      createPlayerProfile({
+        fargorateId: SECOND_ACCOUNT.fargorateId,
+        firstName: SECOND_ACCOUNT.firstName,
+        lastName: SECOND_ACCOUNT.lastName,
+        effectiveRating: 450,
+      }),
+    )
+
+    const component = await mountSuspended(LookupPage)
+    await component
+      .findAll('button')
+      .find((button) => button.text() === 'Jiro Suzuki (400)')
+      ?.trigger('click')
+    await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
+
+    expect(
+      JSON.parse(localStorage.getItem('fairmatch:recentAccounts') ?? '[]'),
+    ).toEqual([{ ...SECOND_ACCOUNT, effectiveRating: 450 }])
+  })
+
   it('サジェストでの直接サインインに失敗したら知らせる', async () => {
     sessionHandler.mockImplementation(notFound)
     localStorage.setItem(
