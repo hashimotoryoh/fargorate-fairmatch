@@ -24,10 +24,11 @@ export default defineConfig({
           environment: 'node',
           include: ['tests/unit/**/*.spec.ts'],
           setupFiles: ['tests/setup/nitro-auto-imports.ts'],
-          // 各テストが vi.stubGlobal で差し替えたグローバルを自動で戻す。
-          // サーバー側の自動インポートをグローバルで模しているため、
-          // 戻し忘れがそのまま他のテストへ漏れる。
+          // 各テストが vi.stubGlobal / vi.stubEnv で差し替えたグローバルや
+          // 環境変数を自動で戻す。サーバー側の自動インポートをグローバルで
+          // 模しているため、戻し忘れがそのまま他のテストへ漏れる。
           unstubGlobals: true,
+          unstubEnvs: true,
         },
       },
       await defineVitestProject({

@@ -12,13 +12,10 @@ type RecaptchaVerifyResponse = {
  * reCAPTCHA v3 のトークンをGoogleのAPIで検証する。
  *
  * `action` はクライアント側で `execute()` に渡した値と一致するかを見て、
- * 他の画面向けに取得したトークンの使い回しを防ぐ。
- *
- * Googleが公開しているテスト用キーでは、この `action` の検証が常に失敗する
- * （hostname・actionの検証をスキップする特殊なキーであるため）。ローカル
- * 開発では `localhost` をドメインに加えた自分のキーを使うこと
- * （`.env.example` 参照）。この一致チェック自体を外すのは誤った対処なので
- * 行わないこと。
+ * 他の画面向けに取得したトークンの使い回しを防ぐ。ただしこの検証は本番でのみ
+ * 行う。Googleが公開しているテスト用キー（`.env.example` 参照）は
+ * hostname・actionの検証を常にスキップする特殊なキーで、ローカル開発でも
+ * 引き続きこのキーを使えるようにするため。
  */
 export async function verifyRecaptchaToken(
   token: unknown,
@@ -58,9 +55,11 @@ export async function verifyRecaptchaToken(
     })
   }
 
+  const shouldCheckAction = process.env.NODE_ENV === 'production'
+
   if (
     !result.success ||
-    result.action !== action ||
+    (shouldCheckAction && result.action !== action) ||
     (result.score ?? 0) < RECAPTCHA_SCORE_THRESHOLD
   ) {
     throw createError({

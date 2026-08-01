@@ -58,12 +58,24 @@ describe('verifyRecaptchaToken', () => {
     ).rejects.toMatchObject({ statusCode: 422 })
   })
 
-  it('action が一致しなければ 422 を投げる', async () => {
+  // Googleが公開しているテスト用キーはhostname・actionの検証を常にスキップ
+  // するため、ローカル開発でもそのキーを使い続けられるよう本番でのみ厳格に
+  // 検証する。
+  it('本番でactionが一致しなければ 422 を投げる', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
     stubFetch(verifyResponse({ action: 'other' }))
 
     await expect(
       verifyRecaptchaToken('valid-token', 'lookup'),
     ).rejects.toMatchObject({ statusCode: 422 })
+  })
+
+  it('本番以外ではactionが一致しなくても通す', async () => {
+    stubFetch(verifyResponse({ action: 'other' }))
+
+    await expect(
+      verifyRecaptchaToken('valid-token', 'lookup'),
+    ).resolves.toBeUndefined()
   })
 
   it.each([
@@ -76,7 +88,9 @@ describe('verifyRecaptchaToken', () => {
       const fetchMock = stubFetch(verifyResponse())
 
       await expect(verifyRecaptchaToken(token, 'lookup')).rejects.toMatchObject(
-        { statusCode: 422 },
+        {
+          statusCode: 422,
+        },
       )
       expect(fetchMock).not.toHaveBeenCalled()
     },
