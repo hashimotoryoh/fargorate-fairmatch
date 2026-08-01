@@ -1,6 +1,7 @@
 import { createError, defineEventHandler, readBody } from 'h3'
 import { isValidFargorateId } from '../../shared/utils/fargorateId'
 import { lookupPlayerProfile, readFargorateId } from '../../server/utils/lookup'
+import { verifyRecaptchaToken } from '../../server/utils/recaptcha'
 
 /**
  * `server/` のコードはNitroの自動インポートに依存しており、素のNode環境では
@@ -17,6 +18,19 @@ Object.assign(globalThis, {
   isValidFargorateId,
   lookupPlayerProfile,
   readFargorateId,
+  verifyRecaptchaToken,
+})
+
+/**
+ * `useRuntimeConfig` はテスト用の固定値を返す。値そのものに検証したい意味は
+ * 無く（実際のGoogleへの問い合わせは `$fetch` 側で差し替える）、未定義による
+ * 例外だけを避ければ足りる。
+ */
+Object.assign(globalThis, {
+  useRuntimeConfig: () => ({
+    recaptchaSecretKey: 'test-secret',
+    public: { recaptchaSiteKey: 'test-site-key' },
+  }),
 })
 
 /**

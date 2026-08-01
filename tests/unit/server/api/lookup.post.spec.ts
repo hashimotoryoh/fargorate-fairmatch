@@ -14,23 +14,52 @@ describe('POST /api/lookup', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.stubGlobal('lookupPlayerProfile', lookupPlayerProfile)
+    // reCAPTCHA検証は既定で成功させる。失敗時の挙動は個別のテストで確かめる。
+    vi.stubGlobal(
+      '$fetch',
+      vi
+        .fn()
+        .mockResolvedValue({ success: true, score: 0.9, action: 'lookup' }),
+    )
   })
 
   it('該当するプレイヤーの情報を返す', async () => {
     const profile = createPlayerProfile()
     lookupPlayerProfile.mockResolvedValue(profile)
 
-    const response = await callHandler(handler, { fargorateId: FARGORATE_ID })
+    const response = await callHandler(handler, {
+      fargorateId: FARGORATE_ID,
+      recaptchaToken: 'valid-token',
+    })
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual(profile)
     expect(lookupPlayerProfile).toHaveBeenCalledWith(FARGORATE_ID)
   })
 
+  // 外部APIへの総当たりを防ぐための関門なので、ここで弾けばルックアップ自体をさせない。
+  it('reCAPTCHAの検証に失敗したら 422 を返し、ルックアップを行わない', async () => {
+    vi.stubGlobal(
+      '$fetch',
+      vi.fn().mockResolvedValue({ success: false, score: 0.1 }),
+    )
+
+    const response = await callHandler(handler, {
+      fargorateId: FARGORATE_ID,
+      recaptchaToken: 'invalid-token',
+    })
+
+    expect(response.status).toBe(422)
+    expect(lookupPlayerProfile).not.toHaveBeenCalled()
+  })
+
   it('該当が無ければ 404 を返す', async () => {
     lookupPlayerProfile.mockResolvedValue(null)
 
-    const response = await callHandler(handler, { fargorateId: FARGORATE_ID })
+    const response = await callHandler(handler, {
+      fargorateId: FARGORATE_ID,
+      recaptchaToken: 'valid-token',
+    })
 
     expect(response.status).toBe(404)
     expect(response.statusMessage).toBe('Player not found')
@@ -60,7 +89,10 @@ describe('POST /api/lookup', () => {
       }),
     )
 
-    const response = await callHandler(handler, { fargorateId: FARGORATE_ID })
+    const response = await callHandler(handler, {
+      fargorateId: FARGORATE_ID,
+      recaptchaToken: 'valid-token',
+    })
 
     expect(response.status).toBe(502)
   })
@@ -71,7 +103,10 @@ describe('POST /api/lookup', () => {
     vi.stubGlobal('setUserSession', setUserSession)
     lookupPlayerProfile.mockResolvedValue(createPlayerProfile())
 
-    await callHandler(handler, { fargorateId: FARGORATE_ID })
+    await callHandler(handler, {
+      fargorateId: FARGORATE_ID,
+      recaptchaToken: 'valid-token',
+    })
 
     expect(setUserSession).not.toHaveBeenCalled()
   })

@@ -15,12 +15,14 @@ const {
   routeQuery,
   navigateToMock,
   refreshSessionMock,
+  executeRecaptchaMock,
   lookupHandler,
   sessionHandler,
 } = vi.hoisted(() => ({
   routeQuery: { redirect: undefined as unknown },
   navigateToMock: vi.fn(),
   refreshSessionMock: vi.fn(),
+  executeRecaptchaMock: vi.fn(),
   lookupHandler: vi.fn(),
   sessionHandler: vi.fn(),
 }))
@@ -31,6 +33,8 @@ mockNuxtImport('useUserSession', () => () => ({
   fetch: refreshSessionMock,
   loggedIn: { value: false },
 }))
+// 実ブラウザでのreCAPTCHAスクリプト読み込みはテスト環境では発生させない。
+mockNuxtImport('useRecaptcha', () => () => ({ execute: executeRecaptchaMock }))
 
 registerEndpoint('/api/lookup', { method: 'POST', handler: lookupHandler })
 registerEndpoint('/api/auth/session', {
@@ -69,6 +73,7 @@ describe('サインインページ', () => {
     vi.clearAllMocks()
     await useLocale('ja')
     routeQuery.redirect = undefined
+    executeRecaptchaMock.mockResolvedValue('test-token')
     lookupHandler.mockReturnValue(createPlayerProfile())
     sessionHandler.mockReturnValue(createPlayerProfile())
   })
@@ -146,6 +151,19 @@ describe('サインインページ', () => {
 
     expect(component.find('[role="alert"]').text()).toContain(
       jaMessage('lookup.errors.unexpected'),
+    )
+  })
+
+  it('reCAPTCHAの検証に失敗したらその旨を知らせる', async () => {
+    lookupHandler.mockImplementation(() => {
+      throw createError({ statusCode: 422 })
+    })
+
+    const component = await mountSuspended(LookupPage)
+    await fillAndSubmit(component, FARGORATE_ID)
+
+    expect(component.find('[role="alert"]').text()).toContain(
+      jaMessage('lookup.errors.recaptchaFailed'),
     )
   })
 
