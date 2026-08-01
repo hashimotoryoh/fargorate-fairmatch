@@ -16,6 +16,7 @@ useSeoMeta({
 const route = useRoute()
 const localePath = useLocalePath()
 const { fetch: refreshSession } = useUserSession()
+const { recentIds, addRecentId } = useRecentFargorateIds()
 
 const fargorateId = ref('')
 // 'input' はID入力、'confirm' は本人確認のステップ。
@@ -70,6 +71,7 @@ async function confirm() {
       method: 'POST',
       body: { fargorateId: fargorateId.value },
     })
+    addRecentId(fargorateId.value)
     await refreshSession()
     // `resolveRedirectPath` はロケールを知らない純粋な関数に保つ。オープン
     // リダイレクトの判定と、ロケールの付与を混ぜないため、ここで通す。
@@ -123,6 +125,24 @@ function reject() {
               required
             />
           </label>
+
+          <div
+            v-if="recentIds.length"
+            class="flex flex-wrap items-center gap-2"
+          >
+            <span class="text-base-content/70 text-xs">
+              {{ $t('lookup.recentIds.label') }}
+            </span>
+            <button
+              v-for="id in recentIds"
+              :key="id"
+              type="button"
+              class="btn btn-outline btn-xs font-mono"
+              @click="fargorateId = id"
+            >
+              {{ id }}
+            </button>
+          </div>
 
           <div class="text-center">
             <LookupGuideModal />

@@ -102,6 +102,9 @@
     "heading": "Sign in",
     "lead": "We will look up your information by FargoRate ID.",
     "idLabel": "FargoRate ID (13 digits)",
+    "recentIds": {
+      "label": "Recently used:"
+    },
     "submit": "Search",
     "confirmQuestion": "Is this player you?",
     "confirm": "Yes, that is me",

@@ -67,6 +67,7 @@ async function fillAndSubmit(component: VueWrapper, value: string) {
 describe('サインインページ', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
+    localStorage.clear()
     await useLocale('ja')
     routeQuery.redirect = undefined
     lookupHandler.mockReturnValue(createPlayerProfile())
@@ -275,5 +276,52 @@ describe('サインインページ', () => {
     await fillAndSubmit(component, FARGORATE_ID)
 
     expect(component.find('[role="alert"]').exists()).toBe(false)
+  })
+
+  it('過去に本人確認したIDが無ければサジェストを出さない', async () => {
+    const component = await mountSuspended(LookupPage)
+
+    expect(component.text()).not.toContain(jaMessage('lookup.recentIds.label'))
+  })
+
+  it('過去に本人確認したIDがあればサジェストとして出す', async () => {
+    localStorage.setItem(
+      'fairmatch:recentFargorateIds',
+      JSON.stringify([FARGORATE_ID]),
+    )
+
+    const component = await mountSuspended(LookupPage)
+
+    expect(component.text()).toContain(jaMessage('lookup.recentIds.label'))
+    expect(component.text()).toContain(FARGORATE_ID)
+  })
+
+  it('サジェストを選ぶと入力欄にIDを反映する', async () => {
+    localStorage.setItem(
+      'fairmatch:recentFargorateIds',
+      JSON.stringify([FARGORATE_ID]),
+    )
+
+    const component = await mountSuspended(LookupPage)
+    await component
+      .findAll('button')
+      .find((button) => button.text() === FARGORATE_ID)
+      ?.trigger('click')
+
+    const input = component.find('input[type="text"]')
+      .element as HTMLInputElement
+    expect(input.value).toBe(FARGORATE_ID)
+  })
+
+  it('本人だと確認すると次回のためにIDを記憶する', async () => {
+    const component = await mountSuspended(LookupPage)
+    await fillAndSubmit(component, FARGORATE_ID)
+
+    await component.findAll('button')[0]?.trigger('click')
+    await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
+
+    expect(
+      JSON.parse(localStorage.getItem('fairmatch:recentFargorateIds') ?? '[]'),
+    ).toEqual([FARGORATE_ID])
   })
 })
