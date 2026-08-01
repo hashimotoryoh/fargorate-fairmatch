@@ -64,6 +64,22 @@ async function fillAndSubmit(component: VueWrapper, value: string) {
   )
 }
 
+/**
+ * サジェストの削除ボタンを探す。
+ *
+ * 削除対象を区別できるよう、aria-labelにはアカウントごとの名前とレーティング
+ * が含まれ一意になる。共通の末尾文言だけをキーから取り出し、それで絞り込む。
+ */
+function findRemoveButtons(component: VueWrapper) {
+  const suffix = jaMessage('lookup.recentAccounts.remove', {
+    name: '',
+  }).trim()
+
+  return component
+    .findAll('button')
+    .filter((button) => button.attributes('aria-label')?.endsWith(suffix))
+}
+
 describe('サインインページ', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
@@ -335,6 +351,17 @@ describe('サインインページ', () => {
     expect(component.text()).not.toContain(FARGORATE_ID)
   })
 
+  // 壊れた値でも例外を握りつぶし、サジェスト無しで入力を続けられるようにする。
+  it('localStorageの値が壊れていてもサジェスト無しで続行する', async () => {
+    localStorage.setItem('fairmatch:recentAccounts', '{not valid json')
+
+    const component = await mountSuspended(LookupPage)
+
+    expect(component.text()).not.toContain(
+      jaMessage('lookup.recentAccounts.label'),
+    )
+  })
+
   // 保存形式が想定より多件数になっていても、表示件数の上限（直近5件）を崩さない。
   it('保存件数が上限を超えていても直近5件までしかサジェストしない', async () => {
     const accounts = Array.from({ length: 7 }, (_, i) => ({
@@ -347,10 +374,7 @@ describe('サインインページ', () => {
 
     const component = await mountSuspended(LookupPage)
 
-    const removeButtons = component.findAll(
-      `[aria-label="${jaMessage('lookup.recentAccounts.remove')}"]`,
-    )
-    expect(removeButtons).toHaveLength(5)
+    expect(findRemoveButtons(component)).toHaveLength(5)
   })
 
   // 選んだ時点で本人だとわかっているため、IDの入力や確認画面を経由しない。
@@ -446,9 +470,7 @@ describe('サインインページ', () => {
     )
 
     const component = await mountSuspended(LookupPage)
-    const removeButtons = component.findAll(
-      `[aria-label="${jaMessage('lookup.recentAccounts.remove')}"]`,
-    )
+    const removeButtons = findRemoveButtons(component)
     expect(removeButtons).toHaveLength(2)
 
     await removeButtons[0]?.trigger('click')
@@ -467,9 +489,7 @@ describe('サインインページ', () => {
     )
 
     const component = await mountSuspended(LookupPage)
-    await component
-      .find(`[aria-label="${jaMessage('lookup.recentAccounts.remove')}"]`)
-      .trigger('click')
+    await findRemoveButtons(component)[0]?.trigger('click')
 
     expect(component.text()).not.toContain(
       jaMessage('lookup.recentAccounts.label'),

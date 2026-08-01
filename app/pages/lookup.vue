@@ -22,6 +22,11 @@ const { recentAccounts, addRecentAccount, removeRecentAccount } =
 const fargorateId = ref('')
 // 'input' はID入力、'confirm' は本人確認のステップ。
 const step = ref<'input' | 'confirm'>('input')
+
+// サジェストの表示にも、削除ボタンのaria-label（対象の識別）にも使う。
+function accountLabel(account: RecentAccount) {
+  return `${account.firstName} ${account.lastName} (${account.effectiveRating})`
+}
 const candidate = ref<PlayerProfile | null>(null)
 const pending = ref(false)
 const errorMessage = ref('')
@@ -159,14 +164,16 @@ function reject() {
                 :disabled="pending"
                 @click="selectRecentAccount(account)"
               >
-                {{ account.firstName }} {{ account.lastName }} ({{
-                  account.effectiveRating
-                }})
+                {{ accountLabel(account) }}
               </button>
               <button
                 type="button"
                 class="btn btn-outline btn-xs join-item"
-                :aria-label="$t('lookup.recentAccounts.remove')"
+                :aria-label="
+                  $t('lookup.recentAccounts.remove', {
+                    name: accountLabel(account),
+                  })
+                "
                 :disabled="pending"
                 @click="removeRecentAccount(account.fargorateId)"
               >

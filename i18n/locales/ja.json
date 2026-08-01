@@ -104,7 +104,7 @@
     "idLabel": "FargoRate ID（13桁の数字）",
     "recentAccounts": {
       "label": "最近使用したアカウント:",
-      "remove": "サジェストを削除"
+      "remove": "{name} をサジェストから削除"
     },
     "submit": "検索する",
     "confirmQuestion": "このプレイヤーはあなたですか？",

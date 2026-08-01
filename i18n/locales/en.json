@@ -104,7 +104,7 @@
     "idLabel": "FargoRate ID (13 digits)",
     "recentAccounts": {
       "label": "Recently used accounts:",
-      "remove": "Remove suggestion"
+      "remove": "Remove {name} from suggestions"
     },
     "submit": "Search",
     "confirmQuestion": "Is this player you?",
