@@ -87,14 +87,19 @@ describe('verifyRecaptchaToken', () => {
     ['未指定', undefined],
     ['空文字', ''],
     ['文字列以外', 123],
-  ])('トークンが%sなら外部APIを呼ばずに 422 を投げる', async (_label, token) => {
-    const fetchMock = stubFetch(verifyResponse())
+  ])(
+    'トークンが%sなら外部APIを呼ばずに 422 を投げる',
+    async (_label, token) => {
+      const fetchMock = stubFetch(verifyResponse())
 
-    await expect(verifyRecaptchaToken(token, 'lookup')).rejects.toMatchObject({
-      statusCode: 422,
-    })
-    expect(fetchMock).not.toHaveBeenCalled()
-  })
+      await expect(verifyRecaptchaToken(token, 'lookup')).rejects.toMatchObject(
+        {
+          statusCode: 422,
+        },
+      )
+      expect(fetchMock).not.toHaveBeenCalled()
+    },
+  )
 
   it('外部APIに到達できなければ 502 を投げる', async () => {
     stubFetch(() => {
