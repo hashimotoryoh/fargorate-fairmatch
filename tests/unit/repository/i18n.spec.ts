@@ -44,8 +44,12 @@ describe('翻訳ファイル', () => {
   // 既定のロケールを基準に、他の言語の過不足を見る。
   const referenceKeys = [...flatten(messages('ja')).keys()].toSorted()
 
-  it('日本語と英語が揃っている', () => {
-    expect(localeCodes.toSorted()).toEqual(['en', 'ja'])
+  /**
+   * 言語を増やす作業を設定と翻訳ファイルの追加だけで終わらせたいため、
+   * 一致ではなく存在だけを見る。消えたことは検出しつつ、増えることは許す。
+   */
+  it('日本語と英語がある', () => {
+    expect(localeCodes).toEqual(expect.arrayContaining(['ja', 'en']))
   })
 
   it.each(localeCodes.filter((code) => code !== 'ja'))(
