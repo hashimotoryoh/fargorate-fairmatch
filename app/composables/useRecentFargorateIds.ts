@@ -45,5 +45,12 @@ export function useRecentFargorateIds() {
     writeStoredIds(next)
   }
 
-  return { recentIds, addRecentId }
+  // ユーザーが任意のタイミングでサジェストから個別に消せるようにする。
+  function removeRecentId(id: string) {
+    const next = recentIds.value.filter((stored) => stored !== id)
+    recentIds.value = next
+    writeStoredIds(next)
+  }
+
+  return { recentIds, addRecentId, removeRecentId }
 }

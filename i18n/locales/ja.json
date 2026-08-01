@@ -103,7 +103,8 @@
     "lead": "FargoRate IDであなたの情報を探します。",
     "idLabel": "FargoRate ID（13桁の数字）",
     "recentIds": {
-      "label": "最近使用したID:"
+      "label": "最近使用したID:",
+      "remove": "サジェストを削除"
     },
     "submit": "検索する",
     "confirmQuestion": "このプレイヤーはあなたですか？",

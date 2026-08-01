@@ -313,6 +313,41 @@ describe('サインインページ', () => {
     expect(input.value).toBe(FARGORATE_ID)
   })
 
+  it('サジェストを個別に削除できる', async () => {
+    localStorage.setItem(
+      'fairmatch:recentFargorateIds',
+      JSON.stringify([FARGORATE_ID, '9900007654321']),
+    )
+
+    const component = await mountSuspended(LookupPage)
+    const removeButtons = component.findAll(
+      `[aria-label="${jaMessage('lookup.recentIds.remove')}"]`,
+    )
+    expect(removeButtons).toHaveLength(2)
+
+    await removeButtons[0]?.trigger('click')
+
+    expect(component.text()).not.toContain(FARGORATE_ID)
+    expect(component.text()).toContain('9900007654321')
+    expect(
+      JSON.parse(localStorage.getItem('fairmatch:recentFargorateIds') ?? '[]'),
+    ).toEqual(['9900007654321'])
+  })
+
+  it('最後のサジェストを削除すると一覧ごと消える', async () => {
+    localStorage.setItem(
+      'fairmatch:recentFargorateIds',
+      JSON.stringify([FARGORATE_ID]),
+    )
+
+    const component = await mountSuspended(LookupPage)
+    await component
+      .find(`[aria-label="${jaMessage('lookup.recentIds.remove')}"]`)
+      .trigger('click')
+
+    expect(component.text()).not.toContain(jaMessage('lookup.recentIds.label'))
+  })
+
   it('本人だと確認すると次回のためにIDを記憶する', async () => {
     const component = await mountSuspended(LookupPage)
     await fillAndSubmit(component, FARGORATE_ID)

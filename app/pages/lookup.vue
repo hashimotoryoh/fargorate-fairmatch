@@ -16,7 +16,7 @@ useSeoMeta({
 const route = useRoute()
 const localePath = useLocalePath()
 const { fetch: refreshSession } = useUserSession()
-const { recentIds, addRecentId } = useRecentFargorateIds()
+const { recentIds, addRecentId, removeRecentId } = useRecentFargorateIds()
 
 const fargorateId = ref('')
 // 'input' はID入力、'confirm' は本人確認のステップ。
@@ -133,15 +133,23 @@ function reject() {
             <span class="text-base-content/70 text-xs">
               {{ $t('lookup.recentIds.label') }}
             </span>
-            <button
-              v-for="id in recentIds"
-              :key="id"
-              type="button"
-              class="btn btn-outline btn-xs font-mono"
-              @click="fargorateId = id"
-            >
-              {{ id }}
-            </button>
+            <div v-for="id in recentIds" :key="id" class="join">
+              <button
+                type="button"
+                class="btn btn-outline btn-xs join-item font-mono"
+                @click="fargorateId = id"
+              >
+                {{ id }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline btn-xs join-item"
+                :aria-label="$t('lookup.recentIds.remove')"
+                @click="removeRecentId(id)"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
           <div class="text-center">
