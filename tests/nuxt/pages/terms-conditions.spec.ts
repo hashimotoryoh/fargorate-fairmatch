@@ -16,7 +16,7 @@ const { queryCollectionMock } = vi.hoisted(() => ({
 mockNuxtImport('queryCollection', () => queryCollectionMock)
 
 describe('利用規約のページ', () => {
-  it('content/terms-conditions.md の本文を出す', async () => {
+  it('terms-conditions のドキュメントの本文を出す', async () => {
     const component = await mountSuspended(TermsConditionsPage)
 
     expect(component.find('h1').text()).toBe('/terms-conditions のドキュメント')

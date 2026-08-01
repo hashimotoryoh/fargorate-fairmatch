@@ -1,0 +1,164 @@
+{
+  "locale": {
+    "switchLabel": "Change language"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "game": "Game",
+    "settings": "Settings"
+  },
+  "document": {
+    "privacyPolicy": "Privacy Policy",
+    "termsConditions": "Terms and Conditions",
+    "updatedAt": "Last updated:"
+  },
+  "footer": {
+    "commitTitle": "Running on commit {sha}"
+  },
+  "player": {
+    "fargorateId": "FargoRate ID",
+    "name": "Name",
+    "league": "League",
+    "region": "Region",
+    "team": "Team",
+    "rating": "Rating",
+    "robustness": "Robustness"
+  },
+  "seo": {
+    "index": {
+      "title": "Record your matches with FargoRate",
+      "description": "A web app that helps you enter and review pool match scores on top of FargoRate ratings. Your FargoRate ID is all you need to get started.",
+      "ogTitle": "FargoRate FairMatch",
+      "ogDescription": "A web app that helps you enter and review pool match scores on top of FargoRate ratings."
+    },
+    "lookup": {
+      "title": "Sign in with your FargoRate ID",
+      "description": "Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app. The screen also shows you where to find it.",
+      "ogTitle": "Sign in with your FargoRate ID | FargoRate FairMatch",
+      "ogDescription": "Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app."
+    },
+    "dashboard": {
+      "title": "Dashboard"
+    },
+    "game": {
+      "title": "Game"
+    },
+    "settings": {
+      "title": "Settings"
+    }
+  },
+  "index": {
+    "lead": "A web app that supports pool matches played on FargoRate. It helps you enter scores during a match and look back on how your matches went.",
+    "start": "Get started with your FargoRate ID",
+    "featuresHeading": "What you can do",
+    "features": {
+      "record": {
+        "title": "Keep score in your hand",
+        "description": "Enter the score as the match goes. No paper, no chalk marks, and no arguing about where the score stands."
+      },
+      "review": {
+        "title": "Look back on your results",
+        "description": "Revisit the matches you have played. See who you played, how often, and how each one turned out."
+      },
+      "rating": {
+        "title": "Use FargoRate numbers as they are",
+        "description": "Ratings and robustness come straight from the official FargoRate system. Nothing is self-reported, so players meeting for the first time can still agree on where they stand."
+      }
+    },
+    "aboutHeading": "What is FargoRate?",
+    "aboutBody": "A rating system that puts the skill of pocket billiards players worldwide on a single common scale. Ratings are built from wins, losses, and score margins, so players can be compared on the same scale across countries, regions, and leagues. They update automatically as results arrive from affiliated leagues and tournaments.",
+    "ratingTable": {
+      "level": "Level",
+      "range": "Rating",
+      "note": "Who it describes"
+    },
+    "ratingGuide": {
+      "beginner": {
+        "level": "Beginner",
+        "range": "100 to 300s",
+        "note": "Casual players"
+      },
+      "intermediate": {
+        "level": "Intermediate",
+        "range": "400 to 500s",
+        "note": "Typical amateur league players"
+      },
+      "advanced": {
+        "level": "Advanced",
+        "range": "600s",
+        "note": "The stronger end of the amateur field"
+      },
+      "professional": {
+        "level": "Professional",
+        "range": "700s and above",
+        "note": "Leading pros and the best in the world"
+      }
+    },
+    "gettingStartedHeading": "Getting started",
+    "gettingStartedBody": "Just enter the 13-digit FargoRate ID shown on your player card in the FargoRate app. There is no password to register, and the sign-in screen shows you how to find your ID.",
+    "gettingStartedNote": "This app reads your rating from FargoRate, but it never sends match results to the official system. Nothing you record here changes your rating."
+  },
+  "lookup": {
+    "heading": "Sign in",
+    "lead": "We will look up your information by FargoRate ID.",
+    "idLabel": "FargoRate ID (13 digits)",
+    "submit": "Search",
+    "confirmQuestion": "Is this player you?",
+    "confirm": "Yes, that is me",
+    "reject": "No",
+    "errors": {
+      "invalidId": "Enter your FargoRate ID as 13 digits.",
+      "notFound": "No player was found for that FargoRate ID.",
+      "unexpected": "The request failed. Please wait a moment and try again."
+    }
+  },
+  "lookupGuide": {
+    "trigger": "How to find your FargoRate ID",
+    "heading": "How to find your FargoRate ID",
+    "lead": "Follow these steps in the FargoRate app to find your 13-digit FargoRate ID.",
+    "steps": {
+      "menu": {
+        "title": "Open the menu at the top left",
+        "alt": "The home screen of the FargoRate app, with a hamburger menu at the top left."
+      },
+      "playerCard": {
+        "title": "Open \"Player Card\"",
+        "alt": "The menu of the FargoRate app, with Player Card as the first item."
+      },
+      "number": {
+        "title": "Read the 13-digit number at the bottom",
+        "alt": "The player card in the FargoRate app, with a 13-digit number below the barcode."
+      }
+    },
+    "close": "Close"
+  },
+  "dashboard": {
+    "heading": "Dashboard",
+    "lead": "Your information as retrieved from FargoRate.",
+    "startGame": "Start a game"
+  },
+  "game": {
+    "heading": "Game",
+    "lead": "Choose a discipline to start a new game.",
+    "typeLegend": "Discipline",
+    "types": {
+      "9ball": {
+        "label": "9-Ball",
+        "description": "Pocket the balls from 1 to 9 in order. Whoever pockets the 9 first takes the rack."
+      },
+      "8ball": {
+        "label": "8-Ball",
+        "description": "Clear your own group of seven balls, then pocket the 8 to take the rack."
+      }
+    },
+    "start": "Start the game (coming soon)"
+  },
+  "settings": {
+    "heading": "Settings",
+    "account": "Account",
+    "signedInAs": "Signed in as {name} ({fargorateId}).",
+    "signOut": "Sign out",
+    "language": "Language",
+    "languageDescription": "Choose the language used across the app."
+  }
+}

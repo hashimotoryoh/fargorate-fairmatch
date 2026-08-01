@@ -1,28 +1,43 @@
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import { useNuxtApp } from '#imports'
+import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import MarkdownDocument from '../../../app/components/MarkdownDocument.vue'
+import { jaMessage } from '../../helpers/i18n'
 
-const { queryCollectionMock, firstMock, createErrorMock } = vi.hoisted(() => {
-  const firstMock = vi.fn()
+const { queryCollectionMock, firstMock, createErrorMock, navigateToMock } =
+  vi.hoisted(() => {
+    const firstMock = vi.fn()
 
-  return {
-    firstMock,
-    // `queryCollection('documents').path('/privacy-policy').first()` の連鎖を模す。
-    queryCollectionMock: vi.fn(() => ({
-      path: vi.fn(() => ({ first: firstMock })),
-    })),
-    createErrorMock: vi.fn(
-      (options: { statusMessage?: string }) => new Error(options.statusMessage),
-    ),
-  }
-})
+    return {
+      firstMock,
+      navigateToMock: vi.fn(),
+      // `queryCollection('documents_ja').path('/privacy-policy').first()` の連鎖を模す。
+      queryCollectionMock: vi.fn(() => ({
+        path: vi.fn(() => ({ first: firstMock })),
+      })),
+      createErrorMock: vi.fn(
+        (options: { statusMessage?: string }) =>
+          new Error(options.statusMessage),
+      ),
+    }
+  })
 
 mockNuxtImport('queryCollection', () => queryCollectionMock)
 mockNuxtImport('createError', () => createErrorMock)
+// setLocale はそのロケールのURLへの遷移を起こす。実際に遷移すると、
+// 接頭辞のないルートからロケールを判定し直して元に戻ってしまう。
+mockNuxtImport('navigateTo', () => navigateToMock)
+
+/** ロケールを切り替え、遷移が落ち着くまで待つ。 */
+async function useLocale(code: 'ja' | 'en') {
+  await useNuxtApp().$i18n.setLocale(code)
+  await flushPromises()
+}
 
 function createDocument(overrides: Record<string, unknown> = {}) {
   return {
-    id: 'documents/privacy-policy.md',
+    id: 'documents_ja/privacy-policy.md',
     path: '/privacy-policy',
     title: 'プライバシーポリシー',
     description: '扱う情報の説明。',
@@ -33,9 +48,11 @@ function createDocument(overrides: Record<string, unknown> = {}) {
 }
 
 describe('MarkdownDocument', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await useLocale('ja')
     firstMock.mockReset()
     firstMock.mockResolvedValue(createDocument())
+    queryCollectionMock.mockClear()
   })
 
   it('フロントマターの見出しとMarkdownの本文を出す', async () => {
@@ -55,8 +72,22 @@ describe('MarkdownDocument', () => {
       props: { path: '/terms-conditions' },
     })
 
-    expect(queryCollectionMock).toHaveBeenCalledWith('documents')
+    expect(queryCollectionMock).toHaveBeenCalledWith('documents_ja')
     expect(pathMock).toHaveBeenCalledWith('/terms-conditions')
+  })
+
+  /**
+   * ロケールごとに別のコレクションへ分けている。引き先を間違えると、英語で
+   * 開いても日本語の文面が出る。
+   */
+  it('英語で見ているときは英語のコレクションを引く', async () => {
+    await useLocale('en')
+
+    await mountSuspended(MarkdownDocument, {
+      props: { path: '/privacy-policy' },
+    })
+
+    expect(queryCollectionMock).toHaveBeenCalledWith('documents_en')
   })
 
   /**
@@ -69,8 +100,20 @@ describe('MarkdownDocument', () => {
     })
     const time = component.find('time')
 
+    expect(component.text()).toContain(jaMessage('document.updatedAt'))
     expect(time.attributes('datetime')).toBe('2026-07-31')
     expect(time.text()).toBe('2026年7月31日')
+  })
+
+  // 日付の表記は言語で変わる。ロケールを渡し忘れると日本語のまま固定される。
+  it('最終更新日を英語では英語の表記で出す', async () => {
+    await useLocale('en')
+
+    const component = await mountSuspended(MarkdownDocument, {
+      props: { path: '/privacy-policy' },
+    })
+
+    expect(component.find('time').text()).toBe('July 31, 2026')
   })
 
   // 本文は Tailwind Typography の prose に任せている。

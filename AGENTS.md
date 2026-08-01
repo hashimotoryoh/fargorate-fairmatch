@@ -122,6 +122,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 - Tailwind CSS v4
 - daisyUI v5
 - Nuxt Content v3
+- Nuxt I18n v10
 
 パッケージマネージャーはnpmを使用する。`package-lock.json` を管理しているため、yarnやpnpmに置き換えないこと。依存を追加した場合は `package.json` と `package-lock.json` の両方をコミットすること。
 
@@ -149,13 +150,15 @@ Node.js のバージョンは `.node-version` に従うこと。
 - `shared/`: クライアントとサーバーの双方から使う型やロジック。プロジェクトルート直下に置く
   - `shared/types/`: 双方から使う型定義
   - `shared/utils/`: 双方から使う関数。`app/` と `server/` の両方へ自動インポートされる
-- `content/`: Nuxt Content が扱うMarkdown。プロジェクトルート直下に置く。設定は `content.config.ts`
+- `content/`: Nuxt Content が扱うMarkdown。プロジェクトルート直下に置く。直下は言語のディレクトリ。設定は `content.config.ts`
+- `i18n/`: Nuxt I18n が読む翻訳。プロジェクトルート直下に置く
+  - `i18n/locales/`: 言語ごとのメッセージ。`ja.json` と `en.json`
 - `public/`: ビルドを経ずそのまま配信される静的ファイル
 - `tests/`: Vitestのテスト。プロジェクトルート直下に置く
   - `tests/unit/`: 素のNode環境で動くテスト。純粋なロジックとサーバールート
   - `tests/nuxt/`: Nuxtのランタイムを立ち上げるテスト。コンポーネントとページ
   - `tests/helpers/`: テストから使う補助。フィクスチャやh3のハンドラー呼び出し
-  - `tests/setup/`: テストの前処理。Nitroの自動インポートの補完
+  - `tests/setup/`: テストの前処理。Nitroの自動インポートの補完とブラウザの言語の固定
 - `docs/`: 外部APIの調査などのドキュメント
 - `.github/workflows/`: GitHub Actions のワークフロー
 
@@ -217,22 +220,47 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 ヘッダーのナビゲーションの有無は `showNav` の props で制御する。`useUserSession()` の `loggedIn` を見てはならない。`/` は認証済みでも紹介ページのままにする方針であり、ナビゲーションの有無は認証状態ではなくレイアウトの都合で決まるため。
 
+### 多言語化
+
+日本語（`ja`）と英語（`en`）に対応する。設定は `nuxt.config.ts` の `i18n` にまとめてある。
+
+- URLの戦略は `prefix_except_default`。日本語は接頭辞なし、英語は `/en` を頭に付ける
+- 初回はブラウザの言語で振り分ける。振り分けるのはトップページに来たときだけとし、言語を指定したURLは尊重する。全ページで振り分けると、共有された `/en/privacy-policy` を日本語話者が開いたときに読めない側へ飛ばされる
+- 言語を増やす作業は、`i18n.locales` に1行足して `i18n/locales/<コード>.json` を置くだけで終わる状態に保つこと。`LocaleSwitcher` の選択肢は設定から作っており、言語名を書き並べた箇所を新たに作らないこと
+
+文言は `i18n/locales/*.json` に置く。キーは画面やコンポーネント単位でネストし、テンプレートに現れる順に並べる。文言を足すときは必ず全ての言語に同じキーで足すこと。抜けは `fallbackLocale` に吸収されて別の言語の文面が混ざるだけなので、画面上は壊れて見えない。`tests/unit/repository/i18n.spec.ts` が過不足を検査する。
+
+補間は名前付きのプレースホルダだけを使う。語順は言語で変わるため、「〜として〜しています」のような文は語の並びごと翻訳側に委ねること。
+
+モジュールスコープの定数からは翻訳関数を呼べない。`app/utils/navigation.ts` のように定義時点で文言を決められない場所では、メッセージのキーを持ち、描画側で `$t()` に通すこと。
+
+`useSeoMeta` に渡すページ固有のメタは、ロケールの切り替えに追随させるため値ではなくゲッター（`title: () => t('seo.index.title')`）で渡すこと。
+
+リンクとリダイレクトの遷移先は `localePath()` に通し、ロケールを落とさないこと。対象は `NuxtLink` の `to`、ミドルウェアの `navigateTo`、サインイン後の復帰先である。`resolveRedirectPath()` はロケールを知らない純粋な関数のまま保ち、オープンリダイレクトの判定とロケールの付与を混ぜないこと。既にロケールを含むパスを `localePath()` に通しても二重には付かない。
+
+SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る。`html` の `lang`、hreflang の alternate と `x-default`、canonical、`og:url`、`og:locale` が対象で、これらを手書きで足さないこと。言語を増やすたびに漏れる。
+
+公開URLは `NUXT_PUBLIC_SITE_URL` の1つだけを読み、i18n の `baseUrl`・`site.url`・`runtimeConfig` の全てへ渡す。環境変数を分けると片方だけ設定された状態が起き、誤ったドメインを指す canonical が出る。この形は `tests/unit/repository/site-url.spec.ts` で固定してある。
+
 ### Markdownで管理するドキュメント
 
 文面が主体で、改訂がアプリの挙動と関係しないページは [Nuxt Content](https://content.nuxt.com/) で管理し、実体を `content/` のMarkdownに置く。文面の改訂をコードの変更と切り離すためである。文面だけを直す場合はMarkdownのみを変更し、Vueのコードには触れないこと。
 
 現在あるのはプライバシーポリシー（`/privacy-policy`）と利用規約（`/terms-conditions`）だが、同じ仕組みで別のドキュメントも足せる。特定のドキュメントに寄った名前を付けないこと。
 
-- `content/privacy-policy.md` が `/privacy-policy` に対応する。ファイル名がそのままルートになる
+- `content/ja/privacy-policy.md` が `/privacy-policy` に、`content/en/privacy-policy.md` が `/en/privacy-policy` に対応する。`content/` の直下は言語のディレクトリで、その中のファイル名がそのままルートになる
+- ドキュメントは全ての言語に同じ名前で置くこと。片方の言語にしか無いと、その言語で開いたときだけ404になる
 - ページ（`app/pages/privacy-policy.vue` など）は `MarkdownDocument` にパスを渡すだけの薄いものに保つ
 - フロントマターには `title`・`description`・`updatedAt` を書く。`title` は見出しとタイトルタグ、`description` はメタタグ、`updatedAt` は最終更新日の表示に使う
 - 見出しは `##` から始める。ページの `h1` は `title` から出しているため、本文に `#` を書くと見出しが重なる
-- 文面を改訂したら `updatedAt` も改めること
+- 文面を改訂したら `updatedAt` も改めること。文面が言語をまたぐ内容であれば、全ての言語を揃えて改訂すること
 - フッターに出す場合は `app/utils/navigation.ts` の `documentNavItems` に足す
 
 ドキュメントを追加する際は、Markdownとページに加えて、公開ページであれば `tests/unit/repository/page-protection.spec.ts` の `PUBLIC_PAGES` も更新すること。
 
-コレクションは `content.config.ts` の `documents` 一つだけである。`type: 'page'` が備える `description` は本来任意項目だが、メタタグに必ず出すためスキーマで必須にしてある。用途の異なるコンテンツを足す場合は、`content/` 直下ではなくサブディレクトリを切り、コレクションを分けること。
+コレクションは言語ごとに分けてある（`content.config.ts` の `documents_ja` と `documents_en`）。Nuxt Content はコレクションをまたいだ絞り込みを持たないためである。`source` の `prefix` を空にしてパスから言語を外してあるので、ページが渡すパスは言語によらず `/privacy-policy` のままでよい。`type: 'page'` が備える `description` は本来任意項目だが、メタタグに必ず出すためスキーマで必須にしてある。用途の異なるコンテンツを足す場合は、言語のディレクトリの下にさらにディレクトリを切り、コレクションを分けること。
+
+プライバシーポリシーと利用規約は準拠法が日本法であるため、日英どちらにも「解釈に相違がある場合は日本語版を優先する」条項を置いてある。法務文書の翻訳を足す場合も同じ扱いにすること。
 
 データベースの接続には Node.js 同梱の `node:sqlite` を使う設定にしてある（`nuxt.config.ts` の `content.experimental.sqliteConnector`）。既定のままでは `better-sqlite3` のインストールを対話的に促され、CIのビルドが止まるため、この指定を外さないこと。
 
@@ -241,6 +269,8 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 `public/img/fargorate-id-*.png` には本人以外の顔が写り込んでいる。`ScreenshotFigure` で必要な範囲だけを切り出して使い、**顔がDOMに存在しない範囲までクロップすること**。切り出し範囲を変更する際は必ず写り込みがないことを確認すること。
 
 ぼかしで隠す方法は採らない。`backdrop-filter` は祖先の `opacity` の影響を受け、モーダルはまさに `opacity` を遷移させるため、環境によっては素通しになりうる。
+
+FargoRateアプリの表示言語は端末の設定に従うため、案内の画像も本来は言語ごとに撮り分ける必要がある。画像とクロップの座標は文言ではないので翻訳ファイルではなく `app/utils/lookupGuide.ts` に置き、ロケールで引く形にしてある。**英語版の画像はまだ用意できておらず、当面は日本語版を流用している。** 英語のスクリーンショットが揃ったら `en` の配列だけを差し替えること。
 
 ### コーディング規約
 
@@ -294,6 +324,9 @@ Vitestでテストを書く。実行方法は `README.md` に記載している�
 - サーバールートは `tests/helpers/h3.ts` の `callHandler` でWeb標準のリクエストとして叩く。`readBody` の解釈や `createError` の応答への変換まで含めて確かめるため、ハンドラーを関数として直接呼ばないこと
 - 認証やリダイレクトの制限は、緩めた場合にテストが落ちる形で書くこと。オープンリダイレクトの防止やセッションへの保存内容は、壊れても画面上は正常に見えてしまう
 - `tests/unit/repository/` にはリポジトリの規約そのものを守るテストを置いている。保護ページの宣言漏れやガイドのシンボリックリンクなど、レビューで見落とすと影響の大きいものが対象である
+- 表示文言はテストにベタ書きせず、`tests/helpers/i18n.ts` の `jaMessage()` でキーから引くこと。ベタ書きすると翻訳ファイルとの二重管理になり、キーの綴り間違いも検出できない。文面の改訂では落ちず、キーの取り違えでは落ちる状態に保つ
+- `nuxt` プロジェクトのブラウザの言語は `tests/setup/browser-locale.ts` で日本語に固定してある。happy-dom の既定は英語で、言語検出が働くとどちらの言語で描画されるかがテストごとに変わるためである。英語での描画は `setLocale('en')` で明示的に切り替えて確かめること
+- `setLocale()` はそれ自体がそのロケールのURLへの遷移を起こす。`navigateTo` をモックしていない場合、接頭辞のないルートからロケールを判定し直して元に戻る。ロケールを切り替えるテストでは `navigateTo` をモックし、`setLocale` のあとに `flushPromises()` を挟んでから記録を消すこと
 
 `server/` のコードはNitroの自動インポートに依存しており、素のNode環境では未定義になる。テストのためにソースへインポート文を足すのではなく、`tests/setup/nitro-auto-imports.ts` に名前を足して解決すること。
 

@@ -35,6 +35,7 @@ export default defineConfig({
           name: 'nuxt',
           environment: 'nuxt',
           include: ['tests/nuxt/**/*.spec.ts'],
+          setupFiles: ['tests/setup/browser-locale.ts'],
           environmentOptions: {
             nuxt: {
               domEnvironment: 'happy-dom',

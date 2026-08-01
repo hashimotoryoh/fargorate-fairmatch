@@ -1,6 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import GamePage from '../../../app/pages/game.vue'
+import { jaMessage } from '../../helpers/i18n'
 
 describe('ゲームページ', () => {
   it('9ボールと8ボールを説明つきで選ばせる', async () => {
@@ -8,10 +9,14 @@ describe('ゲームページ', () => {
     const labels = component.findAll('fieldset label')
 
     expect(labels).toHaveLength(2)
-    expect(labels[0]?.text()).toContain('9ボール')
-    expect(labels[0]?.text()).toContain('9番を先に落とした方が取得する')
-    expect(labels[1]?.text()).toContain('8ボール')
-    expect(labels[1]?.text()).toContain('8番を落とした方が取得する')
+    expect(labels[0]?.text()).toContain(jaMessage('game.types.9ball.label'))
+    expect(labels[0]?.text()).toContain(
+      jaMessage('game.types.9ball.description'),
+    )
+    expect(labels[1]?.text()).toContain(jaMessage('game.types.8ball.label'))
+    expect(labels[1]?.text()).toContain(
+      jaMessage('game.types.8ball.description'),
+    )
   })
 
   it('種目を同じ名前のラジオボタンとして排他にする', async () => {
@@ -49,7 +54,7 @@ describe('ゲームページ', () => {
     const component = await mountSuspended(GamePage)
     const button = component.find('button')
 
-    expect(button.text()).toContain('準備中')
+    expect(button.text()).toBe(jaMessage('game.start'))
     expect(button.attributes('disabled')).toBeDefined()
   })
 })

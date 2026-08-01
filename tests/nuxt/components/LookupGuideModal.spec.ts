@@ -1,6 +1,7 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
 import LookupGuideModal from '../../../app/components/LookupGuideModal.vue'
+import { jaMessage } from '../../helpers/i18n'
 
 function percent(style: string | undefined, property: string): number {
   const matched = style?.match(
@@ -15,7 +16,7 @@ describe('LookupGuideModal', () => {
     const component = await mountSuspended(LookupGuideModal)
     const trigger = component.find('button')
 
-    expect(trigger.text()).toBe('FargoRate IDの確認方法')
+    expect(trigger.text()).toBe(jaMessage('lookupGuide.trigger'))
     expect(trigger.attributes('type')).toBe('button')
   })
 
@@ -40,9 +41,15 @@ describe('LookupGuideModal', () => {
       '2',
       '3',
     ])
-    expect(steps[0]?.text()).toContain('左上のメニューを開く')
-    expect(steps[1]?.text()).toContain('「プレイヤーカード」を開く')
-    expect(steps[2]?.text()).toContain('一番下の13桁の数字を読む')
+    expect(steps[0]?.text()).toContain(
+      jaMessage('lookupGuide.steps.menu.title'),
+    )
+    expect(steps[1]?.text()).toContain(
+      jaMessage('lookupGuide.steps.playerCard.title'),
+    )
+    expect(steps[2]?.text()).toContain(
+      jaMessage('lookupGuide.steps.number.title'),
+    )
   })
 
   it('手順ごとにスクリーンショットと代替テキストを添える', async () => {

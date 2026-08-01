@@ -1,4 +1,6 @@
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
+import { useNuxtApp } from '#imports'
+import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { RouteLocationNormalized } from 'vue-router'
 import guest from '../../../app/middleware/guest'
@@ -14,9 +16,21 @@ mockNuxtImport('navigateTo', () => navigateToMock)
 const TO = { fullPath: '/lookup' } as RouteLocationNormalized
 const FROM = { fullPath: '/' } as RouteLocationNormalized
 
+/**
+ * ロケールを切り替える。
+ *
+ * `setLocale` は自身もそのロケールのURLへの遷移を起こすため、
+ * 落ち着かせてから navigateTo の記録を消す。
+ */
+async function useLocale(code: 'ja' | 'en') {
+  await useNuxtApp().$i18n.setLocale(code)
+  await flushPromises()
+  navigateToMock.mockClear()
+}
+
 describe('guest ミドルウェア', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+  beforeEach(async () => {
+    await useLocale('ja')
     loggedIn.value = false
   })
 
@@ -31,5 +45,15 @@ describe('guest ミドルウェア', () => {
     guest(TO, FROM)
 
     expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
+  })
+
+  // 送り先がロケールを落とすと、英語で見ていた人が日本語のページに着く。
+  it('英語で見ているときは英語のダッシュボードへ送る', async () => {
+    loggedIn.value = true
+    await useLocale('en')
+
+    guest(TO, FROM)
+
+    expect(navigateToMock).toHaveBeenCalledWith('/en/dashboard')
   })
 })

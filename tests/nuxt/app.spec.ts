@@ -1,10 +1,18 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { useRuntimeConfig } from '#imports'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../app/app.vue'
 
 const SITE_URL = 'https://fairmatch.example'
 
+/**
+ * 公開URLを差し替える。
+ *
+ * 絶対URLの組み立てに使う i18n の `baseUrl` はビルド時に固まるため、テスト
+ * からは差し替えられない。ここで切り替えられるのは、絶対URLを要するメタを
+ * 出すかどうかの判断だけである。1つの環境変数が3か所へ渡ることは
+ * `tests/unit/repository/site-url.spec.ts` で見ている。
+ */
 function setSiteUrl(siteUrl: string) {
   Object.assign(useRuntimeConfig().public, { siteUrl })
 }
@@ -13,16 +21,13 @@ function head(selector: string) {
   return document.head.querySelector(selector)
 }
 
-describe('アプリのルートコンポーネント', () => {
-  beforeEach(() => {
-    setSiteUrl('')
-    document.head
-      .querySelectorAll('link[rel="canonical"], meta[property="og:url"]')
-      .forEach((node) => node.remove())
-  })
+function headAll(selector: string) {
+  return [...document.head.querySelectorAll(selector)]
+}
 
-  afterEach(() => {
-    setSiteUrl('')
+describe('アプリのルートコンポーネント（公開URLが設定済み）', () => {
+  beforeEach(() => {
+    setSiteUrl(SITE_URL)
   })
 
   it('サイト共通のOGPを出す', async () => {
@@ -33,37 +38,55 @@ describe('アプリのルートコンポーネント', () => {
         head('meta[property="og:site_name"]')?.getAttribute('content'),
       ).toBe('FargoRate FairMatch')
     })
-    expect(head('meta[property="og:locale"]')?.getAttribute('content')).toBe(
-      'ja_JP',
+  })
+
+  // 表示中の言語を示す。固定していると、英語のページも日本語だと伝えてしまう。
+  it('og:locale を表示中の言語で出す', async () => {
+    await mountSuspended(App)
+
+    await vi.waitFor(() => {
+      expect(head('meta[property="og:locale"]')?.getAttribute('content')).toBe(
+        'ja_JP',
+      )
+    })
+    expect(
+      headAll('meta[property="og:locale:alternate"]').map((node) =>
+        node.getAttribute('content'),
+      ),
+    ).toContain('en_US')
+  })
+
+  it('canonical と og:url を出す', async () => {
+    await mountSuspended(App)
+
+    await vi.waitFor(() => {
+      expect(head('link[rel="canonical"]')).not.toBeNull()
+    })
+    expect(head('meta[property="og:url"]')?.getAttribute('content')).toBe(
+      head('link[rel="canonical"]')?.getAttribute('href'),
     )
   })
 
   /**
-   * 誤ったドメインを指す canonical は、正しいURLが無いことより害がある。
-   * 公開URLが分からないうちは、絶対URLを要するメタを出さない。
+   * 言語ごとのURLを検索エンジンに伝える。既定のロケールを x-default に据えて、
+   * どの言語にも当てはまらない利用者の行き先を示す。
    */
-  it('公開URLが未設定なら canonical と og:url を出さない', async () => {
+  it('全ての言語の hreflang を出す', async () => {
     await mountSuspended(App)
 
     await vi.waitFor(() => {
-      expect(head('meta[property="og:site_name"]')).not.toBeNull()
+      expect(headAll('link[rel="alternate"]').length).toBeGreaterThan(0)
     })
-    expect(head('link[rel="canonical"]')).toBeNull()
-    expect(head('meta[property="og:url"]')).toBeNull()
-  })
 
-  it('公開URLが設定されていれば canonical と og:url を絶対URLで出す', async () => {
-    setSiteUrl(SITE_URL)
-
-    await mountSuspended(App)
-
-    await vi.waitFor(() => {
-      expect(head('link[rel="canonical"]')?.getAttribute('href')).toBe(
-        `${SITE_URL}/`,
-      )
-    })
-    expect(head('meta[property="og:url"]')?.getAttribute('content')).toBe(
-      `${SITE_URL}/`,
+    const alternates = Object.fromEntries(
+      headAll('link[rel="alternate"]').map((node) => [
+        node.getAttribute('hreflang'),
+        node.getAttribute('href'),
+      ]),
     )
+
+    expect(alternates['ja-JP']).toBe('/')
+    expect(alternates['en-US']).toBe('/en')
+    expect(alternates['x-default']).toBe('/')
   })
 })

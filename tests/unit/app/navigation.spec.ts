@@ -13,11 +13,11 @@ describe('mainNavItems', () => {
     ])
   })
 
-  it('すべての項目が自サイト内の絶対パスと表示名とアイコンを持つ', () => {
+  it('すべての項目が自サイト内の絶対パスと表示名のキーとアイコンを持つ', () => {
     for (const item of mainNavItems) {
       expect(item.to.startsWith('/')).toBe(true)
       expect(item.to.startsWith('//')).toBe(false)
-      expect(item.label).not.toBe('')
+      expect(item.labelKey).not.toBe('')
       expect(item.iconPaths.length).toBeGreaterThan(0)
     }
   })

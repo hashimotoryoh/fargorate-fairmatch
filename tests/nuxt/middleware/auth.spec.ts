@@ -1,4 +1,6 @@
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
+import { useNuxtApp } from '#imports'
+import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { RouteLocationNormalized } from 'vue-router'
 import auth from '../../../app/middleware/auth'
@@ -21,9 +23,21 @@ function route(fullPath: string) {
 
 const FROM = route('/')
 
+/**
+ * ロケールを切り替える。
+ *
+ * `setLocale` は自身もそのロケールのURLへの遷移を起こすため、
+ * 落ち着かせてから navigateTo の記録を消す。
+ */
+async function useLocale(code: 'ja' | 'en') {
+  await useNuxtApp().$i18n.setLocale(code)
+  await flushPromises()
+  navigateToMock.mockClear()
+}
+
 describe('auth ミドルウェア', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+  beforeEach(async () => {
+    await useLocale('ja')
     loggedIn.value = false
     responseHeader.value = ''
     useResponseHeaderMock.mockReturnValue(responseHeader)
@@ -42,6 +56,21 @@ describe('auth ミドルウェア', () => {
     expect(navigateToMock).toHaveBeenCalledWith({
       path: '/lookup',
       query: { redirect: '/dashboard' },
+    })
+  })
+
+  /**
+   * 英語で読んでいた人を日本語のサインインページへ送ると、サインインの手前で
+   * 読めない画面に突き当たる。送り先はロケールを保たなければならない。
+   */
+  it('英語で見ているときは英語のルックアップページへ送る', async () => {
+    await useLocale('en')
+
+    auth(route('/en/dashboard'), FROM)
+
+    expect(navigateToMock).toHaveBeenCalledWith({
+      path: '/en/lookup',
+      query: { redirect: '/en/dashboard' },
     })
   })
 

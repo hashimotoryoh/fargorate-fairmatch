@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const { commitSha, repositoryUrl } = useRuntimeConfig().public
 
+const localePath = useLocalePath()
+
 // GitHub上の表示に合わせて先頭7桁だけを見せる。
 const shortCommitSha = computed(() => commitSha.slice(0, 7))
 </script>
@@ -26,9 +28,9 @@ const shortCommitSha = computed(() => commitSha.slice(0, 7))
           v-for="item in documentNavItems"
           :key="item.to"
           class="link link-hover"
-          :to="item.to"
+          :to="localePath(item.to)"
         >
-          {{ item.label }}
+          {{ $t(item.labelKey) }}
         </NuxtLink>
       </nav>
 
@@ -64,7 +66,7 @@ const shortCommitSha = computed(() => commitSha.slice(0, 7))
           :href="`${repositoryUrl}/commit/${commitSha}`"
           target="_blank"
           rel="noopener"
-          :title="`コミット ${shortCommitSha} で動作しています`"
+          :title="$t('footer.commitTitle', { sha: shortCommitSha })"
         >
           {{ shortCommitSha }}
         </a>

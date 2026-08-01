@@ -2,3 +2,6 @@ User-Agent: *
 Disallow: /dashboard
 Disallow: /game
 Disallow: /settings
+Disallow: /en/dashboard
+Disallow: /en/game
+Disallow: /en/settings
