@@ -46,7 +46,14 @@ function resolveCommitSha(): string {
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/content', '@nuxt/eslint', 'nuxt-auth-utils', '@nuxtjs/i18n'],
+  // sitemap は i18n が組み立てたルートを読むため、最後に置く。
+  modules: [
+    '@nuxt/content',
+    '@nuxt/eslint',
+    'nuxt-auth-utils',
+    '@nuxtjs/i18n',
+    '@nuxtjs/sitemap',
+  ],
   typescript: {
     strict: true,
   },
@@ -75,6 +82,19 @@ export default defineNuxtConfig({
       alwaysRedirect: false,
       fallbackLocale: 'ja',
     },
+  },
+  site: { url: SITE_URL },
+  sitemap: {
+    /**
+     * 検索エンジンに載せるのは認証の要らないページだけで、これは公開ページと
+     * 一致する。ロケール接頭辞の付いたパスは i18n との連携が自動で広げるため、
+     * 接頭辞なしのパスだけを挙げれば足りる。
+     *
+     * ここは保護ページの列挙になるため、`app/pages/` から導いた保護ページを
+     * 網羅していることを `tests/unit/repository/page-protection.spec.ts` で
+     * 機械的に確かめている。追加漏れをレビューに頼らないため。
+     */
+    exclude: ['/dashboard', '/game', '/settings'],
   },
   css: ['@/assets/css/main.css'],
   content: {

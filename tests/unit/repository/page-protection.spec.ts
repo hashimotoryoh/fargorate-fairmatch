@@ -3,7 +3,11 @@ import { fileURLToPath } from 'node:url'
 import { basename, join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-const PAGES_DIR = fileURLToPath(new URL('../../../app/pages', import.meta.url))
+const ROOT = fileURLToPath(new URL('../../..', import.meta.url))
+const PAGES_DIR = join(ROOT, 'app/pages')
+
+/** 既定のロケール以外の接頭辞。robots.txt に列挙するために要る。 */
+const PREFIXED_LOCALES = ['en']
 
 /**
  * 認証なしでアクセスできるページ。検索エンジンに開放するページと一致する。
@@ -63,6 +67,32 @@ describe('ページの保護の宣言', () => {
   it('保護ページに prerender や ISR・SWR を宣言していない', () => {
     for (const name of protectedPages) {
       expect(pageSource(name)).not.toMatch(/prerender|isr|swr/i)
+    }
+  })
+
+  /**
+   * sitemap の除外と robots.txt は、性質上どうしても保護ページの列挙になる。
+   * ページを足したときに書き漏らすと、非公開のページが検索エンジンへ案内
+   * されてしまうため、`app/pages/` から導いた一覧と突き合わせる。
+   */
+  it('sitemap が保護ページを除外している', () => {
+    const config = readFileSync(join(ROOT, 'nuxt.config.ts'), 'utf8')
+    const exclude = config.match(/exclude: \[(.*?)\]/s)?.[1] ?? ''
+
+    for (const name of protectedPages) {
+      expect(exclude).toContain(`'/${name}'`)
+    }
+  })
+
+  it('robots.txt が保護ページを全てのロケールで拒否している', () => {
+    const robots = readFileSync(join(ROOT, 'public/robots.txt'), 'utf8')
+
+    for (const name of protectedPages) {
+      expect(robots).toContain(`Disallow: /${name}\n`)
+
+      for (const locale of PREFIXED_LOCALES) {
+        expect(robots).toContain(`Disallow: /${locale}/${name}\n`)
+      }
     }
   })
 })
