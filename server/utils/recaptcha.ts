@@ -27,6 +27,15 @@ export async function verifyRecaptchaToken(
 
   const { recaptchaSecretKey } = useRuntimeConfig()
 
+  // 未設定のまま気づかず本番稼働すると、全リクエストが422（ユーザー起因の
+  // ように見える表示）で落ち続けてしまう。設定漏れとして明示的に検知する。
+  if (!recaptchaSecretKey) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'NUXT_RECAPTCHA_SECRET_KEY is not configured',
+    })
+  }
+
   let result: RecaptchaVerifyResponse
   try {
     result = await $fetch<RecaptchaVerifyResponse>(RECAPTCHA_VERIFY_URL, {

@@ -23,19 +23,33 @@ export function useRecaptcha() {
   let ready: Promise<void> | null = null
 
   function load(): Promise<void> {
-    ready ??= new Promise((resolve, reject) => {
-      if (window.grecaptcha) {
-        resolve()
-        return
-      }
+    if (!ready) {
+      // 失敗時は `ready` を戻し、次回呼び出しで読み込みを再試行できるようにする。
+      ready = new Promise<void>((resolve, reject) => {
+        if (window.grecaptcha) {
+          resolve()
+          return
+        }
 
-      const script = document.createElement('script')
-      script.src = `${RECAPTCHA_SCRIPT_URL}?render=${recaptchaSiteKey}`
-      script.onload = () => window.grecaptcha!.ready(() => resolve())
-      script.onerror = () =>
-        reject(new Error('failed to load the reCAPTCHA script'))
-      document.head.appendChild(script)
-    })
+        const script = document.createElement('script')
+        script.src = `${RECAPTCHA_SCRIPT_URL}?render=${encodeURIComponent(recaptchaSiteKey)}`
+        script.onload = () => {
+          if (!window.grecaptcha) {
+            reject(
+              new Error('reCAPTCHA script loaded without defining grecaptcha'),
+            )
+            return
+          }
+          window.grecaptcha.ready(() => resolve())
+        }
+        script.onerror = () =>
+          reject(new Error('failed to load the reCAPTCHA script'))
+        document.head.appendChild(script)
+      }).catch((error: unknown) => {
+        ready = null
+        throw error
+      })
+    }
 
     return ready
   }

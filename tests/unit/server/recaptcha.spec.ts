@@ -94,4 +94,22 @@ describe('verifyRecaptchaToken', () => {
       statusMessage: 'Failed to reach the reCAPTCHA verification API',
     })
   })
+
+  // 設定漏れで secret key が空のまま本番稼働すると、全リクエストが
+  // reCAPTCHA失敗（422）に見えてしまい気づけない。500で明示的に落とす。
+  it('シークレットキーが未設定なら外部APIを呼ばずに 500 を投げる', async () => {
+    vi.stubGlobal('useRuntimeConfig', () => ({
+      recaptchaSecretKey: '',
+      public: { recaptchaSiteKey: 'test-site-key' },
+    }))
+    const fetchMock = stubFetch(verifyResponse())
+
+    await expect(
+      verifyRecaptchaToken('valid-token', 'lookup'),
+    ).rejects.toMatchObject({
+      statusCode: 500,
+      statusMessage: 'NUXT_RECAPTCHA_SECRET_KEY is not configured',
+    })
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
 })
