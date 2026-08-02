@@ -6,15 +6,20 @@ const { error } = defineProps<{
   error: { statusCode?: number; statusMessage?: string; message?: string }
 }>()
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const localePath = useLocalePath()
 const theme = useTheme()
 
 const isNotFound = computed(() => error.statusCode === 404)
 
+// lang は他のページと同じく BCP47 のタグ（`ja-JP`・`en-US`）にする必要がある。
+// `useI18n().locale` はロケールコード（`ja`・`en`）そのままで、他ページと値が
+// 食い違うため、app.vue と同じ `useLocaleHead` から取る。
+const localeHead = useLocaleHead({ seo: false })
+
 useHead({
   htmlAttrs: {
-    lang: () => locale.value,
+    lang: () => localeHead.value.htmlAttrs?.lang,
     'data-theme': () => theme.value,
   },
 })
