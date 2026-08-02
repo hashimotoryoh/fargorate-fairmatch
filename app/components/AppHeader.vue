@@ -16,7 +16,7 @@ const localePath = useLocalePath()
         :to="localePath('/')"
         class="btn btn-ghost gap-2 px-2 text-sm font-bold sm:text-base"
       >
-        <AppLogo class="text-primary size-7 shrink-0" />
+        <Icon name="custom:app-logo" class="text-primary size-7 shrink-0" />
         <span>FargoRate FairMatch</span>
       </NuxtLink>
     </div>

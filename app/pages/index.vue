@@ -24,7 +24,7 @@ const ratingGuideKeys = [
   <div class="flex flex-col gap-16 py-8">
     <section class="hero">
       <div class="hero-content flex-col gap-6 text-center">
-        <AppLogo class="text-primary size-20" />
+        <Icon name="custom:app-logo" class="text-primary size-20" />
 
         <div class="flex flex-col gap-4">
           <h1 class="text-3xl font-bold sm:text-4xl">FargoRate FairMatch</h1>

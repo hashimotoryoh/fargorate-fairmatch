@@ -1,5 +1,8 @@
 import { execSync } from 'node:child_process'
+import { createResolver } from 'nuxt/kit'
 import tailwindcss from '@tailwindcss/vite'
+
+const { resolve } = createResolver(import.meta.url)
 
 const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairmatch'
 
@@ -50,12 +53,25 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/content',
     '@nuxt/eslint',
+    '@nuxt/icon',
     'nuxt-auth-utils',
     '@nuxtjs/i18n',
     '@nuxtjs/sitemap',
   ],
   typescript: {
     strict: true,
+  },
+  icon: {
+    // daisyUIのドックやヘッダーでは `currentColor` に色を委ねたいため、
+    // CSSの背景画像ではなくインラインSVGで描く。
+    mode: 'svg',
+    // アプリロゴを `custom:app-logo` として使えるようにする。
+    customCollections: [
+      {
+        prefix: 'custom',
+        dir: resolve('./app/assets/icons'),
+      },
+    ],
   },
   i18n: {
     defaultLocale: 'ja',
