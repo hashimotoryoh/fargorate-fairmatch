@@ -9,7 +9,7 @@ describe('AppLogo', () => {
     const svg = component.find('svg')
 
     expect(svg.attributes('viewBox')).toBe('0 0 24 24')
-    expect(svg.attributes('stroke')).toBe('currentColor')
+    expect(svg.find('g[stroke="currentColor"]').exists()).toBe(true)
     expect(svg.attributes('aria-hidden')).toBe('true')
   })
 
