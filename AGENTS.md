@@ -123,6 +123,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 - daisyUI v5
 - Nuxt Content v3
 - Nuxt I18n v10
+- Nuxt Icon v2
 
 パッケージマネージャーはnpmを使用する。`package-lock.json` を管理しているため、yarnやpnpmに置き換えないこと。依存を追加した場合は `package.json` と `package-lock.json` の両方をコミットすること。
 
@@ -138,12 +139,14 @@ Node.js のバージョンは `.node-version` に従うこと。
 
 - `app/`: アプリケーションのソース。Nuxt v4 の `srcDir`
   - `app/app.vue`: ルートコンポーネント
+  - `app/app.config.ts`: 実行時に参照するアプリ設定。`@nuxt/icon` の描画モードなど
   - `app/components/`: コンポーネント。自動インポートの対象
   - `app/layouts/`: レイアウト
   - `app/pages/`: ページ。ファイル名がそのままルートになる
   - `app/middleware/`: ルートミドルウェア。`.global.ts` の接尾辞で全ルートに適用される
   - `app/utils/`: 汎用の関数。自動インポートの対象
   - `app/assets/css/main.css`: Tailwind CSS と daisyUI の読み込み口
+  - `app/assets/icons/`: `@nuxt/icon` のカスタムコレクション（`custom:` プレフィックス）のSVG。アプリロゴなど既存のアイコンセットにない図形を置く
 - `server/`: Nitroのサーバールート。プロジェクトルート直下に置く
   - `server/api/`: APIのエンドポイント。ファイル名の `.post.ts` などがHTTPメソッドに対応する
   - `server/utils/`: サーバールートから自動インポートされるユーティリティ
@@ -318,6 +321,15 @@ FargoRateアプリの表示言語は端末の設定に従うため、案内の�
 - 設定はCSSファーストで行う。`app/assets/css/main.css` の `@import` と `@plugin` が入口であり、`tailwind.config.js` は作成しないこと
 - daisyUIのコンポーネントクラス（`btn`、`card` など）を優先し、細かな調整をTailwindのユーティリティクラスで行う
 - スコープ付きの `<style>` は、ユーティリティクラスで表現できない場合に限って使う
+
+### アイコン
+
+アイコンには [`@nuxt/icon`](https://nuxt.com/modules/icon) を使う。`<Icon name="..." />` に名前を渡すだけで描画され、生のSVGをコンポーネントへ書き下さない。
+
+- 一般的なアイコンは Material Design Icons（`mdi:` プレフィックス、例: `mdi:cog`）を使う。アイコン名は [icones.js.org](https://icones.js.org/collection/mdi) で探せる
+- このアプリ固有の図形（アプリロゴなど）は `app/assets/icons/` にSVGを置き、`custom:` プレフィックスで参照する（例: `custom:app-logo`）。コレクションの設定は `nuxt.config.ts` の `icon.customCollections` にある
+- 描画モードは `app/app.config.ts` で `svg` に固定してある。既定の `css`（背景画像）ではテストで `<svg>` を検査できず、daisyUIのドックのように `currentColor` へ色を委ねる箇所とも相性が悪いため
+- アイコン名を動的に組み立てる（テンプレートリテラルなど）と、`nuxt.config.ts` の `icon.clientBundle`（テスト実行時のみ有効）が静的スキャンで拾えない。`mainNavItems`（`app/utils/navigation.ts`）のようにコンポーネント外の配列からアイコン名を渡す場合は、その配列を `nuxt.config.ts` 側でも読み、`clientBundle.icons` へ明示的に列挙すること
 
 ### コード品質
 
