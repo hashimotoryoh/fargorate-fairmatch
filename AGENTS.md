@@ -124,6 +124,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 - Nuxt Content v3
 - Nuxt I18n v10
 - Nuxt Icon v2
+- Nuxt Image v2
 
 パッケージマネージャーはnpmを使用する。`package-lock.json` を管理しているため、yarnやpnpmに置き換えないこと。依存を追加した場合は `package.json` と `package-lock.json` の両方をコミットすること。
 
@@ -313,6 +314,8 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 記事詳細は `og:type: article` と `article:published_time`/`article:modified_time` を出し、`Article` 形式のJSON-LD（`application/ld+json`）も埋め込む。`NewsArticle` を触る場合、これらは他のページに無い固有の実装なので崩さないこと。`NewsArticle` はGoogle Newsへの掲載を前提とした`NewsArticle`型ではなく、一般的な記事を表す`Article`型を使っている（アップデート告知はニュース記事としての掲載要件を満たさないため）。
 
 記事固有のOGP画像（`image`）が無ければ、`public/img/ogp.png` のサイト共通の既定OGP画像にフォールバックする。この既定画像は `app/app.vue` の `useSeoMeta` からも参照しており、ニュース以外の全ページのSNSシェア時のプレビューにも使われる。canonical等と同じく、`NUXT_PUBLIC_SITE_URL` が未設定の間は絶対URLを組めないため、OGP画像とJSON-LDのどちらも出さない。
+
+一覧・詳細のいずれも、このOGP画像を本文の見出し画像としてそのまま表示する。`<img>` を直接書かず `@nuxt/image` の `<NuxtImg>` を使うこと。`public/` 直下のローカル画像はIPXプロバイダーが追加設定なしで最適化を扱える。
 
 Dockやヘッダーの `mainNavItems` にはニュースを追加しない方針。認証の有無によらず辿れる導線として `app/utils/navigation.ts` の `documentNavItems`（フッター）と、設定ページ（`/settings`）のカードにリンクを置いている。
 

@@ -54,6 +54,7 @@ export default defineNuxtConfig({
     '@nuxt/content',
     '@nuxt/eslint',
     '@nuxt/icon',
+    '@nuxt/image',
     'nuxt-auth-utils',
     '@nuxtjs/i18n',
     '@nuxtjs/sitemap',
