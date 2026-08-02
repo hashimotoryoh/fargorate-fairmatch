@@ -17,7 +17,7 @@ const schema = z.object({
  * 必要がない。
  *
  * `include` は `${locale}/*.md` とし、ロケール直下の `.md` だけを対象にする。
- * `*` はディレクトリ区切りをまたがないため、`news/` のようなサブディレクトリや
+ * `*` はディレクトリ区切りをまたがないため、`blog/` のようなサブディレクトリや
  * `faq.csv` のような `.md` 以外のファイルは自動的に対象外になる。コレクションを
  * 増やすたびに `exclude` を書き足す必要がないようにするための書き方。
  */
@@ -29,7 +29,7 @@ function documentCollection(locale: string) {
   })
 }
 
-const newsSchema = z.object({
+const blogSchema = z.object({
   // 一覧のカードとメタタグに使うため必須にする。
   description: z.string(),
   // 公開日（'YYYY-MM-DD'）。一覧の並び順と表示に使う。
@@ -41,17 +41,17 @@ const newsSchema = z.object({
 })
 
 /**
- * ロケール1つ分のニュース記事のコレクション。
+ * ロケール1つ分のブログ記事のコレクション。
  *
- * `content/<ロケール>/news/**` を対象にし、`prefix: 'news'` で
- * `/news/<スラッグ>` のパスに揃える。ドキュメントと違って複数記事を持つため、
+ * `content/<ロケール>/blog/**` を対象にし、`prefix: 'blog'` で
+ * `/blog/<スラッグ>` のパスに揃える。ドキュメントと違って複数記事を持つため、
  * スキーマも別に持つ（`updatedAt` が任意で `date` と `image` を追加で持つ）。
  */
-function newsCollection(locale: string) {
+function blogCollection(locale: string) {
   return defineCollection({
     type: 'page',
-    source: { include: `${locale}/news/**`, prefix: 'news' },
-    schema: newsSchema,
+    source: { include: `${locale}/blog/**`, prefix: 'blog' },
+    schema: blogSchema,
   })
 }
 
@@ -92,12 +92,12 @@ export default defineContentConfig({
     documents_ja: documentCollection('ja'),
     documents_en: documentCollection('en'),
     /**
-     * アップデートやプレスリリースなどのニュース記事。ドキュメントと違って
-     * 複数の記事を持つため、`/news` の一覧ページと `/news/<スラッグ>` の
+     * アップデートやプレスリリースなどのブログ記事。ドキュメントと違って
+     * 複数の記事を持つため、`/blog` の一覧ページと `/blog/<スラッグ>` の
      * 詳細ページに分けて扱う。
      */
-    news_ja: newsCollection('ja'),
-    news_en: newsCollection('en'),
+    blog_ja: blogCollection('ja'),
+    blog_en: blogCollection('en'),
     /** よくある質問。`/faq` で全件をアコーディオン表示する。 */
     faq_ja: faqCollection('ja'),
     faq_en: faqCollection('en'),

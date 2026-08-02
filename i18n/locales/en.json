@@ -11,7 +11,7 @@
     "settings": "Settings"
   },
   "document": {
-    "news": "News",
+    "blog": "Blog",
     "faq": "FAQ",
     "privacyPolicy": "Privacy Policy",
     "termsConditions": "Terms and Conditions",
@@ -59,10 +59,10 @@
     "settings": {
       "title": "Settings"
     },
-    "news": {
-      "title": "News",
+    "blog": {
+      "title": "Blog",
       "description": "Keep up with FargoRate FairMatch updates and press releases in one place.",
-      "ogTitle": "News - FargoRate FairMatch",
+      "ogTitle": "Blog - FargoRate FairMatch",
       "ogDescription": "Keep up with FargoRate FairMatch updates and press releases in one place."
     },
     "faq": {
@@ -208,13 +208,13 @@
     "themeDescription": "Choose the color scheme used across the app.",
     "language": "Language",
     "languageDescription": "Choose the language used across the app.",
-    "newsDescription": "Check app updates and announcements.",
+    "blogDescription": "Check app updates and announcements.",
     "faqDescription": "Find answers to common questions about how to use the app and how it relates to FargoRate."
   },
-  "news": {
-    "heading": "News",
+  "blog": {
+    "heading": "Blog",
     "lead": "Keep up with app updates and announcements in one place.",
-    "empty": "There is no news yet.",
+    "empty": "There is no blog post yet.",
     "publishedAt": "Published:",
     "updatedAt": "Updated:"
   },
@@ -223,5 +223,16 @@
     "lead": "Answers to common questions about how to use the app and how it relates to FargoRate.",
     "searchPlaceholder": "Search questions",
     "empty": "No matching questions were found."
+  },
+  "error": {
+    "notFound": {
+      "heading": "Page not found",
+      "lead": "The page you're looking for may have moved or no longer exists."
+    },
+    "unexpected": {
+      "heading": "Something went wrong",
+      "lead": "Please wait a moment and try again."
+    },
+    "backHome": "Back to home"
   }
 }

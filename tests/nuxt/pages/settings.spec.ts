@@ -117,13 +117,13 @@ describe('設定ページ', () => {
     )
   })
 
-  // Dockにはタブを追加しない方針のため、設定画面がニュースへの唯一の導線になる。
-  it('ニュースページへのリンクを出す', async () => {
+  // Dockにはタブを追加しない方針のため、設定画面がブログへの唯一の導線になる。
+  it('ブログページへのリンクを出す', async () => {
     const component = await mountSuspended(SettingsPage)
-    const link = component.find('a[href="/news"]')
+    const link = component.find('a[href="/blog"]')
 
     expect(link.exists()).toBe(true)
-    expect(component.text()).toContain(jaMessage('settings.newsDescription'))
+    expect(component.text()).toContain(jaMessage('settings.blogDescription'))
   })
 
   // Dockやヘッダーのメインナビにはfaqを追加しない方針のため、フッターに加えて

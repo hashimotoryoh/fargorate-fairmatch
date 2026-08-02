@@ -60,20 +60,20 @@ describe('llms.txt の設定', () => {
     expect(llmsBlock()).toMatch(/domain: SITE_URL/)
   })
 
-  it('日本語コレクション（documents_ja・news_ja）を参照していない', () => {
+  it('日本語コレクション（documents_ja・blog_ja）を参照していない', () => {
     const block = llmsSectionsBlock()
 
     expect(block).not.toContain("'documents_ja'")
-    expect(block).not.toContain("'news_ja'")
+    expect(block).not.toContain("'blog_ja'")
   })
 
-  it('英語コレクション（documents_en・news_en）を raw markdown から除外していない', () => {
+  it('英語コレクション（documents_en・blog_en）を raw markdown から除外していない', () => {
     // 改行を挟んで折り返されても検査できるよう、dotAll（s）フラグを付ける。
     const excludeCollections =
       llmsBlock().match(/excludeCollections: \[(.*?)\]/s)?.[1] ?? ''
 
     expect(excludeCollections).not.toContain("'documents_en'")
-    expect(excludeCollections).not.toContain("'news_en'")
+    expect(excludeCollections).not.toContain("'blog_en'")
   })
 
   it.each(protectedPagePaths())(

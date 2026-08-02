@@ -1,8 +1,8 @@
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { clearNuxtData } from '#imports'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import NewsIndexPage from '../../../../app/pages/news/index.vue'
-import { createNewsArticle } from '../../../helpers/fixtures'
+import BlogIndexPage from '../../../../app/pages/blog/index.vue'
+import { createBlogArticle } from '../../../helpers/fixtures'
 import { jaMessage } from '../../../helpers/i18n'
 
 const { queryCollectionMock, allMock, orderMock } = vi.hoisted(() => {
@@ -12,14 +12,14 @@ const { queryCollectionMock, allMock, orderMock } = vi.hoisted(() => {
   return {
     allMock,
     orderMock,
-    // `queryCollection('news_ja').order('date', 'DESC').all()` の連鎖を模す。
+    // `queryCollection('blog_ja').order('date', 'DESC').all()` の連鎖を模す。
     queryCollectionMock: vi.fn(() => ({ order: orderMock })),
   }
 })
 
 mockNuxtImport('queryCollection', () => queryCollectionMock)
 
-describe('ニュースの一覧ページ', () => {
+describe('ブログの一覧ページ', () => {
   // useAsyncData はロケール単位でキャッシュするため、テストごとに一覧を洗い直す。
   beforeEach(() => {
     clearNuxtData()
@@ -29,13 +29,13 @@ describe('ニュースの一覧ページ', () => {
     // 並び替え自体はクエリ（`order('date', 'DESC')`）が担うため、ページは
     // 受け取った順をそのまま出す。新しい順で返ってきた体で検証する。
     allMock.mockResolvedValue([
-      createNewsArticle('/news/newer', '新しい記事', { date: '2026-08-01' }),
-      createNewsArticle('/news/older', '古い記事', { date: '2026-07-01' }),
+      createBlogArticle('/blog/newer', '新しい記事', { date: '2026-08-01' }),
+      createBlogArticle('/blog/older', '古い記事', { date: '2026-07-01' }),
     ])
 
-    const component = await mountSuspended(NewsIndexPage)
+    const component = await mountSuspended(BlogIndexPage)
 
-    expect(queryCollectionMock).toHaveBeenCalledWith('news_ja')
+    expect(queryCollectionMock).toHaveBeenCalledWith('blog_ja')
     expect(orderMock).toHaveBeenCalledWith('date', 'DESC')
 
     const titles = component.findAll('.card-title')
@@ -47,43 +47,43 @@ describe('ニュースの一覧ページ', () => {
 
   it('各記事のカードから記事のパスへ辿れる', async () => {
     allMock.mockResolvedValue([
-      createNewsArticle('/news/sample-article', 'サンプル記事'),
+      createBlogArticle('/blog/sample-article', 'サンプル記事'),
     ])
 
-    const component = await mountSuspended(NewsIndexPage)
+    const component = await mountSuspended(BlogIndexPage)
 
-    expect(component.find('a[href="/news/sample-article"]').exists()).toBe(true)
+    expect(component.find('a[href="/blog/sample-article"]').exists()).toBe(true)
   })
 
   it('記事が無ければその旨を出す', async () => {
     allMock.mockResolvedValue([])
 
-    const component = await mountSuspended(NewsIndexPage)
+    const component = await mountSuspended(BlogIndexPage)
 
-    expect(component.text()).toContain(jaMessage('news.empty'))
+    expect(component.text()).toContain(jaMessage('blog.empty'))
   })
 
   it('記事固有の画像があればカードの画像に使う', async () => {
     allMock.mockResolvedValue([
-      createNewsArticle('/news/with-image', '画像のある記事', {
-        image: '/img/news/with-image.png',
+      createBlogArticle('/blog/with-image', '画像のある記事', {
+        image: '/img/blog/with-image.png',
       }),
     ])
 
-    const component = await mountSuspended(NewsIndexPage)
+    const component = await mountSuspended(BlogIndexPage)
     const image = component.find('img')
 
-    expect(image.attributes('src')).toContain('/img/news/with-image.png')
+    expect(image.attributes('src')).toContain('/img/blog/with-image.png')
     expect(image.attributes('alt')).toBe('画像のある記事')
   })
 
   // フロントマターに image が無ければ、カードの画像も既定のOGP画像にフォールバックする。
   it('記事固有の画像が無ければカードの画像に既定のOGP画像を使う', async () => {
     allMock.mockResolvedValue([
-      createNewsArticle('/news/no-image', '画像の無い記事'),
+      createBlogArticle('/blog/no-image', '画像の無い記事'),
     ])
 
-    const component = await mountSuspended(NewsIndexPage)
+    const component = await mountSuspended(BlogIndexPage)
     const image = component.find('img')
 
     expect(image.attributes('src')).toContain('/img/ogp.png')

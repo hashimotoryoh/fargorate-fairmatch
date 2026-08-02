@@ -25,13 +25,13 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 | `/lookup`           | FargoRate IDでのサインイン       | 不要 |
 | `/privacy-policy`   | プライバシーポリシー             | 不要 |
 | `/terms-conditions` | 利用規約                         | 不要 |
-| `/news`             | ニュースの一覧                   | 不要 |
-| `/news/[slug]`      | ニュースの詳細                   | 不要 |
+| `/blog`             | ブログの一覧                     | 不要 |
+| `/blog/[slug]`      | ブログの詳細                     | 不要 |
 | `/dashboard`        | 自分のレーティングなどの表示     | 必要 |
 | `/game`             | 種目を選んで新しいゲームを始める | 必要 |
 | `/settings`         | サインアウトなどの設定           | 必要 |
 
-ニュースへの導線はDockやヘッダーのナビゲーションには置かず、フッターと設定画面から辿れるようにしている。
+ブログへの導線はDockやヘッダーのナビゲーションには置かず、フッターと設定画面から辿れるようにしている。
 
 検索エンジンにインデックスさせるのは認証の要らないページのみで、これは認証なしでアクセスできるページと一致する。公開ページは言語ごとのURLを `sitemap.xml` に載せ、hreflang で互いを指し示す。
 
@@ -67,16 +67,16 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 
 プライバシーポリシーと利用規約は準拠法が日本法であるため、日英どちらにも「解釈に相違がある場合は日本語版を優先する」条項を置いている。
 
-### ニュース
+### ブログ
 
-アップデートやプレスリリースなどのニュースも、同じくNuxt Contentで管理する。プライバシーポリシー等が1文書1ページなのに対し、ニュースは複数記事を持つため、`content/<言語>/news/<スラッグ>.md` に置き、`/news` の一覧と `/news/<スラッグ>` の詳細に分けて表示する。
+アップデートやプレスリリースなどのブログも、同じくNuxt Contentで管理する。プライバシーポリシー等が1文書1ページなのに対し、ブログは複数記事を持つため、`content/<言語>/blog/<スラッグ>.md` に置き、`/blog` の一覧と `/blog/<スラッグ>` の詳細に分けて表示する。
 
 | ファイル                              | ルート                      |
 | ------------------------------------- | --------------------------- |
-| `content/ja/news/news-page-launch.md` | `/news/news-page-launch`    |
-| `content/en/news/news-page-launch.md` | `/en/news/news-page-launch` |
+| `content/ja/blog/blog-page-launch.md` | `/blog/blog-page-launch`    |
+| `content/en/blog/blog-page-launch.md` | `/en/blog/blog-page-launch` |
 
-記事は日英を1対1でペアリングする運用（`tests/unit/repository/news.spec.ts` で検査している）。フロントマターは `title`・`description`・`date`（公開日）に加え、任意で `updatedAt`（改訂日）と `image`（記事固有のOGP画像。`public/` 起点のパス）を書ける。`image` を省略するとサイト共通の既定OGP画像（`public/img/ogp.png`）にフォールバックする。
+記事は日英を1対1でペアリングする運用（`tests/unit/repository/blog.spec.ts` で検査している）。フロントマターは `title`・`description`・`date`（公開日）に加え、任意で `updatedAt`（改訂日）と `image`（記事固有のOGP画像。`public/` 起点のパス）を書ける。`image` を省略するとサイト共通の既定OGP画像（`public/img/ogp.png`）にフォールバックする。
 
 Nuxt Content はビルド時にMarkdownをSQLiteのデータベースへ書き出す。データベースの接続には Node.js 同梱の `node:sqlite` を使う設定にしてあるため、`better-sqlite3` などのネイティブモジュールを別途入れる必要はない。
 

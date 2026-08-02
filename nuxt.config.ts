@@ -16,6 +16,18 @@ const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairmatch'
 const SITE_URL = process.env.NUXT_PUBLIC_SITE_URL ?? ''
 
 /**
+ * 認証が必要な保護ページのパス。sitemapの除外とrobots.txtのDisallowの
+ * 両方でこの1つだけを参照し、列挙を二重管理にしない。ロケール接頭辞付きの
+ * パス（`/en/...`）は@nuxtjs/sitemapと@nuxtjs/robotsがi18nの設定から
+ * 自動で展開するため、接頭辞なしのパスだけを挙げれば足りる。
+ *
+ * ここは保護ページの列挙になるため、`app/pages/` から導いた保護ページを
+ * 網羅していることを `tests/unit/repository/page-protection.spec.ts` で
+ * 機械的に確かめている。追加漏れをレビューに頼らないため。
+ */
+const PROTECTED_PAGE_PATHS = ['/dashboard', '/game', '/settings']
+
+/**
  * フッターのバージョン表示に使うコミットハッシュを解決する。
  *
  * デプロイ先が未定なので、主要なホスティングが注入する環境変数を順に見て、
@@ -49,7 +61,8 @@ function resolveCommitSha(): string {
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  // sitemap は i18n が組み立てたルートを読むため、最後に置く。
+  // sitemap は i18n が組み立てたルートを読むため、i18nの後に置く。
+  // robots は Sitemap: 行の組み立てに sitemap の設定を読むため、さらに後に置く。
   modules: [
     '@nuxt/content',
     // @nuxt/content が起動時にこのモジュールを検出し、page コレクションを
@@ -61,6 +74,7 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     '@nuxtjs/i18n',
     '@nuxtjs/sitemap',
+    '@nuxtjs/robots',
   ],
   typescript: {
     strict: true,
@@ -105,23 +119,21 @@ export default defineNuxtConfig({
   },
   site: { url: SITE_URL },
   sitemap: {
+    // 検索エンジンに載せるのは認証の要らないページだけで、これは公開ページと
+    // 一致する。保護ページの列挙は PROTECTED_PAGE_PATHS に一本化してある。
+    exclude: PROTECTED_PAGE_PATHS,
     /**
-     * 検索エンジンに載せるのは認証の要らないページだけで、これは公開ページと
-     * 一致する。ロケール接頭辞の付いたパスは i18n との連携が自動で広げるため、
-     * 接頭辞なしのパスだけを挙げれば足りる。
-     *
-     * ここは保護ページの列挙になるため、`app/pages/` から導いた保護ページを
-     * 網羅していることを `tests/unit/repository/page-protection.spec.ts` で
-     * 機械的に確かめている。追加漏れをレビューに頼らないため。
-     */
-    exclude: ['/dashboard', '/game', '/settings'],
-    /**
-     * `/news/[slug]` は動的ルートで、ルート定義からはスラッグを列挙できない。
-     * `server/api/__sitemap__/news.ts` が Nuxt Content から記事のパスを
+     * `/blog/[slug]` は動的ルートで、ルート定義からはスラッグを列挙できない。
+     * `server/api/__sitemap__/blog.ts` が Nuxt Content から記事のパスを
      * 集めて返す（`_i18nTransform` によりロケール接頭辞付きのURLとhreflangは
      * 自動で組み立てられる）。
      */
-    sources: ['/api/__sitemap__/news'],
+    sources: ['/api/__sitemap__/blog'],
+  },
+  // robots.txt はこのモジュールが動的に生成する（public/robots.txt は置かない）。
+  // Sitemap: 行は site.url と @nuxtjs/sitemap の連携から自動で組み立てられる。
+  robots: {
+    disallow: PROTECTED_PAGE_PATHS,
   },
   /**
    * AIクローラー・エージェント向けの `/llms.txt`（https://llmstxt.org/）。
@@ -132,8 +144,8 @@ export default defineNuxtConfig({
    * 方針にしてある（`robots.txt` も単一ファイルである前例に揃えた）。
    * 本文中のリンクも英語ロケールのURL（`/en/...`）を指す。
    *
-   * `sections` は `documents_en`・`news_en` だけを参照し、`documents_ja`・
-   * `news_ja` は参照しない。日本語コレクションを足すと英語限定の方針が
+   * `sections` は `documents_en`・`blog_en` だけを参照し、`documents_ja`・
+   * `blog_ja` は参照しない。日本語コレクションを足すと英語限定の方針が
    * 崩れるため、`tests/unit/repository/llms-txt.spec.ts` で機械的に
    * 検査している。
    *
@@ -145,13 +157,13 @@ export default defineNuxtConfig({
   llms: {
     domain: SITE_URL,
     title: 'FargoRate FairMatch',
-    // documents_ja/documents_en、news_ja/news_en はそれぞれ日英で同じパスを
-    // 共有しており（例: /privacy-policy、/news/<スラッグ>）、`/raw/*.md` は
+    // documents_ja/documents_en、blog_ja/blog_en はそれぞれ日英で同じパスを
+    // 共有しており（例: /privacy-policy、/blog/<スラッグ>）、`/raw/*.md` は
     // 最初に見つかったコレクションを返すだけでロケールを見分けない。日本語
     // コレクションを対象から外すことで、`/raw/privacy-policy.md` が確実に
     // documents_en の英語本文を返すようにする。
     contentRawMarkdown: {
-      excludeCollections: ['documents_ja', 'news_ja'],
+      excludeCollections: ['documents_ja', 'blog_ja'],
     },
     description:
       'A web app that helps you enter and review pool match scores on top of FargoRate ratings. Your FargoRate ID is all you need to get started. It reads ratings from the official FargoRate system but never sends match results back, so it never updates your rating.',
@@ -184,8 +196,8 @@ export default defineNuxtConfig({
         contentCollection: 'documents_en',
       },
       {
-        title: 'News',
-        contentCollection: 'news_en',
+        title: 'Blog',
+        contentCollection: 'blog_en',
       },
     ],
   },

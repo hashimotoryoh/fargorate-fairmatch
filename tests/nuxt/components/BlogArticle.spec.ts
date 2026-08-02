@@ -2,8 +2,8 @@ import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { useNuxtApp, useRuntimeConfig } from '#imports'
 import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import NewsArticle from '../../../app/components/NewsArticle.vue'
-import { createNewsArticle } from '../../helpers/fixtures'
+import BlogArticle from '../../../app/components/BlogArticle.vue'
+import { createBlogArticle } from '../../helpers/fixtures'
 import { jaMessage } from '../../helpers/i18n'
 
 const { queryCollectionMock, firstMock, createErrorMock, navigateToMock } =
@@ -13,7 +13,7 @@ const { queryCollectionMock, firstMock, createErrorMock, navigateToMock } =
     return {
       firstMock,
       navigateToMock: vi.fn(),
-      // `queryCollection('news_ja').path('/news/...').first()` の連鎖を模す。
+      // `queryCollection('blog_ja').path('/blog/...').first()` の連鎖を模す。
       queryCollectionMock: vi.fn(() => ({
         path: vi.fn(() => ({ first: firstMock })),
       })),
@@ -44,39 +44,36 @@ async function useLocale(code: 'ja' | 'en') {
   await flushPromises()
 }
 
-describe('NewsArticle', () => {
+describe('BlogArticle', () => {
   beforeEach(async () => {
     await useLocale('ja')
     setSiteUrl(SITE_URL)
     firstMock.mockReset()
     firstMock.mockResolvedValue(
-      createNewsArticle(
-        '/news/news-page-launch',
-        'ニュースページを公開しました',
-      ),
+      createBlogArticle('/blog/blog-page-launch', 'ブログページを公開しました'),
     )
     queryCollectionMock.mockClear()
   })
 
   it('フロントマターの見出しとMarkdownの本文を出す', async () => {
-    const component = await mountSuspended(NewsArticle, {
-      props: { path: '/news/news-page-launch' },
+    const component = await mountSuspended(BlogArticle, {
+      props: { path: '/blog/blog-page-launch' },
     })
 
-    expect(component.find('h1').text()).toBe('ニュースページを公開しました')
-    expect(component.text()).toContain('ニュースページを公開しましたの本文。')
+    expect(component.find('h1').text()).toBe('ブログページを公開しました')
+    expect(component.text()).toContain('ブログページを公開しましたの本文。')
   })
 
   it('渡されたパスの記事を引く', async () => {
     const pathMock = vi.fn(() => ({ first: firstMock }))
     queryCollectionMock.mockReturnValueOnce({ path: pathMock })
 
-    await mountSuspended(NewsArticle, {
-      props: { path: '/news/other-article' },
+    await mountSuspended(BlogArticle, {
+      props: { path: '/blog/other-article' },
     })
 
-    expect(queryCollectionMock).toHaveBeenCalledWith('news_ja')
-    expect(pathMock).toHaveBeenCalledWith('/news/other-article')
+    expect(queryCollectionMock).toHaveBeenCalledWith('blog_ja')
+    expect(pathMock).toHaveBeenCalledWith('/blog/other-article')
   })
 
   // ロケールごとに別のコレクションへ分けている。引き先を間違えると、英語で
@@ -84,52 +81,52 @@ describe('NewsArticle', () => {
   it('英語で見ているときは英語のコレクションを引く', async () => {
     await useLocale('en')
 
-    await mountSuspended(NewsArticle, {
-      props: { path: '/news/news-page-launch' },
+    await mountSuspended(BlogArticle, {
+      props: { path: '/blog/blog-page-launch' },
     })
 
-    expect(queryCollectionMock).toHaveBeenCalledWith('news_en')
+    expect(queryCollectionMock).toHaveBeenCalledWith('blog_en')
   })
 
   it('公開日を表示中の言語の表記で出す', async () => {
-    const component = await mountSuspended(NewsArticle, {
-      props: { path: '/news/news-page-launch' },
+    const component = await mountSuspended(BlogArticle, {
+      props: { path: '/blog/blog-page-launch' },
     })
     const time = component.find('time')
 
-    expect(component.text()).toContain(jaMessage('news.publishedAt'))
+    expect(component.text()).toContain(jaMessage('blog.publishedAt'))
     expect(time.attributes('datetime')).toBe('2026-08-01')
     expect(time.text()).toBe('2026年8月1日')
   })
 
   // 改訂日が無い記事では、公開日だけを見せ更新日の表記を出さない。
   it('updatedAtが無ければ更新日を出さない', async () => {
-    const component = await mountSuspended(NewsArticle, {
-      props: { path: '/news/news-page-launch' },
+    const component = await mountSuspended(BlogArticle, {
+      props: { path: '/blog/blog-page-launch' },
     })
 
-    expect(component.text()).not.toContain(jaMessage('news.updatedAt'))
+    expect(component.text()).not.toContain(jaMessage('blog.updatedAt'))
   })
 
   it('updatedAtがあれば更新日も出す', async () => {
     // useAsyncData はパスごとにキャッシュするため、別の記事と別のパスを使う。
     firstMock.mockResolvedValue(
-      createNewsArticle('/news/with-update', 'アップデートのある記事', {
+      createBlogArticle('/blog/with-update', 'アップデートのある記事', {
         updatedAt: '2026-08-02',
       }),
     )
 
-    const component = await mountSuspended(NewsArticle, {
-      props: { path: '/news/with-update' },
+    const component = await mountSuspended(BlogArticle, {
+      props: { path: '/blog/with-update' },
     })
 
-    expect(component.text()).toContain(jaMessage('news.updatedAt'))
+    expect(component.text()).toContain(jaMessage('blog.updatedAt'))
     expect(component.findAll('time').at(1)?.text()).toBe('2026年8月2日')
   })
 
   it('記事はwebsiteではなくarticleとしてOGPに出す', async () => {
-    await mountSuspended(NewsArticle, {
-      props: { path: '/news/news-page-launch' },
+    await mountSuspended(BlogArticle, {
+      props: { path: '/blog/blog-page-launch' },
     })
 
     await vi.waitFor(() => {
@@ -144,8 +141,8 @@ describe('NewsArticle', () => {
 
   // フロントマターに image が無ければ、サイト共通の既定OGP画像にフォールバックする。
   it('記事固有の画像が無ければ既定のOGP画像を使う', async () => {
-    await mountSuspended(NewsArticle, {
-      props: { path: '/news/news-page-launch' },
+    await mountSuspended(BlogArticle, {
+      props: { path: '/blog/blog-page-launch' },
     })
 
     await vi.waitFor(() => {
@@ -158,18 +155,18 @@ describe('NewsArticle', () => {
   it('記事固有の画像があればそれをOGP画像に使う', async () => {
     // useAsyncData はパスごとにキャッシュするため、別の記事と別のパスを使う。
     firstMock.mockResolvedValue(
-      createNewsArticle('/news/with-image', '画像のある記事', {
-        image: '/img/news/with-image.png',
+      createBlogArticle('/blog/with-image', '画像のある記事', {
+        image: '/img/blog/with-image.png',
       }),
     )
 
-    await mountSuspended(NewsArticle, {
-      props: { path: '/news/with-image' },
+    await mountSuspended(BlogArticle, {
+      props: { path: '/blog/with-image' },
     })
 
     await vi.waitFor(() => {
       expect(head('meta[property="og:image"]')?.getAttribute('content')).toBe(
-        `${SITE_URL}/img/news/with-image.png`,
+        `${SITE_URL}/img/blog/with-image.png`,
       )
     })
   })
@@ -177,26 +174,26 @@ describe('NewsArticle', () => {
   // OGPと同じ画像を本文の見出し画像としても表示する。
   it('記事固有の画像があれば見出し画像に使う', async () => {
     firstMock.mockResolvedValue(
-      createNewsArticle('/news/with-heading-image', '見出し画像のある記事', {
-        image: '/img/news/with-heading-image.png',
+      createBlogArticle('/blog/with-heading-image', '見出し画像のある記事', {
+        image: '/img/blog/with-heading-image.png',
       }),
     )
 
-    const component = await mountSuspended(NewsArticle, {
-      props: { path: '/news/with-heading-image' },
+    const component = await mountSuspended(BlogArticle, {
+      props: { path: '/blog/with-heading-image' },
     })
 
     const image = component.find('img')
     expect(image.attributes('src')).toContain(
-      '/img/news/with-heading-image.png',
+      '/img/blog/with-heading-image.png',
     )
     expect(image.attributes('alt')).toBe('見出し画像のある記事')
   })
 
   // フロントマターに image が無ければ、見出し画像も既定のOGP画像にフォールバックする。
   it('記事固有の画像が無ければ見出し画像に既定のOGP画像を使う', async () => {
-    const component = await mountSuspended(NewsArticle, {
-      props: { path: '/news/news-page-launch' },
+    const component = await mountSuspended(BlogArticle, {
+      props: { path: '/blog/blog-page-launch' },
     })
 
     const image = component.find('img')
@@ -204,8 +201,8 @@ describe('NewsArticle', () => {
   })
 
   it('Article形式の構造化データを埋め込む', async () => {
-    await mountSuspended(NewsArticle, {
-      props: { path: '/news/news-page-launch' },
+    await mountSuspended(BlogArticle, {
+      props: { path: '/blog/blog-page-launch' },
     })
 
     await vi.waitFor(() => {
@@ -217,9 +214,9 @@ describe('NewsArticle', () => {
     )
 
     expect(json['@type']).toBe('Article')
-    expect(json.headline).toBe('ニュースページを公開しました')
+    expect(json.headline).toBe('ブログページを公開しました')
     expect(json.datePublished).toBe('2026-08-01')
-    expect(json.mainEntityOfPage).toBe(`${SITE_URL}/news/news-page-launch`)
+    expect(json.mainEntityOfPage).toBe(`${SITE_URL}/blog/blog-page-launch`)
   })
 
   /**
@@ -230,8 +227,8 @@ describe('NewsArticle', () => {
     firstMock.mockResolvedValue(null)
 
     // useAsyncData の結果はキーごとに使い回されるため、他のテストと別のパスを使う。
-    const component = await mountSuspended(NewsArticle, {
-      props: { path: '/news/removed' },
+    const component = await mountSuspended(BlogArticle, {
+      props: { path: '/blog/removed' },
     }).catch(() => null)
 
     expect(createErrorMock).toHaveBeenCalledWith(

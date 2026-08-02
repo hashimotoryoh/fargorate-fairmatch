@@ -95,15 +95,15 @@ async function signOut() {
     <div class="card bg-base-200">
       <div class="card-body gap-4">
         <div>
-          <h2 class="card-title text-base">{{ $t('document.news') }}</h2>
+          <h2 class="card-title text-base">{{ $t('document.blog') }}</h2>
           <p class="text-base-content/70 mt-1 text-sm">
-            {{ $t('settings.newsDescription') }}
+            {{ $t('settings.blogDescription') }}
           </p>
         </div>
 
         <div class="card-actions">
-          <NuxtLink :to="localePath('/news')" class="btn btn-outline">
-            {{ $t('document.news') }}
+          <NuxtLink :to="localePath('/blog')" class="btn btn-outline">
+            {{ $t('document.blog') }}
           </NuxtLink>
         </div>
       </div>

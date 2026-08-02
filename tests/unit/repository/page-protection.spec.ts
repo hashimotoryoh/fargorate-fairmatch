@@ -6,9 +6,6 @@ import { describe, expect, it } from 'vitest'
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url))
 const PAGES_DIR = join(ROOT, 'app/pages')
 
-/** 既定のロケール以外の接頭辞。robots.txt に列挙するために要る。 */
-const PREFIXED_LOCALES = ['en']
-
 /**
  * 認証なしでアクセスできるページ。検索エンジンに開放するページと一致する。
  * ここを増やすことは公開範囲を広げることなので、意図せず増えないよう明示する。
@@ -19,8 +16,8 @@ const PUBLIC_PAGES = [
   'guest',
   'privacy-policy',
   'terms-conditions',
-  'news/index',
-  'news/[slug]',
+  'blog/index',
+  'blog/[slug]',
   'faq',
 ]
 
@@ -29,7 +26,7 @@ const GUEST_ONLY_PAGES = ['lookup', 'guest']
 
 /**
  * `app/pages/` 配下を再帰的に辿り、`.vue` の拡張子を除いた相対パスを返す
- * （例: `news/index`、`news/[slug]`）。ニュース一覧・詳細のようにディレクトリを
+ * （例: `blog/index`、`blog/[slug]`）。ブログ一覧・詳細のようにディレクトリを
  * 持つページも同じ規約で検査できるようにするため、トップレベルに限定しない。
  */
 function pageNames(): string[] {
@@ -96,28 +93,25 @@ describe('ページの保護の宣言', () => {
   })
 
   /**
-   * sitemap の除外と robots.txt は、性質上どうしても保護ページの列挙になる。
-   * ページを足したときに書き漏らすと、非公開のページが検索エンジンへ案内
-   * されてしまうため、`app/pages/` から導いた一覧と突き合わせる。
+   * sitemap の除外と robots.txt の Disallow（@nuxtjs/robots が動的生成する）は、
+   * 性質上どうしても保護ページの列挙になる。`nuxt.config.ts` の
+   * `PROTECTED_PAGE_PATHS` にその列挙を一本化してあり、ページを足したときに
+   * 書き漏らすと非公開のページが検索エンジンへ案内されてしまうため、
+   * `app/pages/` から導いた一覧と突き合わせる。
    */
-  it('sitemap が保護ページを除外している', () => {
+  it('PROTECTED_PAGE_PATHS が保護ページを網羅している', () => {
     const config = readFileSync(join(ROOT, 'nuxt.config.ts'), 'utf8')
-    const exclude = config.match(/exclude: \[(.*?)\]/s)?.[1] ?? ''
+    const paths = config.match(/PROTECTED_PAGE_PATHS = \[(.*?)\]/s)?.[1] ?? ''
 
     for (const name of protectedPages) {
-      expect(exclude).toContain(`'/${name}'`)
+      expect(paths).toContain(`'/${name}'`)
     }
   })
 
-  it('robots.txt が保護ページを全てのロケールで拒否している', () => {
-    const robots = readFileSync(join(ROOT, 'public/robots.txt'), 'utf8')
+  it('sitemap の除外と robots.txt の Disallow が PROTECTED_PAGE_PATHS を共有している', () => {
+    const config = readFileSync(join(ROOT, 'nuxt.config.ts'), 'utf8')
 
-    for (const name of protectedPages) {
-      expect(robots).toContain(`Disallow: /${name}\n`)
-
-      for (const locale of PREFIXED_LOCALES) {
-        expect(robots).toContain(`Disallow: /${locale}/${name}\n`)
-      }
-    }
+    expect(config).toContain('exclude: PROTECTED_PAGE_PATHS')
+    expect(config).toContain('disallow: PROTECTED_PAGE_PATHS')
   })
 })
