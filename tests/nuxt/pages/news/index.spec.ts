@@ -26,9 +26,11 @@ describe('お知らせの一覧ページ', () => {
   })
 
   it('記事を公開日の新しい順に並べて出す', async () => {
+    // 並び替え自体はクエリ（`order('date', 'DESC')`）が担うため、ページは
+    // 受け取った順をそのまま出す。新しい順で返ってきた体で検証する。
     allMock.mockResolvedValue([
-      createNewsArticle('/news/older', '古い記事', { date: '2026-07-01' }),
       createNewsArticle('/news/newer', '新しい記事', { date: '2026-08-01' }),
+      createNewsArticle('/news/older', '古い記事', { date: '2026-07-01' }),
     ])
 
     const component = await mountSuspended(NewsIndexPage)
@@ -38,8 +40,8 @@ describe('お知らせの一覧ページ', () => {
 
     const titles = component.findAll('.card-title')
     expect(titles.map((title) => title.text())).toEqual([
-      '古い記事',
       '新しい記事',
+      '古い記事',
     ])
   })
 
