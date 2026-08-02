@@ -48,6 +48,30 @@ export function createDocument(path: string, title: string) {
   }
 }
 
+/**
+ * `news` コレクションが返すニュース記事。Markdownの解析結果そのままの形で、
+ * `body` は ContentRenderer が受け取れる最小の構造にしてある。
+ */
+export function createNewsArticle(
+  path: string,
+  title: string,
+  overrides: {
+    date?: string
+    updatedAt?: string
+    image?: string
+  } = {},
+) {
+  return {
+    id: `news${path}.md`,
+    path,
+    title,
+    description: `${title}の説明。`,
+    date: '2026-08-01',
+    body: { type: 'minimal', value: [['p', {}, `${title}の本文。`]] },
+    ...overrides,
+  }
+}
+
 export function createFargoRatePlayer(
   overrides: Partial<FargoRatePlayer> = {},
 ): FargoRatePlayer {

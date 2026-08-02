@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { basename, join } from 'node:path'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url))
@@ -19,15 +19,27 @@ const PUBLIC_PAGES = [
   'guest',
   'privacy-policy',
   'terms-conditions',
+  'news/index',
+  'news/[slug]',
 ]
 
 /** 認証済みのユーザーを追い返すページ。サインインの入口が対象。 */
 const GUEST_ONLY_PAGES = ['lookup', 'guest']
 
+/**
+ * `app/pages/` 配下を再帰的に辿り、`.vue` の拡張子を除いた相対パスを返す
+ * （例: `news/index`、`news/[slug]`）。ニュース一覧・詳細のようにディレクトリを
+ * 持つページも同じ規約で検査できるようにするため、トップレベルに限定しない。
+ */
 function pageNames(): string[] {
-  return readdirSync(PAGES_DIR)
-    .filter((file) => file.endsWith('.vue'))
-    .map((file) => basename(file, '.vue'))
+  return readdirSync(PAGES_DIR, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.vue'))
+    .map((entry) =>
+      join(entry.parentPath ?? entry.path, entry.name)
+        .slice(PAGES_DIR.length + 1)
+        .replaceAll('\\', '/')
+        .replace(/\.vue$/, ''),
+    )
 }
 
 function pageSource(name: string): string {
