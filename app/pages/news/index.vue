@@ -35,8 +35,17 @@ const { data: articles } = await useAsyncData(
       <li v-for="article in articles" :key="article.path">
         <NuxtLink
           :to="localePath(article.path)"
-          class="card bg-base-200 hover:bg-base-300 transition-colors"
+          class="card bg-base-200 hover:bg-base-300 sm:card-side transition-colors"
         >
+          <figure class="sm:w-48 sm:shrink-0">
+            <NuxtImg
+              :src="article.image ?? '/img/ogp.png'"
+              :alt="article.title"
+              width="400"
+              height="210"
+              class="aspect-video w-full object-cover"
+            />
+          </figure>
           <div class="card-body gap-2">
             <time :datetime="article.date" class="text-base-content/60 text-xs">
               {{ formatLocaleDate(article.date, locale) }}

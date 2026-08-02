@@ -124,6 +124,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 - Nuxt Content v3
 - Nuxt I18n v10
 - Nuxt Icon v2
+- Nuxt Image v2
 
 パッケージマネージャーはnpmを使用する。`package-lock.json` を管理しているため、yarnやpnpmに置き換えないこと。依存を追加した場合は `package.json` と `package-lock.json` の両方をコミットすること。
 
@@ -298,9 +299,9 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 
 データベースの接続には Node.js 同梱の `node:sqlite` を使う設定にしてある（`nuxt.config.ts` の `content.experimental.sqliteConnector`）。既定のままでは `better-sqlite3` のインストールを対話的に促され、CIのビルドが止まるため、この指定を外さないこと。
 
-### お知らせ（ニュース）
+### ニュース
 
-アップデートやプレスリリースなどのお知らせは `/news`（一覧）と `/news/[slug]`（詳細）で扱う。プライバシーポリシー等が1文書1ページなのに対し、お知らせは複数記事を持つ点が異なるため、`documents_ja`/`documents_en` とは別に `news_ja`/`news_en` コレクションを `content.config.ts` に持つ（「用途の異なるコンテンツを足す場合は、言語のディレクトリの下にさらにディレクトリを切り、コレクションを分けること」の実例）。
+アップデートやプレスリリースなどのニュースは `/news`（一覧）と `/news/[slug]`（詳細）で扱う。プライバシーポリシー等が1文書1ページなのに対し、ニュースは複数記事を持つ点が異なるため、`documents_ja`/`documents_en` とは別に `news_ja`/`news_en` コレクションを `content.config.ts` に持つ（「用途の異なるコンテンツを足す場合は、言語のディレクトリの下にさらにディレクトリを切り、コレクションを分けること」の実例）。
 
 - `content/ja/news/<スラッグ>.md` が `/news/<スラッグ>` に対応する。`source` の `include` は `<ロケール>/news/**`、`prefix` は `'news'` にしてあり、ロケールの部分だけを外して `news/` を残す
 - 記事は日英を1対1でペアリングする運用にしてある。`tests/unit/repository/news.spec.ts` がスラッグの過不足を検査する
@@ -314,7 +315,9 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 
 記事固有のOGP画像（`image`）が無ければ、`public/img/ogp.png` のサイト共通の既定OGP画像にフォールバックする。この既定画像は `app/app.vue` の `useSeoMeta` からも参照しており、ニュース以外の全ページのSNSシェア時のプレビューにも使われる。canonical等と同じく、`NUXT_PUBLIC_SITE_URL` が未設定の間は絶対URLを組めないため、OGP画像とJSON-LDのどちらも出さない。
 
-Dockやヘッダーの `mainNavItems` にはお知らせを追加しない方針。認証の有無によらず辿れる導線として `app/utils/navigation.ts` の `documentNavItems`（フッター）と、設定ページ（`/settings`）のカードにリンクを置いている。
+一覧・詳細のいずれも、このOGP画像を本文の見出し画像としてそのまま表示する。`<img>` を直接書かず `@nuxt/image` の `<NuxtImg>` を使うこと。`public/` 直下のローカル画像はIPXプロバイダーが追加設定なしで最適化を扱える。
+
+Dockやヘッダーの `mainNavItems` にはニュースを追加しない方針。認証の有無によらず辿れる導線として `app/utils/navigation.ts` の `documentNavItems`（フッター）と、設定ページ（`/settings`）のカードにリンクを置いている。
 
 ### スクリーンショットを使った案内
 

@@ -11,7 +11,7 @@
     "settings": "設定"
   },
   "document": {
-    "news": "お知らせ",
+    "news": "ニュース",
     "privacyPolicy": "プライバシーポリシー",
     "termsConditions": "利用規約",
     "updatedAt": "最終更新日:"
@@ -59,10 +59,10 @@
       "title": "設定"
     },
     "news": {
-      "title": "お知らせ",
-      "description": "FargoRate FairMatchのアップデートやプレスリリースなど、お知らせをまとめて確認できます。",
-      "ogTitle": "お知らせ - FargoRate FairMatch",
-      "ogDescription": "FargoRate FairMatchのアップデートやプレスリリースなど、お知らせをまとめて確認できます。"
+      "title": "ニュース",
+      "description": "FargoRate FairMatchのアップデートやプレスリリースなど、ニュースをまとめて確認できます。",
+      "ogTitle": "ニュース - FargoRate FairMatch",
+      "ogDescription": "FargoRate FairMatchのアップデートやプレスリリースなど、ニュースをまとめて確認できます。"
     }
   },
   "index": {
@@ -203,12 +203,12 @@
     "themeDescription": "画面の配色を選びます。",
     "language": "言語",
     "languageDescription": "画面の表示に使う言語を選びます。",
-    "newsDescription": "アプリの更新情報やお知らせを確認できます。"
+    "newsDescription": "アプリの更新情報などのニュースを確認できます。"
   },
   "news": {
-    "heading": "お知らせ",
-    "lead": "アプリのアップデートやお知らせをまとめて確認できます。",
-    "empty": "お知らせはまだありません。",
+    "heading": "ニュース",
+    "lead": "アプリのアップデートなどのニュースをまとめて確認できます。",
+    "empty": "ニュースはまだありません。",
     "publishedAt": "公開日:",
     "updatedAt": "更新日:"
   }

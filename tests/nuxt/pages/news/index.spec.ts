@@ -19,7 +19,7 @@ const { queryCollectionMock, allMock, orderMock } = vi.hoisted(() => {
 
 mockNuxtImport('queryCollection', () => queryCollectionMock)
 
-describe('お知らせの一覧ページ', () => {
+describe('ニュースの一覧ページ', () => {
   // useAsyncData はロケール単位でキャッシュするため、テストごとに一覧を洗い直す。
   beforeEach(() => {
     clearNuxtData()
@@ -61,5 +61,31 @@ describe('お知らせの一覧ページ', () => {
     const component = await mountSuspended(NewsIndexPage)
 
     expect(component.text()).toContain(jaMessage('news.empty'))
+  })
+
+  it('記事固有の画像があればカードの画像に使う', async () => {
+    allMock.mockResolvedValue([
+      createNewsArticle('/news/with-image', '画像のある記事', {
+        image: '/img/news/with-image.png',
+      }),
+    ])
+
+    const component = await mountSuspended(NewsIndexPage)
+    const image = component.find('img')
+
+    expect(image.attributes('src')).toContain('/img/news/with-image.png')
+    expect(image.attributes('alt')).toBe('画像のある記事')
+  })
+
+  // フロントマターに image が無ければ、カードの画像も既定のOGP画像にフォールバックする。
+  it('記事固有の画像が無ければカードの画像に既定のOGP画像を使う', async () => {
+    allMock.mockResolvedValue([
+      createNewsArticle('/news/no-image', '画像の無い記事'),
+    ])
+
+    const component = await mountSuspended(NewsIndexPage)
+    const image = component.find('img')
+
+    expect(image.attributes('src')).toContain('/img/ogp.png')
   })
 })
