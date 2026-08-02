@@ -16,6 +16,18 @@ const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairmatch'
 const SITE_URL = process.env.NUXT_PUBLIC_SITE_URL ?? ''
 
 /**
+ * 認証が必要な保護ページのパス。sitemapの除外とrobots.txtのDisallowの
+ * 両方でこの1つだけを参照し、列挙を二重管理にしない。ロケール接頭辞付きの
+ * パス（`/en/...`）は@nuxtjs/sitemapと@nuxtjs/robotsがi18nの設定から
+ * 自動で展開するため、接頭辞なしのパスだけを挙げれば足りる。
+ *
+ * ここは保護ページの列挙になるため、`app/pages/` から導いた保護ページを
+ * 網羅していることを `tests/unit/repository/page-protection.spec.ts` で
+ * 機械的に確かめている。追加漏れをレビューに頼らないため。
+ */
+const PROTECTED_PAGE_PATHS = ['/dashboard', '/game', '/settings']
+
+/**
  * フッターのバージョン表示に使うコミットハッシュを解決する。
  *
  * デプロイ先が未定なので、主要なホスティングが注入する環境変数を順に見て、
@@ -49,7 +61,8 @@ function resolveCommitSha(): string {
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  // sitemap は i18n が組み立てたルートを読むため、最後に置く。
+  // sitemap は i18n が組み立てたルートを読むため、i18nの後に置く。
+  // robots は Sitemap: 行の組み立てに sitemap の設定を読むため、さらに後に置く。
   modules: [
     '@nuxt/content',
     // @nuxt/content が起動時にこのモジュールを検出し、page コレクションを
@@ -61,6 +74,7 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     '@nuxtjs/i18n',
     '@nuxtjs/sitemap',
+    '@nuxtjs/robots',
   ],
   typescript: {
     strict: true,
@@ -105,16 +119,9 @@ export default defineNuxtConfig({
   },
   site: { url: SITE_URL },
   sitemap: {
-    /**
-     * 検索エンジンに載せるのは認証の要らないページだけで、これは公開ページと
-     * 一致する。ロケール接頭辞の付いたパスは i18n との連携が自動で広げるため、
-     * 接頭辞なしのパスだけを挙げれば足りる。
-     *
-     * ここは保護ページの列挙になるため、`app/pages/` から導いた保護ページを
-     * 網羅していることを `tests/unit/repository/page-protection.spec.ts` で
-     * 機械的に確かめている。追加漏れをレビューに頼らないため。
-     */
-    exclude: ['/dashboard', '/game', '/settings'],
+    // 検索エンジンに載せるのは認証の要らないページだけで、これは公開ページと
+    // 一致する。保護ページの列挙は PROTECTED_PAGE_PATHS に一本化してある。
+    exclude: PROTECTED_PAGE_PATHS,
     /**
      * `/news/[slug]` は動的ルートで、ルート定義からはスラッグを列挙できない。
      * `server/api/__sitemap__/news.ts` が Nuxt Content から記事のパスを
@@ -122,6 +129,11 @@ export default defineNuxtConfig({
      * 自動で組み立てられる）。
      */
     sources: ['/api/__sitemap__/news'],
+  },
+  // robots.txt はこのモジュールが動的に生成する（public/robots.txt は置かない）。
+  // Sitemap: 行は site.url と @nuxtjs/sitemap の連携から自動で組み立てられる。
+  robots: {
+    disallow: PROTECTED_PAGE_PATHS,
   },
   /**
    * AIクローラー・エージェント向けの `/llms.txt`（https://llmstxt.org/）。

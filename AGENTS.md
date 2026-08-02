@@ -277,6 +277,12 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 
 公開URLは `NUXT_PUBLIC_SITE_URL` の1つだけを読み、i18n の `baseUrl`・`site.url`・`runtimeConfig` の全てへ渡す。環境変数を分けると片方だけ設定された状態が起き、誤ったドメインを指す canonical が出る。この形は `tests/unit/repository/site-url.spec.ts` で固定してある。
 
+### robots.txt と sitemap
+
+`robots.txt` は静的ファイルを置かず、`@nuxtjs/sitemap` と同じNuxt SEOファミリーの `@nuxtjs/robots` が動的に生成する。手書きの静的ファイルでは `NUXT_PUBLIC_SITE_URL` に依存する `Sitemap:` 行を環境ごとに正しく埋め込めないためである。
+
+保護ページ（`/dashboard`、`/game`、`/settings`）のパスは `nuxt.config.ts` の `PROTECTED_PAGE_PATHS` に一本化してあり、`sitemap.exclude` と `robots.disallow` の両方がこの1つだけを参照する。ロケール接頭辞付きのパス（`/en/...`）は `@nuxtjs/i18n` の設定から両モジュールが自動で展開するため、接頭辞なしのパスだけを挙げれば足りる。保護ページを増やす際はこの配列を更新すること。`tests/unit/repository/page-protection.spec.ts` が `app/pages/` から導いた保護ページの一覧との整合性を検査する。
+
 ### Markdownで管理するドキュメント
 
 文面が主体で、改訂がアプリの挙動と関係しないページは [Nuxt Content](https://content.nuxt.com/) で管理し、実体を `content/` のMarkdownに置く。文面の改訂をコードの変更と切り離すためである。文面だけを直す場合はMarkdownのみを変更し、Vueのコードには触れないこと。
