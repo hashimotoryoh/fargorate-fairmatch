@@ -11,7 +11,9 @@ describe('AppHeader', () => {
 
     expect(home.exists()).toBe(true)
     expect(home.text()).toContain('FargoRate FairMatch')
-    expect(home.find('svg').exists()).toBe(true)
+    expect(home.findComponent({ name: 'NuxtIconSvg' }).props('name')).toBe(
+      'custom:app-logo',
+    )
   })
 
   /**

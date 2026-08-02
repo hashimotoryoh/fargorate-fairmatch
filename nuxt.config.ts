@@ -72,19 +72,6 @@ export default defineNuxtConfig({
         dir: resolve('./app/assets/icons'),
       },
     ],
-    // vitestの `nuxt` プロジェクトはNitroのアイコン配信APIを持たないため、
-    // アイコンデータをクライアントバンドルへ静的に含めてネットワーク取得を
-    // 避ける。ロゴは `<Icon name="custom:app-logo">` と静的に書いているため
-    // スキャンで拾える。Vitestは既定で `NODE_ENV=test` を立てる。
-    ...(process.env.NODE_ENV === 'test'
-      ? {
-          provider: 'none',
-          clientBundle: {
-            scan: true,
-            includeCustomCollections: true,
-          },
-        }
-      : {}),
   },
   i18n: {
     defaultLocale: 'ja',

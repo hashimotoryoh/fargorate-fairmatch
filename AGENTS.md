@@ -328,7 +328,7 @@ FargoRateアプリの表示言語は端末の設定に従うため、案内の�
 - 一般的なアイコンは Material Design Icons（`mdi:` プレフィックス、例: `mdi:cog`）を使う。アイコン名は [icones.js.org](https://icones.js.org/collection/mdi) で探せる
 - このアプリ固有の図形（アプリロゴなど）は `app/assets/icons/` にSVGを置き、`custom:` プレフィックスで参照する（例: `custom:app-logo`）。コレクションの設定は `nuxt.config.ts` の `icon.customCollections` にある
 - 描画モードは `nuxt.config.ts` の `icon.mode` で `svg` に固定してある。既定の `css`（背景画像）では `currentColor` へ色を委ねたい箇所（daisyUIのドックなど）と相性が悪いため
-- `nuxt.config.ts` の `icon.clientBundle`（テスト実行時のみ有効）は、Vitestの `nuxt` プロジェクトがNitroのアイコン配信APIを持たないための設定である。アイコン名をテンプレートに直接書いた箇所（`<Icon name="mdi:cog" />` など）は静的スキャンで拾えるが、`mainNavItems`（`app/utils/navigation.ts`）のようにコンポーネント外の配列から動的に渡す名前は拾えない。ただしUIテストの方針（後述）によりアイコンの描画結果そのものを検査することは無いため、動的な名前をテスト用に列挙する必要は無い
+- `nuxt.config.ts` に `icon.clientBundle` や `icon.provider: 'none'` のようなテスト専用の分岐は加えないこと。`@nuxt/icon` のREADMEはVitest Browser ModeやCypress Component Testingのような、実サーバーを持たない環境向けにこの構成を案内しているが、Vitestの `nuxt` プロジェクトは `@nuxt/test-utils` が裏で実際にNitroを起動するため、アイコンはテスト中も本物のAPI経由で解決できる。動的に渡すアイコン名（`mainNavItems`の`icon`など）を検査する必要が生じても、まず本当に静的スキャンや事前バンドルが要るかを確かめてから足すこと
 
 ### コード品質
 
