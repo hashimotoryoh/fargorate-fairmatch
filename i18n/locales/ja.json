@@ -39,13 +39,13 @@
     "lookup": {
       "title": "FargoRate IDでサインイン",
       "description": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。IDの調べ方も画面上で案内します。",
-      "ogTitle": "FargoRate IDでサインイン | FargoRate FairMatch",
+      "ogTitle": "FargoRate IDでサインイン - FargoRate FairMatch",
       "ogDescription": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。"
     },
     "guest": {
       "title": "ゲストとして始める",
       "description": "FargoRate IDをお持ちでない方は、名前とレーティングを入力するだけで始められます。名前の入力は任意です。",
-      "ogTitle": "ゲストとして始める | FargoRate FairMatch",
+      "ogTitle": "ゲストとして始める - FargoRate FairMatch",
       "ogDescription": "FargoRate IDをお持ちでない方は、名前とレーティングを入力するだけで始められます。"
     },
     "dashboard": {

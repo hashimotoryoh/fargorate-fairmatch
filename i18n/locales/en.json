@@ -39,13 +39,13 @@
     "lookup": {
       "title": "Sign in with your FargoRate ID",
       "description": "Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app. The screen also shows you where to find it.",
-      "ogTitle": "Sign in with your FargoRate ID | FargoRate FairMatch",
+      "ogTitle": "Sign in with your FargoRate ID - FargoRate FairMatch",
       "ogDescription": "Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app."
     },
     "guest": {
       "title": "Start as a guest",
       "description": "No FargoRate ID? Enter a name and a rating to get started. The name is optional.",
-      "ogTitle": "Start as a guest | FargoRate FairMatch",
+      "ogTitle": "Start as a guest - FargoRate FairMatch",
       "ogDescription": "No FargoRate ID? Enter a name and a rating to get started."
     },
     "dashboard": {
