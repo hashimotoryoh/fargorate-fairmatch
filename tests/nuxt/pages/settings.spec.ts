@@ -117,6 +117,15 @@ describe('設定ページ', () => {
     )
   })
 
+  // Dockにはタブを追加しない方針のため、設定画面がお知らせへの唯一の導線になる。
+  it('お知らせページへのリンクを出す', async () => {
+    const component = await mountSuspended(SettingsPage)
+    const link = component.find('a[href="/news"]')
+
+    expect(link.exists()).toBe(true)
+    expect(component.text()).toContain(jaMessage('settings.newsDescription'))
+  })
+
   // 二度押しで破棄と移動が重ならないよう、処理中はボタンを無効にする。
   it('サインアウトの処理中はボタンを無効にする', async () => {
     let resolveClear: (() => void) | undefined

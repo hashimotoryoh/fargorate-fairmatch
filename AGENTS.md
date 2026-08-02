@@ -298,6 +298,24 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 
 データベースの接続には Node.js 同梱の `node:sqlite` を使う設定にしてある（`nuxt.config.ts` の `content.experimental.sqliteConnector`）。既定のままでは `better-sqlite3` のインストールを対話的に促され、CIのビルドが止まるため、この指定を外さないこと。
 
+### お知らせ（ニュース）
+
+アップデートやプレスリリースなどのお知らせは `/news`（一覧）と `/news/[slug]`（詳細）で扱う。プライバシーポリシー等が1文書1ページなのに対し、お知らせは複数記事を持つ点が異なるため、`documents_ja`/`documents_en` とは別に `news_ja`/`news_en` コレクションを `content.config.ts` に持つ（「用途の異なるコンテンツを足す場合は、言語のディレクトリの下にさらにディレクトリを切り、コレクションを分けること」の実例）。
+
+- `content/ja/news/<スラッグ>.md` が `/news/<スラッグ>` に対応する。`source` の `include` は `<ロケール>/news/**`、`prefix` は `'news'` にしてあり、ロケールの部分だけを外して `news/` を残す
+- 記事は日英を1対1でペアリングする運用にしてある。`tests/unit/repository/news.spec.ts` がスラッグの過不足を検査する
+- フロントマターは `title`・`description`・`date`（公開日）が必須、`updatedAt`（改訂日）・`image`（記事固有のOGP画像。`public/` 起点のパス）は任意
+- `/news/[slug]` はこのリポジトリで最初の動的ルートであり、`app/pages/` にサブディレクトリを持つ最初のページでもある。`tests/unit/repository/page-protection.spec.ts` の `pageNames()` はこれに対応して `app/pages/` を再帰的に辿るようにしてあるため、ページを深い階層に追加しても保護の検査から漏れない
+- 記事の取得・404処理・SEOは `MarkdownDocument` を流用せず `NewsArticle` コンポーネントに分けた。公開日・改訂日の扱いや `article` 用のOGP（後述）など性質が異なるため
+
+`/news/[slug]` は動的ルートで、ページのルート定義からはスラッグを列挙できない。`@nuxtjs/sitemap` にMarkdownの記事パスを教えるため、`server/api/__sitemap__/news.ts` で `news_ja` コレクションから全記事のパスを返し、`nuxt.config.ts` の `sitemap.sources` に登録してある。返す各URLに `_i18nTransform: true` を付けることで、通常のページと同じくロケール接頭辞付きのURL（`/en/news/<スラッグ>`）とhreflangの相互参照を `@nuxtjs/sitemap` 側が自動で組み立てる（記事は日英を1対1でペアリングしているため、既定ロケールのコレクションだけを見れば全スラッグを網羅できる）。
+
+記事詳細は `og:type: article` と `article:published_time`/`article:modified_time` を出し、`Article` 形式のJSON-LD（`application/ld+json`）も埋め込む。`NewsArticle` を触る場合、これらは他のページに無い固有の実装なので崩さないこと。`NewsArticle` はGoogle Newsへの掲載を前提とした`NewsArticle`型ではなく、一般的な記事を表す`Article`型を使っている（アップデート告知はニュース記事としての掲載要件を満たさないため）。
+
+記事固有のOGP画像（`image`）が無ければ、`public/img/ogp.png` のサイト共通の既定OGP画像にフォールバックする。この既定画像は `app/app.vue` の `useSeoMeta` からも参照しており、ニュース以外の全ページのSNSシェア時のプレビューにも使われる。canonical等と同じく、`NUXT_PUBLIC_SITE_URL` が未設定の間は絶対URLを組めないため、OGP画像とJSON-LDのどちらも出さない。
+
+Dockやヘッダーの `mainNavItems` にはお知らせを追加しない方針。認証の有無によらず辿れる導線として `app/utils/navigation.ts` の `documentNavItems`（フッター）と、設定ページ（`/settings`）のカードにリンクを置いている。
+
 ### スクリーンショットを使った案内
 
 `public/img/fargorate-id-*.png` には本人以外の顔が写り込んでいる。`ScreenshotFigure` で必要な範囲だけを切り出して使い、**顔がDOMに存在しない範囲までクロップすること**。切り出し範囲を変更する際は必ず写り込みがないことを確認すること。

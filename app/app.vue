@@ -1,13 +1,19 @@
 <script setup lang="ts">
+const { siteUrl } = useRuntimeConfig().public
+
 // サイト全体で共通のメタ。ページ固有のものは各ページの useSeoMeta で足す。
 // og:locale は言語によって変わるため、後述の useLocaleHead に任せる。
+//
+// og:image は絶対URLを要するため、canonical や hreflang と同じく siteUrl が
+// 分かっているときだけ出す。記事固有の画像を持つページ（ニュース詳細）は
+// 自身の useSeoMeta でこの既定値を上書きする。
 useSeoMeta({
   ogSiteName: 'FargoRate FairMatch',
   ogType: 'website',
+  ogImage: () => (siteUrl ? `${siteUrl}/img/ogp.png` : undefined),
   twitterCard: 'summary_large_image',
+  twitterImage: () => (siteUrl ? `${siteUrl}/img/ogp.png` : undefined),
 })
-
-const { siteUrl } = useRuntimeConfig().public
 
 // html の lang、hreflang の alternate、canonical、og:url、og:locale をまとめて
 // 作る。手書きすると言語を増やすたびに漏れるため、i18n の設定を唯一の出所にする。

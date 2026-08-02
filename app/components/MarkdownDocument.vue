@@ -36,13 +36,8 @@ useSeoMeta({
   ogDescription: document.value.description,
 })
 
-// フロントマターのISO形式の日付を、表示中の言語の表記に直す。タイムゾーンを
-// 指定しないと、UTCの0時が前日として表示される環境がある。
 const updatedAtLabel = computed(() =>
-  new Intl.DateTimeFormat(locale.value, {
-    dateStyle: 'long',
-    timeZone: 'UTC',
-  }).format(new Date(document.value!.updatedAt)),
+  formatLocaleDate(document.value!.updatedAt, locale.value),
 )
 </script>
 

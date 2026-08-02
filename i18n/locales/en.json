@@ -11,6 +11,7 @@
     "settings": "Settings"
   },
   "document": {
+    "news": "News",
     "privacyPolicy": "Privacy Policy",
     "termsConditions": "Terms and Conditions",
     "updatedAt": "Last updated:"
@@ -39,13 +40,13 @@
     "lookup": {
       "title": "Sign in with your FargoRate ID",
       "description": "Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app. The screen also shows you where to find it.",
-      "ogTitle": "Sign in with your FargoRate ID | FargoRate FairMatch",
+      "ogTitle": "Sign in with your FargoRate ID - FargoRate FairMatch",
       "ogDescription": "Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app."
     },
     "guest": {
       "title": "Start as a guest",
       "description": "No FargoRate ID? Enter a name and a rating to get started. The name is optional.",
-      "ogTitle": "Start as a guest | FargoRate FairMatch",
+      "ogTitle": "Start as a guest - FargoRate FairMatch",
       "ogDescription": "No FargoRate ID? Enter a name and a rating to get started."
     },
     "dashboard": {
@@ -56,6 +57,12 @@
     },
     "settings": {
       "title": "Settings"
+    },
+    "news": {
+      "title": "News",
+      "description": "Keep up with FargoRate FairMatch updates and press releases in one place.",
+      "ogTitle": "News - FargoRate FairMatch",
+      "ogDescription": "Keep up with FargoRate FairMatch updates and press releases in one place."
     }
   },
   "index": {
@@ -195,6 +202,14 @@
     "theme": "Theme",
     "themeDescription": "Choose the color scheme used across the app.",
     "language": "Language",
-    "languageDescription": "Choose the language used across the app."
+    "languageDescription": "Choose the language used across the app.",
+    "newsDescription": "Check app updates and announcements."
+  },
+  "news": {
+    "heading": "News",
+    "lead": "Keep up with app updates and announcements in one place.",
+    "empty": "There is no news yet.",
+    "publishedAt": "Published:",
+    "updatedAt": "Updated:"
   }
 }

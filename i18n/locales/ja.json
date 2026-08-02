@@ -11,6 +11,7 @@
     "settings": "設定"
   },
   "document": {
+    "news": "お知らせ",
     "privacyPolicy": "プライバシーポリシー",
     "termsConditions": "利用規約",
     "updatedAt": "最終更新日:"
@@ -39,13 +40,13 @@
     "lookup": {
       "title": "FargoRate IDでサインイン",
       "description": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。IDの調べ方も画面上で案内します。",
-      "ogTitle": "FargoRate IDでサインイン | FargoRate FairMatch",
+      "ogTitle": "FargoRate IDでサインイン - FargoRate FairMatch",
       "ogDescription": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。"
     },
     "guest": {
       "title": "ゲストとして始める",
       "description": "FargoRate IDをお持ちでない方は、名前とレーティングを入力するだけで始められます。名前の入力は任意です。",
-      "ogTitle": "ゲストとして始める | FargoRate FairMatch",
+      "ogTitle": "ゲストとして始める - FargoRate FairMatch",
       "ogDescription": "FargoRate IDをお持ちでない方は、名前とレーティングを入力するだけで始められます。"
     },
     "dashboard": {
@@ -56,6 +57,12 @@
     },
     "settings": {
       "title": "設定"
+    },
+    "news": {
+      "title": "お知らせ",
+      "description": "FargoRate FairMatchのアップデートやプレスリリースなど、お知らせをまとめて確認できます。",
+      "ogTitle": "お知らせ - FargoRate FairMatch",
+      "ogDescription": "FargoRate FairMatchのアップデートやプレスリリースなど、お知らせをまとめて確認できます。"
     }
   },
   "index": {
@@ -195,6 +202,14 @@
     "theme": "テーマ",
     "themeDescription": "画面の配色を選びます。",
     "language": "言語",
-    "languageDescription": "画面の表示に使う言語を選びます。"
+    "languageDescription": "画面の表示に使う言語を選びます。",
+    "newsDescription": "アプリの更新情報やお知らせを確認できます。"
+  },
+  "news": {
+    "heading": "お知らせ",
+    "lead": "アプリのアップデートやお知らせをまとめて確認できます。",
+    "empty": "お知らせはまだありません。",
+    "publishedAt": "公開日:",
+    "updatedAt": "更新日:"
   }
 }

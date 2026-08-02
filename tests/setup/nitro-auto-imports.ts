@@ -22,6 +22,8 @@ import { verifyRecaptchaToken } from '../../server/utils/recaptcha'
 Object.assign(globalThis, {
   createError,
   defineEventHandler,
+  // @nuxtjs/sitemap の実体もh3の defineEventHandler そのままの再エクスポート。
+  defineSitemapEventHandler: defineEventHandler,
   readBody,
   isValidFargorateId,
   GUEST_NAME_MAX_LENGTH,
@@ -60,5 +62,8 @@ Object.assign(globalThis, {
   },
   setUserSession: () => {
     throw new Error('setUserSession は vi.stubGlobal で差し替えること')
+  },
+  queryCollection: () => {
+    throw new Error('queryCollection は vi.stubGlobal で差し替えること')
   },
 })
