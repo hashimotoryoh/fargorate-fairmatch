@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PlayerProfile } from '#shared/types/player'
+import type { FargoRatePlayer } from '#shared/types/player'
 import type { RecentAccount } from '~/composables/useRecentAccounts'
 
 definePageMeta({ middleware: 'guest' })
@@ -27,9 +27,20 @@ const step = ref<'input' | 'confirm'>('input')
 
 // サジェストの表示にも、削除ボタンのaria-label（対象の識別）にも使う。
 function accountLabel(account: RecentAccount) {
-  return `${account.firstName} ${account.lastName} (${account.effectiveRating})`
+  return `${account.name} (${account.rating})`
 }
-const candidate = ref<PlayerProfile | null>(null)
+const candidate = ref<FargoRatePlayer | null>(null)
+
+// ゲストの導線でも元々開こうとしていたページを引き継ぐ。
+const guestPath = computed(() =>
+  localePath({
+    path: '/guest',
+    query:
+      typeof route.query.redirect === 'string'
+        ? { redirect: route.query.redirect }
+        : {},
+  }),
+)
 const pending = ref(false)
 const errorMessage = ref('')
 
@@ -61,7 +72,7 @@ async function lookup() {
 
   try {
     const recaptchaToken = await executeRecaptcha('lookup')
-    candidate.value = await $fetch<PlayerProfile>('/api/lookup', {
+    candidate.value = await $fetch<FargoRatePlayer>('/api/lookup', {
       method: 'POST',
       body: { fargorateId: fargorateId.value, recaptchaToken },
     })
@@ -81,7 +92,7 @@ async function completeSignIn(id: string) {
   errorMessage.value = ''
 
   try {
-    const profile = await $fetch<PlayerProfile>('/api/auth/session', {
+    const profile = await $fetch<FargoRatePlayer>('/api/auth/session', {
       method: 'POST',
       body: { fargorateId: id },
     })
@@ -196,6 +207,12 @@ function reject() {
             <span v-if="pending" class="loading loading-spinner" />
             {{ $t('lookup.submit') }}
           </button>
+
+          <div class="text-center">
+            <NuxtLink :to="guestPath" class="btn btn-link btn-sm">
+              {{ $t('lookup.guestLink') }}
+            </NuxtLink>
+          </div>
         </form>
 
         <div v-else-if="candidate" class="flex flex-col gap-4">

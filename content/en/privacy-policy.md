@@ -1,7 +1,7 @@
 ---
 title: Privacy Policy
 description: Explains what information FargoRate FairMatch handles, why it is used, where it is stored, and how to delete it.
-updatedAt: '2026-08-01'
+updatedAt: '2026-08-02'
 ---
 
 FargoRate FairMatch (the "App") is an individually developed web app that supports pool matches played on FargoRate. This policy sets out what information the App handles and how it is handled.
@@ -11,10 +11,13 @@ FargoRate FairMatch (the "App") is an individually developed web app that suppor
 The App does not ask you to register an email address or a password. The only information it handles is the following.
 
 - **FargoRate ID**: the 13-digit number you enter to sign in
-- **Player information**: your first and last name, league name, region, team name, rating, and rating robustness, all retrieved from external services using the FargoRate ID you entered
+- **Player information**: your name, league name, region, team name, rating, and rating robustness, all retrieved from external services using the FargoRate ID you entered
+- **Guest details**: the name and rating you enter when you sign in without a FargoRate ID
 - **Match records**: the disciplines and scores you enter in the App
 
 You do not enter the player information yourself. It is retrieved from the public lookup features of CSI and FargoRate. The only things the App sends to those services are the FargoRate ID and the name needed for the search.
+
+Guest details are the values you enter, taken as given. They are never sent to an external service and their contents are never verified. The name is optional; if you leave it out, no name is stored and the App simply shows "Guest Player" on screen.
 
 ## How we use it
 
@@ -42,6 +45,8 @@ The App queries the following external services. Both are read-only, and neither
 
 - **CSI (CueSports International)**: to obtain your name and league information from a FargoRate ID
 - **FargoRate**: to obtain a rating and robustness from a name
+
+Neither service is queried when you sign in as a guest.
 
 How those services handle information is governed by their own terms.
 

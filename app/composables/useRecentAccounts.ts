@@ -1,12 +1,16 @@
-import type { PlayerProfile } from '#shared/types/player'
+import type { FargoRatePlayer } from '#shared/types/player'
 
 const STORAGE_KEY = 'fairmatch:recentAccounts'
 // サジェストとして表示する件数の上限。
 const MAX_ENTRIES = 5
 
+/**
+ * ゲストは対象外である。サインインのたびにサーバーが引き直すための鍵となる
+ * FargoRate IDを持たず、レーティングも自己申告なので、記憶しても再現できない。
+ */
 export type RecentAccount = Pick<
-  PlayerProfile,
-  'fargorateId' | 'firstName' | 'lastName' | 'effectiveRating'
+  FargoRatePlayer,
+  'fargorateId' | 'name' | 'rating'
 >
 
 function isRecentAccount(value: unknown): value is RecentAccount {
@@ -16,9 +20,8 @@ function isRecentAccount(value: unknown): value is RecentAccount {
   return (
     typeof account.fargorateId === 'string' &&
     isValidFargorateId(account.fargorateId) &&
-    typeof account.firstName === 'string' &&
-    typeof account.lastName === 'string' &&
-    typeof account.effectiveRating === 'number'
+    typeof account.name === 'string' &&
+    typeof account.rating === 'number'
   )
 }
 
@@ -59,9 +62,8 @@ export function useRecentAccounts() {
   function addRecentAccount(profile: RecentAccount) {
     const account: RecentAccount = {
       fargorateId: profile.fargorateId,
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      effectiveRating: profile.effectiveRating,
+      name: profile.name,
+      rating: profile.rating,
     }
     const next = [
       account,

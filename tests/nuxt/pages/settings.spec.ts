@@ -5,7 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 import SettingsPage from '../../../app/pages/settings.vue'
 import { jaMessage } from '../../helpers/i18n'
-import { createPlayerProfile } from '../../helpers/fixtures'
+import {
+  createGuestPlayer,
+  createFargoRatePlayer,
+} from '../../helpers/fixtures'
 
 // セッションはテンプレートで自動アンラップされる ref として渡す必要がある。
 // ref はモジュールの読み込み後にしか作れないため、入れ物だけを巻き上げる。
@@ -37,16 +40,39 @@ describe('設定ページ', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     await useLocale('ja')
-    session.user = ref(createPlayerProfile())
+    session.user = ref(createFargoRatePlayer())
     clearMock.mockResolvedValue(undefined)
   })
 
-  it('サインイン中のプレイヤーを姓名とFargoRate IDで示す', async () => {
+  it('サインイン中のプレイヤーを名前とFargoRate IDで示す', async () => {
     const component = await mountSuspended(SettingsPage)
 
     expect(component.find('h1').text()).toBe(jaMessage('settings.heading'))
     expect(component.text()).toContain('Taro Yamada')
     expect(component.text()).toContain('9900001234567')
+  })
+
+  // ゲストには見せるIDが無い。自己申告である旨も併せて伝える。
+  it('ゲストはFargoRate IDを伴わない文言で示す', async () => {
+    session.user = ref(createGuestPlayer())
+
+    const component = await mountSuspended(SettingsPage)
+
+    expect(component.text()).toContain(
+      jaMessage('settings.signedInAsGuest', { name: 'Jiro Suzuki' }),
+    )
+  })
+
+  it('名前が未入力のゲストは既定名で示す', async () => {
+    session.user = ref(createGuestPlayer({ name: null }))
+
+    const component = await mountSuspended(SettingsPage)
+
+    expect(component.text()).toContain(
+      jaMessage('settings.signedInAsGuest', {
+        name: jaMessage('player.guestName'),
+      }),
+    )
   })
 
   it('プレイヤー情報が無い間はアカウントの説明を出さない', async () => {

@@ -1,5 +1,13 @@
 import { createError, defineEventHandler, readBody } from 'h3'
 import { isValidFargorateId } from '../../shared/utils/fargorateId'
+import {
+  GUEST_NAME_MAX_LENGTH,
+  GUEST_RATING_MAX,
+  GUEST_RATING_MIN,
+  isValidGuestName,
+  isValidGuestRating,
+} from '../../shared/utils/guestPlayer'
+import { readGuestPlayer } from '../../server/utils/guest'
 import { lookupPlayerProfile, readFargorateId } from '../../server/utils/lookup'
 import { verifyRecaptchaToken } from '../../server/utils/recaptcha'
 
@@ -16,8 +24,14 @@ Object.assign(globalThis, {
   defineEventHandler,
   readBody,
   isValidFargorateId,
+  GUEST_NAME_MAX_LENGTH,
+  GUEST_RATING_MAX,
+  GUEST_RATING_MIN,
+  isValidGuestName,
+  isValidGuestRating,
   lookupPlayerProfile,
   readFargorateId,
+  readGuestPlayer,
   verifyRecaptchaToken,
 })
 

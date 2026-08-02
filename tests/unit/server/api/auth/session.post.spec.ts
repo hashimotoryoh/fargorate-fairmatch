@@ -2,7 +2,10 @@ import { createError } from 'h3'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import handler from '../../../../../server/api/auth/session.post'
 import { callHandler } from '../../../../helpers/h3'
-import { FARGORATE_ID, createPlayerProfile } from '../../../../helpers/fixtures'
+import {
+  FARGORATE_ID,
+  createFargoRatePlayer,
+} from '../../../../helpers/fixtures'
 
 describe('POST /api/auth/session', () => {
   const lookupPlayerProfile = vi.fn()
@@ -15,7 +18,7 @@ describe('POST /api/auth/session', () => {
   })
 
   it('ルックアップし直した情報をセッションへ保存する', async () => {
-    const profile = createPlayerProfile()
+    const profile = createFargoRatePlayer()
     lookupPlayerProfile.mockResolvedValue(profile)
 
     const response = await callHandler(handler, { fargorateId: FARGORATE_ID })
@@ -27,20 +30,19 @@ describe('POST /api/auth/session', () => {
   })
 
   /**
-   * クライアントが任意の姓名やレーティングを自称できてはならない。
+   * クライアントが任意の名前やレーティングを自称できてはならない。
    * 受け取るのはFargoRate IDだけで、保存するのはサーバー側で引き直した結果。
    */
-  it('クライアントが送った姓名やレーティングを無視する', async () => {
-    const profile = createPlayerProfile()
+  it('クライアントが送った名前やレーティングを無視する', async () => {
+    const profile = createFargoRatePlayer()
     lookupPlayerProfile.mockResolvedValue(profile)
 
     const response = await callHandler(handler, {
       fargorateId: FARGORATE_ID,
-      firstName: 'Cheater',
-      lastName: 'McFake',
-      effectiveRating: 830,
+      name: 'Cheater McFake',
+      rating: 830,
       robustness: 9999,
-      user: { effectiveRating: 830 },
+      user: { rating: 830 },
     })
 
     expect(response.body).toEqual(profile)

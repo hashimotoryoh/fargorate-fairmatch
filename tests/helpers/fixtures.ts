@@ -1,7 +1,8 @@
 import type {
   CsiMember,
+  FargoRateLookupPlayer,
   FargoRatePlayer,
-  PlayerProfile,
+  GuestPlayer,
 } from '../../shared/types/player'
 
 /** テストで共通して使うFargoRate ID。13桁であること以外に意味はない。 */
@@ -19,9 +20,9 @@ export function createCsiMember(overrides: Partial<CsiMember> = {}): CsiMember {
   }
 }
 
-export function createFargoRatePlayer(
-  overrides: Partial<FargoRatePlayer> = {},
-): FargoRatePlayer {
+export function createFargoRateLookupPlayer(
+  overrides: Partial<FargoRateLookupPlayer> = {},
+): FargoRateLookupPlayer {
   return {
     membershipId: FARGORATE_ID,
     firstName: 'Taro',
@@ -47,18 +48,29 @@ export function createDocument(path: string, title: string) {
   }
 }
 
-export function createPlayerProfile(
-  overrides: Partial<PlayerProfile> = {},
-): PlayerProfile {
+export function createFargoRatePlayer(
+  overrides: Partial<FargoRatePlayer> = {},
+): FargoRatePlayer {
   return {
+    kind: 'fargorate',
+    name: 'Taro Yamada',
     fargorateId: FARGORATE_ID,
-    firstName: 'Taro',
-    lastName: 'Yamada',
     leagueName: 'Tokyo League',
     region: 'Kanto',
     teamNames: 'Team Alpha',
-    effectiveRating: 523,
+    rating: 523,
     robustness: 412,
+    ...overrides,
+  }
+}
+
+export function createGuestPlayer(
+  overrides: Partial<GuestPlayer> = {},
+): GuestPlayer {
+  return {
+    kind: 'guest',
+    name: 'Jiro Suzuki',
+    rating: 450,
     ...overrides,
   }
 }

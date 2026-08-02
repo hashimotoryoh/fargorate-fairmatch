@@ -31,14 +31,19 @@ async function signOut() {
         <div>
           <h2 class="card-title text-base">{{ $t('settings.account') }}</h2>
           <!--
-            姓名とIDの並び順は言語で変わるため、文の組み立てごと翻訳に任せる。
+            名前とIDの並び順は言語で変わるため、文の組み立てごと翻訳に任せる。
+            ゲストは見せるIDが無いので、文そのものを別のキーに分ける。
           -->
           <p v-if="user" class="text-base-content/70 mt-1 text-sm">
             {{
-              $t('settings.signedInAs', {
-                name: `${user.firstName} ${user.lastName}`,
-                fargorateId: user.fargorateId,
-              })
+              isFargoRatePlayer(user)
+                ? $t('settings.signedInAs', {
+                    name: user.name,
+                    fargorateId: user.fargorateId,
+                  })
+                : $t('settings.signedInAsGuest', {
+                    name: user.name ?? $t('player.guestName'),
+                  })
             }}
           </p>
         </div>

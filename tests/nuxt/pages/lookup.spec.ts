@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, type VueWrapper } from '@vue/test-utils'
 import LookupPage from '../../../app/pages/lookup.vue'
 import { jaMessage } from '../../helpers/i18n'
-import { FARGORATE_ID, createPlayerProfile } from '../../helpers/fixtures'
+import { FARGORATE_ID, createFargoRatePlayer } from '../../helpers/fixtures'
 
 const {
   routeQuery,
@@ -91,8 +91,8 @@ describe('サインインページ', () => {
     await useLocale('ja')
     routeQuery.redirect = undefined
     executeRecaptchaMock.mockResolvedValue('test-token')
-    lookupHandler.mockReturnValue(createPlayerProfile())
-    sessionHandler.mockReturnValue(createPlayerProfile())
+    lookupHandler.mockReturnValue(createFargoRatePlayer())
+    sessionHandler.mockReturnValue(createFargoRatePlayer())
   })
 
   it('FargoRate IDの入力欄と検索ボタンを出す', async () => {
@@ -201,11 +201,11 @@ describe('サインインページ', () => {
   it('確認画面ではルックアップで得たプレイヤーのIDでサインインを確定する', async () => {
     const candidateId = '9900009999999'
     lookupHandler.mockReturnValue(
-      createPlayerProfile({ fargorateId: candidateId }),
+      createFargoRatePlayer({ fargorateId: candidateId }),
     )
     sessionHandler.mockImplementation(async (event) => {
       expect(await readBody(event)).toEqual({ fargorateId: candidateId })
-      return createPlayerProfile({ fargorateId: candidateId })
+      return createFargoRatePlayer({ fargorateId: candidateId })
     })
 
     const component = await mountSuspended(LookupPage)
@@ -335,10 +335,21 @@ describe('サインインページ', () => {
 
   const SECOND_ACCOUNT = {
     fargorateId: '9900007654321',
-    firstName: 'Jiro',
-    lastName: 'Suzuki',
-    effectiveRating: 400,
+    name: 'Jiro Suzuki',
+    rating: 400,
   }
+
+  // FargoRate IDを持たない人が行き止まりにならないようにする。
+  it('ゲストのサインインへのリンクを出し、行き先を引き継ぐ', async () => {
+    routeQuery.redirect = '/settings'
+
+    const component = await mountSuspended(LookupPage)
+    const link = component
+      .findAll('a')
+      .find((anchor) => anchor.text() === jaMessage('lookup.guestLink'))
+
+    expect(link?.attributes('href')).toBe('/guest?redirect=/settings')
+  })
 
   it('過去に本人確認したアカウントが無ければサジェストを出さない', async () => {
     const component = await mountSuspended(LookupPage)
@@ -353,12 +364,7 @@ describe('サインインページ', () => {
     localStorage.setItem(
       'fairmatch:recentAccounts',
       JSON.stringify([
-        {
-          fargorateId: FARGORATE_ID,
-          firstName: 'Taro',
-          lastName: 'Yamada',
-          effectiveRating: 523,
-        },
+        { fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 },
       ]),
     )
 
@@ -384,9 +390,8 @@ describe('サインインページ', () => {
   it('保存件数が上限を超えていても直近5件までしかサジェストしない', async () => {
     const accounts = Array.from({ length: 7 }, (_, i) => ({
       fargorateId: String(9900000000000 + i),
-      firstName: 'Player',
-      lastName: `${i}`,
-      effectiveRating: 400 + i,
+      name: `Player ${i}`,
+      rating: 400 + i,
     }))
     localStorage.setItem('fairmatch:recentAccounts', JSON.stringify(accounts))
 
@@ -400,12 +405,7 @@ describe('サインインページ', () => {
     localStorage.setItem(
       'fairmatch:recentAccounts',
       JSON.stringify([
-        {
-          fargorateId: FARGORATE_ID,
-          firstName: 'Taro',
-          lastName: 'Yamada',
-          effectiveRating: 523,
-        },
+        { fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 },
       ]),
     )
 
@@ -434,11 +434,10 @@ describe('サインインページ', () => {
       JSON.stringify([SECOND_ACCOUNT]),
     )
     sessionHandler.mockReturnValue(
-      createPlayerProfile({
+      createFargoRatePlayer({
         fargorateId: SECOND_ACCOUNT.fargorateId,
-        firstName: SECOND_ACCOUNT.firstName,
-        lastName: SECOND_ACCOUNT.lastName,
-        effectiveRating: 450,
+        name: SECOND_ACCOUNT.name,
+        rating: 450,
       }),
     )
 
@@ -451,7 +450,7 @@ describe('サインインページ', () => {
 
     expect(
       JSON.parse(localStorage.getItem('fairmatch:recentAccounts') ?? '[]'),
-    ).toEqual([{ ...SECOND_ACCOUNT, effectiveRating: 450 }])
+    ).toEqual([{ ...SECOND_ACCOUNT, rating: 450 }])
   })
 
   it('サジェストでの直接サインインに失敗したら知らせる', async () => {
@@ -477,12 +476,7 @@ describe('サインインページ', () => {
     localStorage.setItem(
       'fairmatch:recentAccounts',
       JSON.stringify([
-        {
-          fargorateId: FARGORATE_ID,
-          firstName: 'Taro',
-          lastName: 'Yamada',
-          effectiveRating: 523,
-        },
+        { fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 },
         SECOND_ACCOUNT,
       ]),
     )
@@ -523,13 +517,6 @@ describe('サインインページ', () => {
 
     expect(
       JSON.parse(localStorage.getItem('fairmatch:recentAccounts') ?? '[]'),
-    ).toEqual([
-      {
-        fargorateId: FARGORATE_ID,
-        firstName: 'Taro',
-        lastName: 'Yamada',
-        effectiveRating: 523,
-      },
-    ])
+    ).toEqual([{ fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 }])
   })
 })

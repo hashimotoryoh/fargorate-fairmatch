@@ -1,7 +1,7 @@
 import type {
   CsiLookupResponse,
   FargoRateLookupResponse,
-  PlayerProfile,
+  FargoRatePlayer,
 } from '#shared/types/player'
 
 const CSI_LOOKUP_URL = 'https://csibbm.com/Public/_MembershipLookupWeeksPlayed'
@@ -36,7 +36,7 @@ async function fetchCsiMember(fargorateId: string) {
  * FargoRateメンバーシップルックアップAPIを姓名で検索し、
  * メンバーシップIDの一致で1件に絞り込む。
  */
-async function fetchFargoRatePlayer(fargorateId: string, query: string) {
+async function fetchFargoRateLookupPlayer(fargorateId: string, query: string) {
   const response = await $fetch<FargoRateLookupResponse>(FARGORATE_LOOKUP_URL, {
     query: { q: query },
   })
@@ -73,7 +73,7 @@ function parseRating(value: unknown): number | null {
  */
 export async function lookupPlayerProfile(
   fargorateId: string,
-): Promise<PlayerProfile | null> {
+): Promise<FargoRatePlayer | null> {
   let member
   try {
     member = await fetchCsiMember(fargorateId)
@@ -90,7 +90,7 @@ export async function lookupPlayerProfile(
 
   let player
   try {
-    player = await fetchFargoRatePlayer(
+    player = await fetchFargoRateLookupPlayer(
       fargorateId,
       `${member.FirstName} ${member.LastName}`,
     )
@@ -105,10 +105,10 @@ export async function lookupPlayerProfile(
     return null
   }
 
-  const effectiveRating = parseRating(player.effectiveRating)
+  const rating = parseRating(player.effectiveRating)
   const robustness = parseRating(player.robustness)
 
-  if (effectiveRating === null || robustness === null) {
+  if (rating === null || robustness === null) {
     throw createError({
       statusCode: 502,
       statusMessage:
@@ -117,13 +117,14 @@ export async function lookupPlayerProfile(
   }
 
   return {
+    kind: 'fargorate',
+    // 姓名の結合はここだけで行い、表示側には結合済みの名前だけを渡す。
+    name: `${member.FirstName} ${member.LastName}`,
     fargorateId,
-    firstName: member.FirstName,
-    lastName: member.LastName,
     leagueName: member.LeagueName,
     region: member.Region,
     teamNames: member.TeamNames,
-    effectiveRating,
+    rating,
     robustness,
   }
 }

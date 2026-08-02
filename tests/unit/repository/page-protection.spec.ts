@@ -13,7 +13,16 @@ const PREFIXED_LOCALES = ['en']
  * 認証なしでアクセスできるページ。検索エンジンに開放するページと一致する。
  * ここを増やすことは公開範囲を広げることなので、意図せず増えないよう明示する。
  */
-const PUBLIC_PAGES = ['index', 'lookup', 'privacy-policy', 'terms-conditions']
+const PUBLIC_PAGES = [
+  'index',
+  'lookup',
+  'guest',
+  'privacy-policy',
+  'terms-conditions',
+]
+
+/** 認証済みのユーザーを追い返すページ。サインインの入口が対象。 */
+const GUEST_ONLY_PAGES = ['lookup', 'guest']
 
 function pageNames(): string[] {
   return readdirSync(PAGES_DIR)
@@ -54,11 +63,14 @@ describe('ページの保護の宣言', () => {
     expect(pageSource(name)).not.toMatch(/middleware:\s*'auth'/)
   })
 
-  it('lookup ページが guest ミドルウェアを宣言している', () => {
-    expect(pageSource('lookup')).toMatch(
-      /definePageMeta\(\{[^}]*middleware:\s*'guest'/,
-    )
-  })
+  it.each(GUEST_ONLY_PAGES)(
+    '%s ページが guest ミドルウェアを宣言している',
+    (name) => {
+      expect(pageSource(name)).toMatch(
+        /definePageMeta\(\{[^}]*middleware:\s*'guest'/,
+      )
+    },
+  )
 
   /**
    * nuxt-auth-utils はプリレンダやキャッシュの際にサーバー側のセッション取得を
