@@ -65,6 +65,21 @@ async function signOut() {
     <div class="card bg-base-200">
       <div class="card-body gap-4">
         <div>
+          <h2 class="card-title text-base">{{ $t('settings.theme') }}</h2>
+          <p class="text-base-content/70 mt-1 text-sm">
+            {{ $t('settings.themeDescription') }}
+          </p>
+        </div>
+
+        <div class="card-actions">
+          <ThemeSwitcher />
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-base-200">
+      <div class="card-body gap-4">
+        <div>
           <h2 class="card-title text-base">{{ $t('settings.language') }}</h2>
           <p class="text-base-content/70 mt-1 text-sm">
             {{ $t('settings.languageDescription') }}

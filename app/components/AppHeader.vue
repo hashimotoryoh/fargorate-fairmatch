@@ -22,8 +22,8 @@ const localePath = useLocalePath()
     </div>
 
     <!--
-      言語の切り替えはどのページからも要るため、`navbar-end` 自体は `showNav`
-      によらず置き、その中でナビゲーションだけを出し分ける。
+      テーマと言語の切り替えはどのページからも要るため、`navbar-end` 自体は
+      `showNav` によらず置き、その中でナビゲーションだけを出し分ける。
     -->
     <div class="navbar-end gap-2">
       <nav v-if="showNav" class="hidden sm:block">
@@ -36,6 +36,7 @@ const localePath = useLocalePath()
         </ul>
       </nav>
 
+      <ThemeSwitcher />
       <LocaleSwitcher />
     </div>
   </header>

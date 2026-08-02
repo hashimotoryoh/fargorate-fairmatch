@@ -107,6 +107,13 @@ describe('設定ページ', () => {
     expect(navigateToMock).toHaveBeenCalledWith('/en')
   })
 
+  it('テーマの切り替えを出す', async () => {
+    const component = await mountSuspended(SettingsPage)
+
+    expect(component.text()).toContain(jaMessage('settings.theme'))
+    expect(component.find('input[type="checkbox"]').exists()).toBe(true)
+  })
+
   // 二度押しで破棄と移動が重ならないよう、処理中はボタンを無効にする。
   it('サインアウトの処理中はボタンを無効にする', async () => {
     let resolveClear: (() => void) | undefined

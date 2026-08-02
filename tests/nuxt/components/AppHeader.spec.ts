@@ -34,6 +34,15 @@ describe('AppHeader', () => {
     }
   })
 
+  // テーマの切り替えも言語と同様、どのページからも要る。
+  it('ナビゲーションの有無によらずテーマの切り替えを出す', async () => {
+    for (const showNav of [false, true]) {
+      const component = await mountSuspended(AppHeader, { props: { showNav } })
+
+      expect(component.find('input[type="checkbox"]').exists()).toBe(true)
+    }
+  })
+
   it('show-nav を付けると主要ナビゲーションを出す', async () => {
     const component = await mountSuspended(AppHeader, {
       props: { showNav: true },

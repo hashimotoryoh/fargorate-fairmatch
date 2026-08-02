@@ -17,8 +17,16 @@ const { siteUrl } = useRuntimeConfig().public
 // 要さないので、`seo` を切っても出る。
 const i18nHead = useLocaleHead({ seo: Boolean(siteUrl) })
 
+// クッキーに保存したテーマを html の data-theme に反映する。SSR時点から
+// 正しい値で描画されるため、ハイドレーション後にテーマが切り替わって
+// ちらつくことがない。
+const theme = useTheme()
+
 useHead(() => ({
-  htmlAttrs: i18nHead.value.htmlAttrs ?? {},
+  htmlAttrs: {
+    ...(i18nHead.value.htmlAttrs ?? {}),
+    'data-theme': theme.value,
+  },
   link: i18nHead.value.link ?? [],
   meta: i18nHead.value.meta ?? [],
 }))
