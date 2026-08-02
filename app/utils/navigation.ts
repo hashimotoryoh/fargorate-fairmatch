@@ -31,7 +31,7 @@ export const mainNavItems: NavItem[] = [
  * 辿れる。本文は `content/` のMarkdownにある。
  */
 export const documentNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
-  { to: '/news', labelKey: 'document.news' },
+  { to: '/blog', labelKey: 'document.blog' },
   { to: '/privacy-policy', labelKey: 'document.privacyPolicy' },
   { to: '/terms-conditions', labelKey: 'document.termsConditions' },
 ]

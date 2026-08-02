@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import handler from '../../../../../server/api/__sitemap__/news'
+import handler from '../../../../../server/api/__sitemap__/blog'
 import { callHandler } from '../../../../helpers/h3'
 
 /**
- * `/news/[slug]` は動的ルートで、ページのルート定義からはスラッグを列挙
+ * `/blog/[slug]` は動的ルートで、ページのルート定義からはスラッグを列挙
  * できない。このハンドラーがNuxt Contentから記事のパスを集めて
  * サイトマップ用の形に変換していることを確かめる。
  */
-describe('GET /api/__sitemap__/news', () => {
+describe('GET /api/__sitemap__/blog', () => {
   const selectMock = vi.fn()
   const allMock = vi.fn()
 
@@ -21,14 +21,14 @@ describe('GET /api/__sitemap__/news', () => {
 
   it('既定ロケールの記事パスをサイトマップの形で返す', async () => {
     allMock.mockResolvedValue([
-      { path: '/news/sample-article', date: '2026-08-01', updatedAt: null },
+      { path: '/blog/sample-article', date: '2026-08-01', updatedAt: null },
     ])
 
     const response = await callHandler(handler, undefined)
 
     expect(response.body).toEqual([
       {
-        loc: '/news/sample-article',
+        loc: '/blog/sample-article',
         lastmod: '2026-08-01',
         _i18nTransform: true,
       },
@@ -39,7 +39,7 @@ describe('GET /api/__sitemap__/news', () => {
   // 自動で組み立てさせるための指定なので、欠けると英語版が漏れる。
   it('_i18nTransformを付けてロケール展開を促す', async () => {
     allMock.mockResolvedValue([
-      { path: '/news/sample-article', date: '2026-08-01', updatedAt: null },
+      { path: '/blog/sample-article', date: '2026-08-01', updatedAt: null },
     ])
 
     const response = await callHandler(handler, undefined)
@@ -53,7 +53,7 @@ describe('GET /api/__sitemap__/news', () => {
   it('updatedAtがあればlastmodに使う', async () => {
     allMock.mockResolvedValue([
       {
-        path: '/news/revised-article',
+        path: '/blog/revised-article',
         date: '2026-08-01',
         updatedAt: '2026-08-02',
       },

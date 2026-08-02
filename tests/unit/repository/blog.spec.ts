@@ -4,16 +4,16 @@ import { basename, join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url))
-const NEWS_DIR = join(ROOT, 'content')
+const BLOG_DIR = join(ROOT, 'content')
 const PUBLIC_DIR = join(ROOT, 'public')
 
 /** 対応する言語。`content/` の直下がそのままロケールのディレクトリになる。 */
-const LOCALES = readdirSync(NEWS_DIR, { withFileTypes: true })
+const LOCALES = readdirSync(BLOG_DIR, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
 
 function articleSlugs(locale: string): string[] {
-  const dir = join(NEWS_DIR, locale, 'news')
+  const dir = join(BLOG_DIR, locale, 'blog')
 
   return readdirSync(dir)
     .filter((file) => file.endsWith('.md'))
@@ -21,7 +21,7 @@ function articleSlugs(locale: string): string[] {
 }
 
 function articleSource(locale: string, slug: string): string {
-  return readFileSync(join(NEWS_DIR, locale, 'news', `${slug}.md`), 'utf8')
+  return readFileSync(join(BLOG_DIR, locale, 'blog', `${slug}.md`), 'utf8')
 }
 
 /** ロケールとスラッグの全ての組み合わせ。 */
@@ -32,12 +32,12 @@ function articles(): [string, string][] {
 }
 
 /**
- * ニュース記事は `content/<ロケール>/news/` にあり、`/news/<スラッグ>` として
+ * ブログ記事は `content/<ロケール>/blog/` にあり、`/blog/<スラッグ>` として
  * 日英を厳密に1対1でペアリングする運用にしている（アップデート内容やお知らせは
  * どちらの言語でも同じ情報を届けたいため）。片方の言語にしか記事が無いと、
  * その言語で開いたときだけ404になるため、対応を機械的に確かめる。
  */
-describe('ニュース記事', () => {
+describe('ブログ記事', () => {
   const slugs = articleSlugs('ja')
 
   it('日本語と英語のディレクトリがある', () => {

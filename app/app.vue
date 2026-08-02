@@ -5,7 +5,7 @@ const { siteUrl } = useRuntimeConfig().public
 // og:locale は言語によって変わるため、後述の useLocaleHead に任せる。
 //
 // og:image は絶対URLを要するため、canonical や hreflang と同じく siteUrl が
-// 分かっているときだけ出す。記事固有の画像を持つページ（ニュース詳細）は
+// 分かっているときだけ出す。記事固有の画像を持つページ（ブログ詳細）は
 // 自身の useSeoMeta でこの既定値を上書きする。
 useSeoMeta({
   ogSiteName: 'FargoRate FairMatch',

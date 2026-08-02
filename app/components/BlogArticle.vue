@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { path } = defineProps<{
-  /** 表示する記事のパス。`/news/<スラッグ>` の形。 */
+  /** 表示する記事のパス。`/blog/<スラッグ>` の形。 */
   path: string
 }>()
 
@@ -11,9 +11,9 @@ const { siteUrl } = useRuntimeConfig().public
 // 記事ごとにキーを分けないと、別の記事の取得結果を使い回してしまう。
 // ロケールごとに別の文面なので、キーにもロケールを含める。
 const { data: article } = await useAsyncData(
-  () => `news:${locale.value}:${path}`,
+  () => `blog:${locale.value}:${path}`,
   () =>
-    queryCollection(`news_${locale.value}` as 'news_ja')
+    queryCollection(`blog_${locale.value}` as 'blog_ja')
       .path(path)
       .first(),
   { watch: [locale] },
@@ -24,7 +24,7 @@ const { data: article } = await useAsyncData(
 if (!article.value) {
   throw createError({
     statusCode: 404,
-    statusMessage: 'News article not found',
+    statusMessage: 'Blog article not found',
     fatal: true,
   })
 }
@@ -63,8 +63,8 @@ useHead(() => ({
           type: 'application/ld+json',
           innerHTML: JSON.stringify({
             '@context': 'https://schema.org',
-            // NewsArticle はGoogle Newsへの掲載を前提とした型で要件が過剰なため、
-            // 一般的な記事を表す Article を使う。
+            // schema.orgの NewsArticle はGoogle Newsへの掲載を前提とした型で
+            // 要件が過剰なため、一般的な記事を表す Article を使う。
             '@type': 'Article',
             headline: article.value!.title,
             description: article.value!.description,
@@ -107,11 +107,11 @@ const updatedAtLabel = computed(() =>
       <h1 class="text-2xl font-bold">{{ article.title }}</h1>
       <p class="text-base-content/60 flex flex-wrap gap-x-3 text-sm">
         <span>
-          {{ $t('news.publishedAt') }}
+          {{ $t('blog.publishedAt') }}
           <time :datetime="article.date">{{ publishedAtLabel }}</time>
         </span>
         <span v-if="updatedAtLabel">
-          {{ $t('news.updatedAt') }}
+          {{ $t('blog.updatedAt') }}
           <time :datetime="article.updatedAt">{{ updatedAtLabel }}</time>
         </span>
       </p>

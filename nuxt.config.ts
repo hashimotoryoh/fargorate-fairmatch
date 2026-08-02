@@ -123,12 +123,12 @@ export default defineNuxtConfig({
     // 一致する。保護ページの列挙は PROTECTED_PAGE_PATHS に一本化してある。
     exclude: PROTECTED_PAGE_PATHS,
     /**
-     * `/news/[slug]` は動的ルートで、ルート定義からはスラッグを列挙できない。
-     * `server/api/__sitemap__/news.ts` が Nuxt Content から記事のパスを
+     * `/blog/[slug]` は動的ルートで、ルート定義からはスラッグを列挙できない。
+     * `server/api/__sitemap__/blog.ts` が Nuxt Content から記事のパスを
      * 集めて返す（`_i18nTransform` によりロケール接頭辞付きのURLとhreflangは
      * 自動で組み立てられる）。
      */
-    sources: ['/api/__sitemap__/news'],
+    sources: ['/api/__sitemap__/blog'],
   },
   // robots.txt はこのモジュールが動的に生成する（public/robots.txt は置かない）。
   // Sitemap: 行は site.url と @nuxtjs/sitemap の連携から自動で組み立てられる。
@@ -144,21 +144,21 @@ export default defineNuxtConfig({
    * 方針にしてある（`robots.txt` も単一ファイルである前例に揃えた）。
    * 本文中のリンクも英語ロケールのURL（`/en/...`）を指す。
    *
-   * `sections` は `documents_en`・`news_en` だけを参照し、`documents_ja`・
-   * `news_ja` は参照しない。日本語コレクションを足すと英語限定の方針が
+   * `sections` は `documents_en`・`blog_en` だけを参照し、`documents_ja`・
+   * `blog_ja` は参照しない。日本語コレクションを足すと英語限定の方針が
    * 崩れるため、`tests/unit/repository/llms-txt.spec.ts` で機械的に
    * 検査している。
    */
   llms: {
     domain: SITE_URL,
     title: 'FargoRate FairMatch',
-    // documents_ja/documents_en、news_ja/news_en はそれぞれ日英で同じパスを
-    // 共有しており（例: /privacy-policy、/news/<スラッグ>）、`/raw/*.md` は
+    // documents_ja/documents_en、blog_ja/blog_en はそれぞれ日英で同じパスを
+    // 共有しており（例: /privacy-policy、/blog/<スラッグ>）、`/raw/*.md` は
     // 最初に見つかったコレクションを返すだけでロケールを見分けない。日本語
     // コレクションを対象から外すことで、`/raw/privacy-policy.md` が確実に
     // documents_en の英語本文を返すようにする。
     contentRawMarkdown: {
-      excludeCollections: ['documents_ja', 'news_ja'],
+      excludeCollections: ['documents_ja', 'blog_ja'],
     },
     description:
       'A web app that helps you enter and review pool match scores on top of FargoRate ratings. Your FargoRate ID is all you need to get started. It reads ratings from the official FargoRate system but never sends match results back, so it never updates your rating.',
@@ -191,8 +191,8 @@ export default defineNuxtConfig({
         contentCollection: 'documents_en',
       },
       {
-        title: 'News',
-        contentCollection: 'news_en',
+        title: 'Blog',
+        contentCollection: 'blog_en',
       },
     ],
   },

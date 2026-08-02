@@ -11,7 +11,7 @@
     "settings": "Settings"
   },
   "document": {
-    "news": "News",
+    "blog": "Blog",
     "privacyPolicy": "Privacy Policy",
     "termsConditions": "Terms and Conditions",
     "updatedAt": "Last updated:"
@@ -58,10 +58,10 @@
     "settings": {
       "title": "Settings"
     },
-    "news": {
-      "title": "News",
+    "blog": {
+      "title": "Blog",
       "description": "Keep up with FargoRate FairMatch updates and press releases in one place.",
-      "ogTitle": "News - FargoRate FairMatch",
+      "ogTitle": "Blog - FargoRate FairMatch",
       "ogDescription": "Keep up with FargoRate FairMatch updates and press releases in one place."
     }
   },
@@ -203,12 +203,12 @@
     "themeDescription": "Choose the color scheme used across the app.",
     "language": "Language",
     "languageDescription": "Choose the language used across the app.",
-    "newsDescription": "Check app updates and announcements."
+    "blogDescription": "Check app updates and announcements."
   },
-  "news": {
-    "heading": "News",
+  "blog": {
+    "heading": "Blog",
     "lead": "Keep up with app updates and announcements in one place.",
-    "empty": "There is no news yet.",
+    "empty": "There is no blog post yet.",
     "publishedAt": "Published:",
     "updatedAt": "Updated:"
   }

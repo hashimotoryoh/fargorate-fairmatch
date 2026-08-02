@@ -4,16 +4,16 @@ const localePath = useLocalePath()
 
 // ロケールを切り替えたときに追随させるため、値ではなくゲッターで渡す。
 useSeoMeta({
-  title: () => t('seo.news.title'),
-  description: () => t('seo.news.description'),
-  ogTitle: () => t('seo.news.ogTitle'),
-  ogDescription: () => t('seo.news.ogDescription'),
+  title: () => t('seo.blog.title'),
+  description: () => t('seo.blog.description'),
+  ogTitle: () => t('seo.blog.ogTitle'),
+  ogDescription: () => t('seo.blog.ogDescription'),
 })
 
 const { data: articles } = await useAsyncData(
-  () => `news-list:${locale.value}`,
+  () => `blog-list:${locale.value}`,
   () =>
-    queryCollection(`news_${locale.value}` as 'news_ja')
+    queryCollection(`blog_${locale.value}` as 'blog_ja')
       .order('date', 'DESC')
       .all(),
   { watch: [locale] },
@@ -23,12 +23,12 @@ const { data: articles } = await useAsyncData(
 <template>
   <div class="mx-auto flex w-full max-w-3xl flex-col gap-6">
     <div>
-      <h1 class="text-xl font-bold">{{ $t('news.heading') }}</h1>
-      <p class="text-base-content/70 mt-1 text-sm">{{ $t('news.lead') }}</p>
+      <h1 class="text-xl font-bold">{{ $t('blog.heading') }}</h1>
+      <p class="text-base-content/70 mt-1 text-sm">{{ $t('blog.lead') }}</p>
     </div>
 
     <p v-if="!articles?.length" class="text-base-content/70 text-sm">
-      {{ $t('news.empty') }}
+      {{ $t('blog.empty') }}
     </p>
 
     <ul v-else class="flex flex-col gap-4">

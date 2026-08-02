@@ -1,8 +1,8 @@
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
-import NewsArticle from '../../../app/components/NewsArticle.vue'
-import { createNewsArticle } from '../../helpers/fixtures'
+import BlogArticle from '../../../app/components/BlogArticle.vue'
+import { createBlogArticle } from '../../helpers/fixtures'
 
 const { queryCollectionMock, firstMock } = vi.hoisted(() => {
   const firstMock = vi.fn()
@@ -22,24 +22,21 @@ function head(selector: string) {
 }
 
 /**
- * 公開URLが未設定のときの `NewsArticle`。
+ * 公開URLが未設定のときの `BlogArticle`。
  *
  * 「出さない」ことを確かめるには、他のテストが出したタグが残っていない head が
  * 要る。unhead はコンポーネントを外してもタグをDOMに残すため、公開URLを設定
- * するテスト（`NewsArticle.spec.ts`）とはファイルごと分ける。
+ * するテスト（`BlogArticle.spec.ts`）とはファイルごと分ける。
  */
-describe('NewsArticle（公開URLが未設定）', () => {
+describe('BlogArticle（公開URLが未設定）', () => {
   // 誤ったドメインを指す og:image やJSON-LDは、無いことより害がある。
   it('OGP画像と構造化データを出さない', async () => {
     firstMock.mockResolvedValue(
-      createNewsArticle(
-        '/news/news-page-launch',
-        'ニュースページを公開しました',
-      ),
+      createBlogArticle('/blog/blog-page-launch', 'ブログページを公開しました'),
     )
 
-    await mountSuspended(NewsArticle, {
-      props: { path: '/news/news-page-launch' },
+    await mountSuspended(BlogArticle, {
+      props: { path: '/blog/blog-page-launch' },
     })
     await flushPromises()
 

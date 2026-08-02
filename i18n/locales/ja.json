@@ -11,7 +11,7 @@
     "settings": "設定"
   },
   "document": {
-    "news": "ニュース",
+    "blog": "ブログ",
     "privacyPolicy": "プライバシーポリシー",
     "termsConditions": "利用規約",
     "updatedAt": "最終更新日:"
@@ -58,11 +58,11 @@
     "settings": {
       "title": "設定"
     },
-    "news": {
-      "title": "ニュース",
-      "description": "FargoRate FairMatchのアップデートやプレスリリースなど、ニュースをまとめて確認できます。",
-      "ogTitle": "ニュース - FargoRate FairMatch",
-      "ogDescription": "FargoRate FairMatchのアップデートやプレスリリースなど、ニュースをまとめて確認できます。"
+    "blog": {
+      "title": "ブログ",
+      "description": "FargoRate FairMatchのアップデートやプレスリリースなど、ブログをまとめて確認できます。",
+      "ogTitle": "ブログ - FargoRate FairMatch",
+      "ogDescription": "FargoRate FairMatchのアップデートやプレスリリースなど、ブログをまとめて確認できます。"
     }
   },
   "index": {
@@ -203,12 +203,12 @@
     "themeDescription": "画面の配色を選びます。",
     "language": "言語",
     "languageDescription": "画面の表示に使う言語を選びます。",
-    "newsDescription": "アプリの更新情報などのニュースを確認できます。"
+    "blogDescription": "アプリの更新情報などのブログを確認できます。"
   },
-  "news": {
-    "heading": "ニュース",
-    "lead": "アプリのアップデートなどのニュースをまとめて確認できます。",
-    "empty": "ニュースはまだありません。",
+  "blog": {
+    "heading": "ブログ",
+    "lead": "アプリのアップデートなどのブログをまとめて確認できます。",
+    "empty": "ブログはまだありません。",
     "publishedAt": "公開日:",
     "updatedAt": "更新日:"
   }

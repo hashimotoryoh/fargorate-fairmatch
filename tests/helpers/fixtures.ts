@@ -49,10 +49,10 @@ export function createDocument(path: string, title: string) {
 }
 
 /**
- * `news` コレクションが返すニュース記事。Markdownの解析結果そのままの形で、
+ * `blog` コレクションが返すブログ記事。Markdownの解析結果そのままの形で、
  * `body` は ContentRenderer が受け取れる最小の構造にしてある。
  */
-export function createNewsArticle(
+export function createBlogArticle(
   path: string,
   title: string,
   overrides: {
@@ -62,7 +62,7 @@ export function createNewsArticle(
   } = {},
 ) {
   return {
-    id: `news${path}.md`,
+    id: `blog${path}.md`,
     path,
     title,
     description: `${title}の説明。`,

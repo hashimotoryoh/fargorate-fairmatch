@@ -16,9 +16,9 @@ const schema = z.object({
  * 揃える。どのロケールを引くかはコレクション名で決まるので、パスまで分ける
  * 必要がない。
  *
- * `include` の `**` はロケール配下を再帰的にマッチするため、`news/` 以下も
- * 拾ってしまい `news_ja`/`news_en` と二重にパースされる（スキーマが異なる
- * ため、ニュース記事側にしか無い `updatedAt` が欠けたまま紛れ込む）。
+ * `include` の `**` はロケール配下を再帰的にマッチするため、`blog/` 以下も
+ * 拾ってしまい `blog_ja`/`blog_en` と二重にパースされる（スキーマが異なる
+ * ため、ブログ記事側にしか無い `updatedAt` が欠けたまま紛れ込む）。
  * `documents_*` はパスを指定してしか引かないため実害は無いが、事故の芽を
  * 断つため明示的に除外する。
  */
@@ -27,14 +27,14 @@ function documentCollection(locale: string) {
     type: 'page',
     source: {
       include: `${locale}/**`,
-      exclude: [`${locale}/news/**`],
+      exclude: [`${locale}/blog/**`],
       prefix: '',
     },
     schema,
   })
 }
 
-const newsSchema = z.object({
+const blogSchema = z.object({
   // 一覧のカードとメタタグに使うため必須にする。
   description: z.string(),
   // 公開日（'YYYY-MM-DD'）。一覧の並び順と表示に使う。
@@ -46,17 +46,17 @@ const newsSchema = z.object({
 })
 
 /**
- * ロケール1つ分のニュース記事のコレクション。
+ * ロケール1つ分のブログ記事のコレクション。
  *
- * `content/<ロケール>/news/**` を対象にし、`prefix: 'news'` で
- * `/news/<スラッグ>` のパスに揃える。ドキュメントと違って複数記事を持つため、
+ * `content/<ロケール>/blog/**` を対象にし、`prefix: 'blog'` で
+ * `/blog/<スラッグ>` のパスに揃える。ドキュメントと違って複数記事を持つため、
  * スキーマも別に持つ（`updatedAt` が任意で `date` と `image` を追加で持つ）。
  */
-function newsCollection(locale: string) {
+function blogCollection(locale: string) {
   return defineCollection({
     type: 'page',
-    source: { include: `${locale}/news/**`, prefix: 'news' },
-    schema: newsSchema,
+    source: { include: `${locale}/blog/**`, prefix: 'blog' },
+    schema: blogSchema,
   })
 }
 
@@ -72,11 +72,11 @@ export default defineContentConfig({
     documents_ja: documentCollection('ja'),
     documents_en: documentCollection('en'),
     /**
-     * アップデートやプレスリリースなどのニュース記事。ドキュメントと違って
-     * 複数の記事を持つため、`/news` の一覧ページと `/news/<スラッグ>` の
+     * アップデートやプレスリリースなどのブログ記事。ドキュメントと違って
+     * 複数の記事を持つため、`/blog` の一覧ページと `/blog/<スラッグ>` の
      * 詳細ページに分けて扱う。
      */
-    news_ja: newsCollection('ja'),
-    news_en: newsCollection('en'),
+    blog_ja: blogCollection('ja'),
+    blog_en: blogCollection('en'),
   },
 })
