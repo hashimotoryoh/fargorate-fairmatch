@@ -325,6 +325,14 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 
 Dockやヘッダーの `mainNavItems` にはニュースを追加しない方針。認証の有無によらず辿れる導線として `app/utils/navigation.ts` の `documentNavItems`（フッター）と、設定ページ（`/settings`）のカードにリンクを置いている。
 
+### llms.txt
+
+AIクローラー・エージェント向けに、サイト構造を案内する `/llms.txt`（[llmstxt.org](https://llmstxt.org/) の規約）を公開している。公式モジュール [`nuxt-llms`](https://github.com/nuxt-content/nuxt-llms) を `nuxt.config.ts` の `modules` に足すと、`@nuxt/content`（^3.2.0以降）がこれを自動検出してフック連携し、`llms` 設定に応じて `/llms.txt` を組み立てる。`nuxt-llms` は `@nuxt/content` より後に置くこと（検出のタイミングの都合）。
+
+このアプリの i18n は `prefix_except_default` だが、`nuxt-llms` はロケールを意識せず単一の `/llms.txt` しか生成しない。ロケールごとに分けず、**英語だけの単一ファイル**として公開する方針にしてある（`robots.txt` も単一ファイルである前例に揃えた）。本文中のリンクも英語ロケールのURL（`/en/...`）を指す。この方針により、`llms.sections` には `documents_en`・`news_en` だけを `contentCollection` で参照し、`documents_ja`・`news_ja` は参照しない。日本語コレクションを足すと方針が崩れるため、`tests/unit/repository/llms-txt.spec.ts` で機械的に検査している。
+
+`documents_ja`/`documents_en`、`news_ja`/`news_en` はそれぞれ日英で同じパス（`prefix` にロケールを含めない設計、前述）を共有するため、`@nuxt/content` が `sections` の `contentCollection` から自動生成する `/raw/*.md` リンクは、素朴には最初に見つかったコレクション（＝`documents_ja`・`news_ja`）を返してしまい、英語のはずのリンクが日本語本文を返す。`llms.contentRawMarkdown.excludeCollections` に `documents_ja`・`news_ja` を列挙し、日本語コレクションを `/raw/*.md` の対象から外すことでこれを防いでいる。コレクションを追加・変更する際はこの一致に注意すること。
+
 ### スクリーンショットを使った案内
 
 `public/img/fargorate-id-*.png` には本人以外の顔が写り込んでいる。`ScreenshotFigure` で必要な範囲だけを切り出して使い、**顔がDOMに存在しない範囲までクロップすること**。切り出し範囲を変更する際は必ず写り込みがないことを確認すること。
