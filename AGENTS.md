@@ -180,7 +180,12 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 ### 認証
 
-ユーザーの認証はFargoRate ID（13桁の数値）のルックアップで行う。セッション管理には [Nuxt Auth Utils](https://github.com/atinux/nuxt-auth-utils) を使う。
+認証には2つの経路がある。セッション管理には [Nuxt Auth Utils](https://github.com/atinux/nuxt-auth-utils) を使う。
+
+- FargoRate ID（13桁の数値）のルックアップ
+- ゲスト（IDを持たないユーザーの自己申告）
+
+#### FargoRate IDでの認証
 
 フローは次のとおり。
 
@@ -190,22 +195,45 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 4. 得られたプレイヤー情報をユーザーに見せ、本人かどうかを確認する
 5. 本人だと確認できたらセッションに保存する
 
-確認の確定時（`POST /api/auth/session`）にクライアントから受け取るのはFargoRate IDだけとし、セッションに保存する情報はサーバー側でルックアップし直した結果を使う。クライアントが任意の姓名やレーティングを自称できないようにするため、この方針を崩さないこと。
+確認の確定時（`POST /api/auth/session`）にクライアントから受け取るのはFargoRate IDだけとし、セッションに保存する情報はサーバー側でルックアップし直した結果を使う。クライアントが任意の名前やレーティングを自称できないようにするため、この方針を崩さないこと。
+
+#### ゲスト認証
+
+FargoRate IDを持たないユーザーは `/guest` で名前とレーティングを入力してサインインする。名前は任意で、未入力なら `null` を保存し、表示時に `player.guestName` で補う。既定名は言語によって変わるため、翻訳した文字列をセッションへ焼き込まないこと。
+
+レーティングの範囲は `shared/utils/guestPlayer.ts` の `GUEST_RATING_MIN` と `GUEST_RATING_MAX`（-90 〜 930）に一本化してある。USAPLが公開しているハンディキャップ計算ツール（https://usaplraceto.azurewebsites.net/）が受け付ける入力レンジに合わせたものである。フォームとサーバールートの双方でこの関数を使い、条件を二重に書かないこと。
+
+ゲストは `POST /api/auth/guest` という別のルートに分けてある。`auth/session` に相乗りさせると、IDを送るだけのつもりの経路に自称の値が紛れ込む余地が生まれるためである。ハンドラーはボディを展開せず、`readGuestPlayer()` が読み取った項目だけでオブジェクトを組み立てる。`fargorateId` や `kind: 'fargorate'` を送られても効かないのはこのためで、`tests/unit/server/api/auth/guest.post.spec.ts` がそれを固定している。
+
+このルートにreCAPTCHAは付けていない。`lookup` に付けているのは非公式の外部APIへの総当たりを防ぐためであり、ゲストは外部APIを一切呼ばないため理由が当てはまらない。
+
+#### プレイヤーの型
+
+`shared/types/player.ts` に4つ置いてある。
+
+- `Player`: 名前とレーティングだけを持つ土台。ゲームの処理はこの型にだけ依存させ、認証の種別を意識せずに済むようにする
+- `SessionPlayer`: セッションに入りうるプレイヤー。`#auth-utils` の `User` はこれを継承する
+- `FargoRatePlayer`: FargoRateで確認が取れたプレイヤー
+- `GuestPlayer`: 自己申告だけのゲスト
+
+`FargoRatePlayer | GuestPlayer` のユニオンで表せると素直だが、`User` はインターフェースであり、インターフェースはユニオン型を継承できない。そのため両者の上位型として `SessionPlayer` を挟んである。
+
+どちらであるかの判別には必ず `isFargoRatePlayer()`（`shared/utils/player.ts`）を使い、`robustness` や `fargorateId` の有無を見る形にしないこと。ゲストの自己申告値を、FargoRateで確認が取れた値と取り違えないためである。`GuestPlayer` がFargoRate固有の項目を型として持たないのも同じ理由による。
 
 CSI・FargoRateの両APIは非公式で利用制約が不明なため、`POST /api/lookup`（IDを送って外部APIへ問い合わせる最初の関門）ではreCAPTCHA v3のスコア判定を通してから `lookupPlayerProfile` を呼ぶ（`server/utils/recaptcha.ts` の `verifyRecaptchaToken`）。クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。`POST /api/auth/session` は `lookup` を通過した画面遷移でしか呼ばれないため、reCAPTCHAは付けていない。
 
 Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり、このアプリでは使えない。v2の `siteverify` の応答には `score` も `action` も含まれず、スコア判定で必ず落ちるためである。v3用のテストキーは公開されていないので、ローカル開発でも `localhost` をドメインに加えた自分のv3キーを使うこと。検証が通らないことを理由に `score` や `action` のチェックを緩めてはならない。
 
-認証なしでアクセスできるのは `/`、`/lookup`、`/privacy-policy`、`/terms-conditions` の4つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
+認証なしでアクセスできるのは `/`、`/lookup`、`/guest`、`/privacy-policy`、`/terms-conditions` の5つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
 
 - `app/middleware/auth.ts`: 未認証なら `/lookup` へ送る。保護対象のページに `definePageMeta({ middleware: 'auth' })` で付ける
-- `app/middleware/guest.ts`: 認証済みなら `/dashboard` へ送る。`/lookup` に付ける
+- `app/middleware/guest.ts`: 認証済みなら `/dashboard` へ送る。サインインの入口である `/lookup` と `/guest` に付ける。名前が同じだが、これは「未認証のユーザー」の意味であり、ゲスト認証とは別の概念である
 
 保護対象のパスをどこかに配列で列挙する形にはしないこと。グローバルミドルウェアであれ `routeRules` であれ、ページを追加するたびに更新が必要になり、更新漏れがそのまま情報の露出になる。保護に関わる指定はすべてページ側の `definePageMeta` から辿れる状態に保つこと。
 
 `auth.ts` はSSR時に `x-robots-tag: noindex, nofollow` も立てる。レイアウトの `noindex` メタタグは本文を返す応答にしか乗らず、未認証時のリダイレクトをカバーできないため。
 
-`auth.ts` は元の行き先を `redirect` クエリに残し、サインイン後にそこへ戻す。この値はURLから誰でも与えられるため、必ず `resolveRedirectPath()`（`app/utils/navigation.ts`）を通してから `navigateTo` に渡すこと。外部サイトへ誘導するオープンリダイレクトを防ぐため。
+`auth.ts` は元の行き先を `redirect` クエリに残し、サインイン後にそこへ戻す。この値はURLから誰でも与えられるため、必ず `resolveRedirectPath()`（`app/utils/navigation.ts`）を通してから `navigateTo` に渡すこと。外部サイトへ誘導するオープンリダイレクトを防ぐため。`/lookup` と `/guest` は互いへのリンクでもこのクエリを引き継ぐ。片方で行き先を落とすと、経路によって戻り先が変わってしまう。
 
 保護ページには `prerender` や ISR・SWR のルートルールを付けないこと。Nuxt Auth Utils はプリレンダやキャッシュの際にサーバー側のセッション取得を飛ばすため、ミドルウェアが認証済みのユーザーを未認証と判定してしまう。
 
