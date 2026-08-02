@@ -15,11 +15,21 @@ const schema = z.object({
  * 分ける。`prefix` を空にしてパスからロケールを外し、`/privacy-policy` の形に
  * 揃える。どのロケールを引くかはコレクション名で決まるので、パスまで分ける
  * 必要がない。
+ *
+ * `include` の `**` はロケール配下を再帰的にマッチするため、`news/` 以下も
+ * 拾ってしまい `news_ja`/`news_en` と二重にパースされる（スキーマが異なる
+ * ため、ニュース記事側にしか無い `updatedAt` が欠けたまま紛れ込む）。
+ * `documents_*` はパスを指定してしか引かないため実害は無いが、事故の芽を
+ * 断つため明示的に除外する。
  */
 function documentCollection(locale: string) {
   return defineCollection({
     type: 'page',
-    source: { include: `${locale}/**`, prefix: '' },
+    source: {
+      include: `${locale}/**`,
+      exclude: [`${locale}/news/**`],
+      prefix: '',
+    },
     schema,
   })
 }
