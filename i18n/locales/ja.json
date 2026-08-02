@@ -2,6 +2,9 @@
   "locale": {
     "switchLabel": "言語を切り替える"
   },
+  "theme": {
+    "switchLabel": "テーマを切り替える"
+  },
   "nav": {
     "dashboard": "ダッシュボード",
     "game": "ゲーム",

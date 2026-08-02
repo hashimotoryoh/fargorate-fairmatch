@@ -2,6 +2,9 @@
   "locale": {
     "switchLabel": "Change language"
   },
+  "theme": {
+    "switchLabel": "Switch theme"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "game": "Game",
