@@ -6,9 +6,12 @@ import {
 import {
   FARGORATE_ID,
   createCsiMember,
-  createFargoRatePlayer,
+  createFargoRateLookupPlayer,
 } from '../../helpers/fixtures'
-import type { CsiMember, FargoRatePlayer } from '../../../shared/types/player'
+import type {
+  CsiMember,
+  FargoRateLookupPlayer,
+} from '../../../shared/types/player'
 
 const CSI_LOOKUP_URL = 'https://csibbm.com/Public/_MembershipLookupWeeksPlayed'
 const FARGORATE_LOOKUP_URL = 'https://dashboard.fargorate.com/api/indexsearch'
@@ -47,7 +50,7 @@ function csiResponse(data: CsiMember[]) {
   return { data, total: data.length }
 }
 
-function fargorateResponse(value: FargoRatePlayer[]) {
+function fargorateResponse(value: FargoRateLookupPlayer[]) {
   return { value }
 }
 
@@ -65,17 +68,17 @@ describe('lookupPlayerProfile', () => {
   it('CSIとFargoRateの結果を統合したプレイヤー情報を返す', async () => {
     stubFetch({
       csi: csiResponse([createCsiMember()]),
-      fargorate: fargorateResponse([createFargoRatePlayer()]),
+      fargorate: fargorateResponse([createFargoRateLookupPlayer()]),
     })
 
     await expect(lookupPlayerProfile(FARGORATE_ID)).resolves.toEqual({
+      kind: 'fargorate',
+      name: 'Taro Yamada',
       fargorateId: FARGORATE_ID,
-      firstName: 'Taro',
-      lastName: 'Yamada',
       leagueName: 'Tokyo League',
       region: 'Kanto',
       teamNames: 'Team Alpha',
-      effectiveRating: 523,
+      rating: 523,
       robustness: 412,
     })
   })
@@ -85,7 +88,7 @@ describe('lookupPlayerProfile', () => {
       csi: csiResponse([
         createCsiMember({ FirstName: 'Hanako', LastName: 'Suzuki' }),
       ]),
-      fargorate: fargorateResponse([createFargoRatePlayer()]),
+      fargorate: fargorateResponse([createFargoRateLookupPlayer()]),
     })
 
     await lookupPlayerProfile(FARGORATE_ID)
@@ -117,8 +120,8 @@ describe('lookupPlayerProfile', () => {
     stubFetch({
       csi: csiResponse([createCsiMember()]),
       fargorate: fargorateResponse([
-        createFargoRatePlayer({ membershipId: '9900009999999' }),
-        createFargoRatePlayer({ membershipId: null }),
+        createFargoRateLookupPlayer({ membershipId: '9900009999999' }),
+        createFargoRateLookupPlayer({ membershipId: null }),
       ]),
     })
 
@@ -136,17 +139,17 @@ describe('lookupPlayerProfile', () => {
     stubFetch({
       csi: csiResponse([createCsiMember()]),
       fargorate: fargorateResponse([
-        createFargoRatePlayer({
+        createFargoRateLookupPlayer({
           membershipId: '9900009999999',
           effectiveRating: '700',
         }),
-        createFargoRatePlayer({ effectiveRating: '523' }),
+        createFargoRateLookupPlayer({ effectiveRating: '523' }),
       ]),
     })
 
     const profile = await lookupPlayerProfile(FARGORATE_ID)
 
-    expect(profile?.effectiveRating).toBe(523)
+    expect(profile?.rating).toBe(523)
   })
 
   it('CSIへ到達できなければ 502 を投げる', async () => {
@@ -180,7 +183,7 @@ describe('lookupPlayerProfile', () => {
     stubFetch({
       csi: csiResponse([createCsiMember()]),
       fargorate: fargorateResponse([
-        createFargoRatePlayer({ effectiveRating }),
+        createFargoRateLookupPlayer({ effectiveRating }),
       ]),
     })
 
@@ -194,7 +197,9 @@ describe('lookupPlayerProfile', () => {
   it('信頼度が数値として解釈できなければ 502 を投げる', async () => {
     stubFetch({
       csi: csiResponse([createCsiMember()]),
-      fargorate: fargorateResponse([createFargoRatePlayer({ robustness: '' })]),
+      fargorate: fargorateResponse([
+        createFargoRateLookupPlayer({ robustness: '' }),
+      ]),
     })
 
     await expect(lookupPlayerProfile(FARGORATE_ID)).rejects.toMatchObject({
@@ -206,7 +211,7 @@ describe('lookupPlayerProfile', () => {
     stubFetch({
       csi: csiResponse([createCsiMember()]),
       fargorate: fargorateResponse([
-        { ...createFargoRatePlayer(), effectiveRating: 523 } as never,
+        { ...createFargoRateLookupPlayer(), effectiveRating: 523 } as never,
       ]),
     })
 
@@ -219,12 +224,15 @@ describe('lookupPlayerProfile', () => {
     stubFetch({
       csi: csiResponse([createCsiMember()]),
       fargorate: fargorateResponse([
-        createFargoRatePlayer({ effectiveRating: '523.4', robustness: '12.5' }),
+        createFargoRateLookupPlayer({
+          effectiveRating: '523.4',
+          robustness: '12.5',
+        }),
       ]),
     })
 
     await expect(lookupPlayerProfile(FARGORATE_ID)).resolves.toMatchObject({
-      effectiveRating: 523.4,
+      rating: 523.4,
       robustness: 12.5,
     })
   })
@@ -234,7 +242,7 @@ describe('lookupPlayerProfile', () => {
       csi: csiResponse([
         createCsiMember({ LeagueName: null, Region: null, TeamNames: null }),
       ]),
-      fargorate: fargorateResponse([createFargoRatePlayer()]),
+      fargorate: fargorateResponse([createFargoRateLookupPlayer()]),
     })
 
     await expect(lookupPlayerProfile(FARGORATE_ID)).resolves.toMatchObject({
@@ -244,20 +252,19 @@ describe('lookupPlayerProfile', () => {
     })
   })
 
-  // 姓名はCSI側を正とする。FargoRate側は姓名での検索結果であり、表記が揺れうる。
-  it('姓名はCSIの値を使う', async () => {
+  // 名前はCSI側を正とする。FargoRate側は姓名での検索結果であり、表記が揺れうる。
+  it('名前はCSIの姓名を結合して作る', async () => {
     stubFetch({
       csi: csiResponse([
         createCsiMember({ FirstName: 'Taro', LastName: 'Yamada' }),
       ]),
       fargorate: fargorateResponse([
-        createFargoRatePlayer({ firstName: 'TARO', lastName: 'YAMADA' }),
+        createFargoRateLookupPlayer({ firstName: 'TARO', lastName: 'YAMADA' }),
       ]),
     })
 
     await expect(lookupPlayerProfile(FARGORATE_ID)).resolves.toMatchObject({
-      firstName: 'Taro',
-      lastName: 'Yamada',
+      name: 'Taro Yamada',
     })
   })
 })

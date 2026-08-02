@@ -30,17 +30,16 @@ describe('POST /api/auth/session', () => {
    * クライアントが任意の姓名やレーティングを自称できてはならない。
    * 受け取るのはFargoRate IDだけで、保存するのはサーバー側で引き直した結果。
    */
-  it('クライアントが送った姓名やレーティングを無視する', async () => {
+  it('クライアントが送った名前やレーティングを無視する', async () => {
     const profile = createPlayerProfile()
     lookupPlayerProfile.mockResolvedValue(profile)
 
     const response = await callHandler(handler, {
       fargorateId: FARGORATE_ID,
-      firstName: 'Cheater',
-      lastName: 'McFake',
-      effectiveRating: 830,
+      name: 'Cheater McFake',
+      rating: 830,
       robustness: 9999,
-      user: { effectiveRating: 830 },
+      user: { rating: 830 },
     })
 
     expect(response.body).toEqual(profile)

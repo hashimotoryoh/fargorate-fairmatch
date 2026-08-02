@@ -18,11 +18,13 @@
   "player": {
     "fargorateId": "FargoRate ID",
     "name": "Name",
+    "guestName": "Guest Player",
     "league": "League",
     "region": "Region",
     "team": "Team",
     "rating": "Rating",
-    "robustness": "Robustness"
+    "robustness": "Robustness",
+    "robustnessNone": "None"
   },
   "seo": {
     "index": {
@@ -37,6 +39,12 @@
       "ogTitle": "Sign in with your FargoRate ID | FargoRate FairMatch",
       "ogDescription": "Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app."
     },
+    "guest": {
+      "title": "Start as a guest",
+      "description": "No FargoRate ID? Enter a name and a rating to get started. The name is optional.",
+      "ogTitle": "Start as a guest | FargoRate FairMatch",
+      "ogDescription": "No FargoRate ID? Enter a name and a rating to get started."
+    },
     "dashboard": {
       "title": "Dashboard"
     },
@@ -50,6 +58,7 @@
   "index": {
     "lead": "A web app that supports pool matches played on FargoRate. It helps you enter scores during a match and look back on how your matches went.",
     "start": "Get started with your FargoRate ID",
+    "startAsGuest": "Don't have a FargoRate ID?",
     "featuresHeading": "What you can do",
     "features": {
       "record": {
@@ -107,6 +116,7 @@
       "remove": "Remove {name} from suggestions"
     },
     "submit": "Search",
+    "guestLink": "Don't have a FargoRate ID?",
     "confirmQuestion": "Is this player you?",
     "confirm": "Yes, that is me",
     "reject": "No",
@@ -114,6 +124,21 @@
       "invalidId": "Enter your FargoRate ID as 13 digits.",
       "notFound": "No player was found for that FargoRate ID.",
       "recaptchaFailed": "We couldn't verify that you're not a robot. Please wait a moment and try again.",
+      "unexpected": "The request failed. Please wait a moment and try again."
+    }
+  },
+  "guest": {
+    "heading": "Start as a guest",
+    "lead": "No FargoRate ID? Just enter a rating to get started.",
+    "nameLabel": "Name (optional)",
+    "ratingLabel": "Rating",
+    "ratingHint": "Enter a whole number between {min} and {max}. If you're not sure, a beginner is around 200 and a typical amateur league player is around 450.",
+    "submit": "Start as a guest",
+    "lookupLink": "Sign in with a FargoRate ID",
+    "errors": {
+      "invalidRating": "Enter a whole number between {min} and {max}.",
+      "invalidName": "Enter a name of at most {max} characters.",
+      "invalidInput": "Please check what you entered.",
       "unexpected": "The request failed. Please wait a moment and try again."
     }
   },
@@ -162,6 +187,7 @@
     "heading": "Settings",
     "account": "Account",
     "signedInAs": "Signed in as {name} ({fargorateId}).",
+    "signedInAsGuest": "Signed in as {name} (guest). Your rating is self-reported and is not tied to any FargoRate record.",
     "signOut": "Sign out",
     "language": "Language",
     "languageDescription": "Choose the language used across the app."

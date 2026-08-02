@@ -18,11 +18,13 @@
   "player": {
     "fargorateId": "FargoRate ID",
     "name": "名前",
+    "guestName": "ゲストプレイヤー",
     "league": "リーグ",
     "region": "リージョン",
     "team": "チーム",
     "rating": "レーティング",
-    "robustness": "信頼度"
+    "robustness": "信頼度",
+    "robustnessNone": "None"
   },
   "seo": {
     "index": {
@@ -37,6 +39,12 @@
       "ogTitle": "FargoRate IDでサインイン | FargoRate FairMatch",
       "ogDescription": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。"
     },
+    "guest": {
+      "title": "ゲストとして始める",
+      "description": "FargoRate IDをお持ちでない方は、名前とレーティングを入力するだけで始められます。名前の入力は任意です。",
+      "ogTitle": "ゲストとして始める | FargoRate FairMatch",
+      "ogDescription": "FargoRate IDをお持ちでない方は、名前とレーティングを入力するだけで始められます。"
+    },
     "dashboard": {
       "title": "ダッシュボード"
     },
@@ -50,6 +58,7 @@
   "index": {
     "lead": "FargoRateを用いたビリヤード対戦を補助するウェブアプリです。対戦中のスコアの入力や、対戦成績の振り返りを手助けします。",
     "start": "FargoRate IDで始める",
+    "startAsGuest": "FargoRate IDを持っていない方はこちら",
     "featuresHeading": "できること",
     "features": {
       "record": {
@@ -107,6 +116,7 @@
       "remove": "{name} をサジェストから削除"
     },
     "submit": "検索する",
+    "guestLink": "FargoRate IDを持っていない方はこちら",
     "confirmQuestion": "このプレイヤーはあなたですか？",
     "confirm": "はい、これは私です",
     "reject": "いいえ",
@@ -114,6 +124,21 @@
       "invalidId": "FargoRate IDは13桁の数字で入力してください。",
       "notFound": "そのFargoRate IDのプレイヤーは見つかりませんでした。",
       "recaptchaFailed": "ロボットではないことを確認できませんでした。しばらくしてからもう一度お試しください。",
+      "unexpected": "通信に失敗しました。しばらくしてからもう一度お試しください。"
+    }
+  },
+  "guest": {
+    "heading": "ゲストとして始める",
+    "lead": "FargoRate IDをお持ちでない方は、レーティングを入力するだけで始められます。",
+    "nameLabel": "名前（任意）",
+    "ratingLabel": "レーティング",
+    "ratingHint": "{min} から {max} までの整数で入力してください。目安がわからない場合は、初級者なら200前後、アマチュアリーグの一般的なプレイヤーなら450前後です。",
+    "submit": "ゲストとして始める",
+    "lookupLink": "FargoRate IDでサインインする",
+    "errors": {
+      "invalidRating": "レーティングは {min} から {max} までの整数で入力してください。",
+      "invalidName": "名前は {max} 文字以内で入力してください。",
+      "invalidInput": "入力の内容を確認してください。",
       "unexpected": "通信に失敗しました。しばらくしてからもう一度お試しください。"
     }
   },
@@ -162,6 +187,7 @@
     "heading": "設定",
     "account": "アカウント",
     "signedInAs": "{name}（{fargorateId}）としてサインインしています。",
+    "signedInAsGuest": "{name}（ゲスト）としてサインインしています。レーティングは自己申告のため、FargoRateの記録とは結び付いていません。",
     "signOut": "サインアウト",
     "language": "言語",
     "languageDescription": "画面の表示に使う言語を選びます。"
