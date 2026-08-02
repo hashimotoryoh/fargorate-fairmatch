@@ -77,6 +77,7 @@ useHead(() => ({
         type="search"
         class="grow"
         :placeholder="$t('faq.searchPlaceholder')"
+        :aria-label="$t('faq.searchPlaceholder')"
       />
     </label>
 
