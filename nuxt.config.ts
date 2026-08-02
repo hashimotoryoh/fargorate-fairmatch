@@ -111,6 +111,13 @@ export default defineNuxtConfig({
      * 機械的に確かめている。追加漏れをレビューに頼らないため。
      */
     exclude: ['/dashboard', '/game', '/settings'],
+    /**
+     * `/news/[slug]` は動的ルートで、ルート定義からはスラッグを列挙できない。
+     * `server/api/__sitemap__/news.ts` が Nuxt Content から記事のパスを
+     * 集めて返す（`_i18nTransform` によりロケール接頭辞付きのURLとhreflangは
+     * 自動で組み立てられる）。
+     */
+    sources: ['/api/__sitemap__/news'],
   },
   css: ['@/assets/css/main.css'],
   content: {
