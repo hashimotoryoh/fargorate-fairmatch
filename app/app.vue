@@ -22,6 +22,11 @@ const i18nHead = useLocaleHead({ seo: Boolean(siteUrl) })
 // ちらつくことがない。
 const theme = useTheme()
 
+// 訪問のたびにクッキーの保存期間を延ばす。値を変えていなくても明示的に
+// 代入し直さないと、useCookie は変更が無い限り Set-Cookie を送り直さない。
+const currentTheme = theme.value
+theme.value = currentTheme
+
 useHead(() => ({
   htmlAttrs: {
     ...(i18nHead.value.htmlAttrs ?? {}),

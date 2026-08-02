@@ -45,4 +45,23 @@ describe('useTheme', () => {
       expect(component.vm.theme).toBe('dark')
     })
   })
+
+  // `refresh: true` により、値を変えていない再訪問でもクッキーの保存期間を
+  // 延ばせる。useCookie は既定では値が変わらない限り書き直さないため、
+  // ここが崩れると再訪問での延長自体が効かなくなる。
+  it('値を変えずに代入し直しても保存期間を延ばすため書き直す', async () => {
+    document.cookie = 'theme=light; path=/'
+    const component = await mountSuspended(TestComponent)
+
+    // ブラウザがクッキーを消す直前の状態を模して、書き直しが実際に起きたか
+    // どうかを確かめられるようにする。
+    document.cookie = 'theme=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    expect(document.cookie).not.toContain('theme=light')
+
+    const currentTheme = component.vm.theme
+    component.vm.theme = currentTheme
+    await component.vm.$nextTick()
+
+    expect(document.cookie).toContain('theme=light')
+  })
 })
