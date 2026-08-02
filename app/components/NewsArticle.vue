@@ -30,12 +30,15 @@ if (!article.value) {
 }
 
 // 記事固有のOGP画像が無ければサイト共通の既定画像にフォールバックする。
+// 本文の見出し画像にも同じ画像を使うため、相対パスを先に確定させる。
+const imagePath = computed(() => article.value!.image ?? '/img/ogp.png')
+
 const ogImage = computed(() => {
   if (!siteUrl) {
     return undefined
   }
 
-  return `${siteUrl}${article.value!.image ?? '/img/ogp.png'}`
+  return `${siteUrl}${imagePath.value}`
 })
 
 useSeoMeta({
@@ -92,7 +95,15 @@ const updatedAtLabel = computed(() =>
 
 <template>
   <article v-if="article" class="mx-auto w-full max-w-3xl py-4">
-    <header class="flex flex-col gap-1">
+    <NuxtImg
+      :src="imagePath"
+      :alt="article.title"
+      width="1200"
+      height="630"
+      class="aspect-video w-full rounded-box object-cover"
+    />
+
+    <header class="mt-6 flex flex-col gap-1">
       <h1 class="text-2xl font-bold">{{ article.title }}</h1>
       <p class="text-base-content/60 flex flex-wrap gap-x-3 text-sm">
         <span>

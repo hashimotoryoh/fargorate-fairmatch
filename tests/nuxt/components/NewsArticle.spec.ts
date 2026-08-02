@@ -174,6 +174,35 @@ describe('NewsArticle', () => {
     })
   })
 
+  // OGPと同じ画像を本文の見出し画像としても表示する。
+  it('記事固有の画像があれば見出し画像に使う', async () => {
+    firstMock.mockResolvedValue(
+      createNewsArticle('/news/with-heading-image', '見出し画像のある記事', {
+        image: '/img/news/with-heading-image.png',
+      }),
+    )
+
+    const component = await mountSuspended(NewsArticle, {
+      props: { path: '/news/with-heading-image' },
+    })
+
+    const image = component.find('img')
+    expect(image.attributes('src')).toContain(
+      '/img/news/with-heading-image.png',
+    )
+    expect(image.attributes('alt')).toBe('見出し画像のある記事')
+  })
+
+  // フロントマターに image が無ければ、見出し画像も既定のOGP画像にフォールバックする。
+  it('記事固有の画像が無ければ見出し画像に既定のOGP画像を使う', async () => {
+    const component = await mountSuspended(NewsArticle, {
+      props: { path: '/news/news-page-launch' },
+    })
+
+    const image = component.find('img')
+    expect(image.attributes('src')).toContain('/img/ogp.png')
+  })
+
   it('Article形式の構造化データを埋め込む', async () => {
     await mountSuspended(NewsArticle, {
       props: { path: '/news/news-page-launch' },

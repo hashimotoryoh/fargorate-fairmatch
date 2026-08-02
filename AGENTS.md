@@ -124,6 +124,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 - Nuxt Content v3
 - Nuxt I18n v10
 - Nuxt Icon v2
+- Nuxt Image v2
 
 パッケージマネージャーはnpmを使用する。`package-lock.json` を管理しているため、yarnやpnpmに置き換えないこと。依存を追加した場合は `package.json` と `package-lock.json` の両方をコミットすること。
 
@@ -298,9 +299,9 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 
 データベースの接続には Node.js 同梱の `node:sqlite` を使う設定にしてある（`nuxt.config.ts` の `content.experimental.sqliteConnector`）。既定のままでは `better-sqlite3` のインストールを対話的に促され、CIのビルドが止まるため、この指定を外さないこと。
 
-### お知らせ（ニュース）
+### ニュース
 
-アップデートやプレスリリースなどのお知らせは `/news`（一覧）と `/news/[slug]`（詳細）で扱う。プライバシーポリシー等が1文書1ページなのに対し、お知らせは複数記事を持つ点が異なるため、`documents_ja`/`documents_en` とは別に `news_ja`/`news_en` コレクションを `content.config.ts` に持つ（「用途の異なるコンテンツを足す場合は、言語のディレクトリの下にさらにディレクトリを切り、コレクションを分けること」の実例）。
+アップデートやプレスリリースなどのニュースは `/news`（一覧）と `/news/[slug]`（詳細）で扱う。プライバシーポリシー等が1文書1ページなのに対し、ニュースは複数記事を持つ点が異なるため、`documents_ja`/`documents_en` とは別に `news_ja`/`news_en` コレクションを `content.config.ts` に持つ（「用途の異なるコンテンツを足す場合は、言語のディレクトリの下にさらにディレクトリを切り、コレクションを分けること」の実例）。
 
 - `content/ja/news/<スラッグ>.md` が `/news/<スラッグ>` に対応する。`source` の `include` は `<ロケール>/news/**`、`prefix` は `'news'` にしてあり、ロケールの部分だけを外して `news/` を残す
 - 記事は日英を1対1でペアリングする運用にしてある。`tests/unit/repository/news.spec.ts` がスラッグの過不足を検査する
@@ -314,7 +315,17 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 
 記事固有のOGP画像（`image`）が無ければ、`public/img/ogp.png` のサイト共通の既定OGP画像にフォールバックする。この既定画像は `app/app.vue` の `useSeoMeta` からも参照しており、ニュース以外の全ページのSNSシェア時のプレビューにも使われる。canonical等と同じく、`NUXT_PUBLIC_SITE_URL` が未設定の間は絶対URLを組めないため、OGP画像とJSON-LDのどちらも出さない。
 
-Dockやヘッダーの `mainNavItems` にはお知らせを追加しない方針。認証の有無によらず辿れる導線として `app/utils/navigation.ts` の `documentNavItems`（フッター）と、設定ページ（`/settings`）のカードにリンクを置いている。
+一覧・詳細のいずれも、このOGP画像を本文の見出し画像としてそのまま表示する。`<img>` を直接書かず `@nuxt/image` の `<NuxtImg>` を使うこと。`public/` 直下のローカル画像はIPXプロバイダーが追加設定なしで最適化を扱える。
+
+Dockやヘッダーの `mainNavItems` にはニュースを追加しない方針。認証の有無によらず辿れる導線として `app/utils/navigation.ts` の `documentNavItems`（フッター）と、設定ページ（`/settings`）のカードにリンクを置いている。
+
+### llms.txt
+
+AIクローラー・エージェント向けに、サイト構造を案内する `/llms.txt`（[llmstxt.org](https://llmstxt.org/) の規約）を公開している。公式モジュール [`nuxt-llms`](https://github.com/nuxt-content/nuxt-llms) を `nuxt.config.ts` の `modules` に足すと、`@nuxt/content`（^3.2.0以降）がこれを自動検出してフック連携し、`llms` 設定に応じて `/llms.txt` を組み立てる。`nuxt-llms` は `@nuxt/content` より後に置くこと（検出のタイミングの都合）。
+
+このアプリの i18n は `prefix_except_default` だが、`nuxt-llms` はロケールを意識せず単一の `/llms.txt` しか生成しない。ロケールごとに分けず、**英語だけの単一ファイル**として公開する方針にしてある（`robots.txt` も単一ファイルである前例に揃えた）。本文中のリンクも英語ロケールのURL（`/en/...`）を指す。この方針により、`llms.sections` には `documents_en`・`news_en` だけを `contentCollection` で参照し、`documents_ja`・`news_ja` は参照しない。日本語コレクションを足すと方針が崩れるため、`tests/unit/repository/llms-txt.spec.ts` で機械的に検査している。
+
+`documents_ja`/`documents_en`、`news_ja`/`news_en` はそれぞれ日英で同じパス（`prefix` にロケールを含めない設計、前述）を共有するため、`@nuxt/content` が `sections` の `contentCollection` から自動生成する `/raw/*.md` リンクは、素朴には最初に見つかったコレクション（＝`documents_ja`・`news_ja`）を返してしまい、英語のはずのリンクが日本語本文を返す。`llms.contentRawMarkdown.excludeCollections` に `documents_ja`・`news_ja` を列挙し、日本語コレクションを `/raw/*.md` の対象から外すことでこれを防いでいる。コレクションを追加・変更する際はこの一致に注意すること。
 
 ### スクリーンショットを使った案内
 
