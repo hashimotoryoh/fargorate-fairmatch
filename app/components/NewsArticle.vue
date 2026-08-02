@@ -80,18 +80,13 @@ useHead(() => ({
     : [],
 }))
 
-// フロントマターのISO形式の日付を、表示中の言語の表記に直す。タイムゾーンを
-// 指定しないと、UTCの0時が前日として表示される環境がある。
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat(locale.value, {
-    dateStyle: 'long',
-    timeZone: 'UTC',
-  }).format(new Date(value))
-}
-
-const publishedAtLabel = computed(() => formatDate(article.value!.date))
+const publishedAtLabel = computed(() =>
+  formatLocaleDate(article.value!.date, locale.value),
+)
 const updatedAtLabel = computed(() =>
-  article.value!.updatedAt ? formatDate(article.value!.updatedAt) : null,
+  article.value!.updatedAt
+    ? formatLocaleDate(article.value!.updatedAt, locale.value)
+    : null,
 )
 </script>
 

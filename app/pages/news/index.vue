@@ -18,13 +18,6 @@ const { data: articles } = await useAsyncData(
       .all(),
   { watch: [locale] },
 )
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat(locale.value, {
-    dateStyle: 'long',
-    timeZone: 'UTC',
-  }).format(new Date(value))
-}
 </script>
 
 <template>
@@ -46,7 +39,7 @@ function formatDate(value: string) {
         >
           <div class="card-body gap-2">
             <time :datetime="article.date" class="text-base-content/60 text-xs">
-              {{ formatDate(article.date) }}
+              {{ formatLocaleDate(article.date, locale) }}
             </time>
             <h2 class="card-title text-base">{{ article.title }}</h2>
             <p class="text-base-content/70 text-sm">
