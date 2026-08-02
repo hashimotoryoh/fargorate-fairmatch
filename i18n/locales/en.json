@@ -211,5 +211,16 @@
     "empty": "There is no news yet.",
     "publishedAt": "Published:",
     "updatedAt": "Updated:"
+  },
+  "error": {
+    "notFound": {
+      "heading": "Page not found",
+      "lead": "The page you're looking for may have moved or no longer exists."
+    },
+    "unexpected": {
+      "heading": "Something went wrong",
+      "lead": "Please wait a moment and try again."
+    },
+    "backHome": "Back to home"
   }
 }
