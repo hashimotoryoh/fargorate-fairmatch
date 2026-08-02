@@ -67,9 +67,14 @@ describe('verifyRecaptchaToken', () => {
   })
 
   // v2のキーを設定すると、応答は success:true でも score を含まない形になる。
-  // スコア不明を「人間」と誤って扱わないこと。
+  // スコア不明を「人間」と誤って扱わないこと。`action` は一致させ、
+  // 落ちる理由が score の欠如だけになるようにしてある。
   it('応答に score が無ければ 422 を投げる', async () => {
-    stubFetch({ success: true, challenge_ts: '2026-08-01T00:00:00Z' })
+    stubFetch({
+      success: true,
+      action: 'lookup',
+      challenge_ts: '2026-08-01T00:00:00Z',
+    })
 
     await expect(
       verifyRecaptchaToken('valid-token', 'lookup'),
