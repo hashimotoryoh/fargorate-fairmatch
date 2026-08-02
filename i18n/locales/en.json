@@ -12,6 +12,7 @@
   },
   "document": {
     "blog": "Blog",
+    "faq": "FAQ",
     "privacyPolicy": "Privacy Policy",
     "termsConditions": "Terms and Conditions",
     "updatedAt": "Last updated:"
@@ -63,6 +64,10 @@
       "description": "Keep up with FargoRate FairMatch updates and press releases in one place.",
       "ogTitle": "Blog - FargoRate FairMatch",
       "ogDescription": "Keep up with FargoRate FairMatch updates and press releases in one place."
+    },
+    "faq": {
+      "title": "FAQ",
+      "description": "Answers to common questions about how to use FargoRate FairMatch and how it relates to FargoRate."
     }
   },
   "index": {
@@ -203,7 +208,8 @@
     "themeDescription": "Choose the color scheme used across the app.",
     "language": "Language",
     "languageDescription": "Choose the language used across the app.",
-    "blogDescription": "Check app updates and announcements."
+    "blogDescription": "Check app updates and announcements.",
+    "faqDescription": "Find answers to common questions about how to use the app and how it relates to FargoRate."
   },
   "blog": {
     "heading": "Blog",
@@ -211,6 +217,12 @@
     "empty": "There is no blog post yet.",
     "publishedAt": "Published:",
     "updatedAt": "Updated:"
+  },
+  "faq": {
+    "heading": "FAQ",
+    "lead": "Answers to common questions about how to use the app and how it relates to FargoRate.",
+    "searchPlaceholder": "Search questions",
+    "empty": "No matching questions were found."
   },
   "error": {
     "notFound": {

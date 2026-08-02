@@ -150,6 +150,7 @@ Node.js のバージョンは `.node-version` に従うこと。
 - `server/`: Nitroのサーバールート。プロジェクトルート直下に置く
   - `server/api/`: APIのエンドポイント。ファイル名の `.post.ts` などがHTTPメソッドに対応する
   - `server/utils/`: サーバールートから自動インポートされるユーティリティ
+  - `server/plugins/`: Nitroのプラグイン。起動時に自動登録される。`llms:generate` など、Nitroのフックに割り込む処理を置く
 - `shared/`: クライアントとサーバーの双方から使う型やロジック。プロジェクトルート直下に置く
   - `shared/types/`: 双方から使う型定義
   - `shared/utils/`: 双方から使う関数。`app/` と `server/` の両方へ自動インポートされる
@@ -332,6 +333,8 @@ AIクローラー・エージェント向けに、サイト構造を案内する
 このアプリの i18n は `prefix_except_default` だが、`nuxt-llms` はロケールを意識せず単一の `/llms.txt` しか生成しない。ロケールごとに分けず、**英語だけの単一ファイル**として公開する方針にしてある（`robots.txt` も単一ファイルである前例に揃えた）。本文中のリンクも英語ロケールのURL（`/en/...`）を指す。この方針により、`llms.sections` には `documents_en`・`blog_en` だけを `contentCollection` で参照し、`documents_ja`・`blog_ja` は参照しない。日本語コレクションを足すと方針が崩れるため、`tests/unit/repository/llms-txt.spec.ts` で機械的に検査している。
 
 `documents_ja`/`documents_en`、`blog_ja`/`blog_en` はそれぞれ日英で同じパス（`prefix` にロケールを含めない設計、前述）を共有するため、`@nuxt/content` が `sections` の `contentCollection` から自動生成する `/raw/*.md` リンクは、素朴には最初に見つかったコレクション（＝`documents_ja`・`blog_ja`）を返してしまい、英語のはずのリンクが日本語本文を返す。`llms.contentRawMarkdown.excludeCollections` に `documents_ja`・`blog_ja` を列挙し、日本語コレクションを `/raw/*.md` の対象から外すことでこれを防いでいる。コレクションを追加・変更する際はこの一致に注意すること。
+
+`llms.sections` の `contentCollection` は `type: 'page'` を前提にしており（`path`/`title`/`seo`/`description` 列を選択する実装のため）、個別ページを持たない `type: 'data'` のコレクション（FAQなど）には使えない。FAQのセクションは `server/plugins/llms-faq.ts` が Nitro の `llms:generate` フックに割り込み、`faq_en` を読んで質問をtitle・回答をdescriptionとするリンクを動的に組み立てて足している。`nuxt.config.ts` にFAQの文面を書き写さないのは、`content/en/faq.csv` を唯一の情報源に保つため。このプラグインも日本語コレクション（`faq_ja`）を参照しない・保護ページを指さない方針は他のセクションと同じで、`tests/unit/repository/llms-txt.spec.ts` で検査している。
 
 ### スクリーンショットを使った案内
 

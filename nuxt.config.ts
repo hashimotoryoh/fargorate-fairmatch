@@ -148,6 +148,11 @@ export default defineNuxtConfig({
    * `blog_ja` は参照しない。日本語コレクションを足すと英語限定の方針が
    * 崩れるため、`tests/unit/repository/llms-txt.spec.ts` で機械的に
    * 検査している。
+   *
+   * FAQ（`faq_en`）のセクションはここには無い。`contentCollection` は
+   * `type: 'page'` 前提（`path`/`title`列を要求）で、個別ページを持たない
+   * `type: 'data'` のFAQには使えないため、`server/plugins/llms-faq.ts` の
+   * `llms:generate` フックで動的に足している。
    */
   llms: {
     domain: SITE_URL,

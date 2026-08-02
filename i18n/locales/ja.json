@@ -12,6 +12,7 @@
   },
   "document": {
     "blog": "ブログ",
+    "faq": "よくある質問",
     "privacyPolicy": "プライバシーポリシー",
     "termsConditions": "利用規約",
     "updatedAt": "最終更新日:"
@@ -63,6 +64,10 @@
       "description": "FargoRate FairMatchのアップデートやプレスリリースなど、ブログをまとめて確認できます。",
       "ogTitle": "ブログ - FargoRate FairMatch",
       "ogDescription": "FargoRate FairMatchのアップデートやプレスリリースなど、ブログをまとめて確認できます。"
+    },
+    "faq": {
+      "title": "よくある質問",
+      "description": "FargoRate FairMatchの使い方やFargoRateとの関係について、よくいただく質問をまとめています。"
     }
   },
   "index": {
@@ -203,7 +208,8 @@
     "themeDescription": "画面の配色を選びます。",
     "language": "言語",
     "languageDescription": "画面の表示に使う言語を選びます。",
-    "blogDescription": "アプリの更新情報などのブログを確認できます。"
+    "blogDescription": "アプリの更新情報などのブログを確認できます。",
+    "faqDescription": "使い方やFargoRateとの関係について、よくある質問を確認できます。"
   },
   "blog": {
     "heading": "ブログ",
@@ -211,6 +217,12 @@
     "empty": "ブログはまだありません。",
     "publishedAt": "公開日:",
     "updatedAt": "更新日:"
+  },
+  "faq": {
+    "heading": "よくある質問",
+    "lead": "アプリの使い方やFargoRateとの関係について、よくいただく質問をまとめています。",
+    "searchPlaceholder": "質問を検索",
+    "empty": "該当する質問が見つかりませんでした。"
   },
   "error": {
     "notFound": {

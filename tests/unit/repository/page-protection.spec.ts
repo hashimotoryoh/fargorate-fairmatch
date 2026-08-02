@@ -18,6 +18,7 @@ const PUBLIC_PAGES = [
   'terms-conditions',
   'blog/index',
   'blog/[slug]',
+  'faq',
 ]
 
 /** 認証済みのユーザーを追い返すページ。サインインの入口が対象。 */

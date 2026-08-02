@@ -72,6 +72,23 @@ export function createBlogArticle(
   }
 }
 
+/**
+ * `faq` コレクションが返すFAQ項目。CSVの1行が1アイテムになるため、IDは
+ * 行番号を持つ `<ロケール>/faq.csv#<行番号>` の形にしてある。
+ */
+export function createFaqItem(
+  rowNumber: number,
+  question: string,
+  answer: string,
+  locale = 'ja',
+) {
+  return {
+    id: `${locale}/faq.csv#${rowNumber}`,
+    question,
+    answer,
+  }
+}
+
 export function createFargoRatePlayer(
   overrides: Partial<FargoRatePlayer> = {},
 ): FargoRatePlayer {

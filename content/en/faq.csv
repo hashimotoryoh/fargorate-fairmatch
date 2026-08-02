@@ -1,0 +1,12 @@
+question,answer
+What is FargoRate FairMatch?,"FargoRate FairMatch is an app that helps you play pool matches using FargoRate. You can check ratings with your opponent, keep score during a match, and look back on your results."
+What is FargoRate?,"FargoRate is a worldwide rating system that measures the skill of pocket billiards players on the same scale, wherever they are."
+Are the match results I enter in this app sent to the official FargoRate?,"No. FargoRate FairMatch only reads and displays information from FargoRate; it never sends match results to the official system, and it never updates your rating."
+Does the rating shown match the official FargoRate value?,"Yes, we display the value exactly as returned by FargoRate's lookup system. Because the source is an unofficial API, it may become temporarily unavailable if it changes without notice."
+I don't have a FargoRate ID. Can I still use the app?,"Yes. If you don't have a FargoRate ID, you can sign in as a guest by entering a name and an approximate rating."
+Where can I find my FargoRate ID?,You can find it on your profile screen in the official FargoRate app or website. The ID entry page also explains how to find it.
+The confirmation screen showed information that isn't mine.,"Because we narrow down candidates by matching your name, a different person with the same name may occasionally appear. If the information doesn't match you, choose ""No"" on the confirmation screen and try again after checking your ID."
+Can I change the name or rating I entered as a guest later?,"This can't be changed from the settings page yet. To change it, sign out and sign in again as a guest with the new details."
+Which game types are supported?,9-ball and 8-ball are supported. Starting an actual match is still under development.
+How is the personal information I enter handled?,See the Privacy Policy for what information is collected and how it's used.
+Is the app available in languages other than Japanese?,The app supports Japanese and English. You can switch languages anytime from the settings page.

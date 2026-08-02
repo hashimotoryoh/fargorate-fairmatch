@@ -32,6 +32,7 @@ export const mainNavItems: NavItem[] = [
  */
 export const documentNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
   { to: '/blog', labelKey: 'document.blog' },
+  { to: '/faq', labelKey: 'document.faq' },
   { to: '/privacy-policy', labelKey: 'document.privacyPolicy' },
   { to: '/terms-conditions', labelKey: 'document.termsConditions' },
 ]

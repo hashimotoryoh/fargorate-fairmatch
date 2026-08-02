@@ -16,20 +16,15 @@ const schema = z.object({
  * 揃える。どのロケールを引くかはコレクション名で決まるので、パスまで分ける
  * 必要がない。
  *
- * `include` の `**` はロケール配下を再帰的にマッチするため、`blog/` 以下も
- * 拾ってしまい `blog_ja`/`blog_en` と二重にパースされる（スキーマが異なる
- * ため、ブログ記事側にしか無い `updatedAt` が欠けたまま紛れ込む）。
- * `documents_*` はパスを指定してしか引かないため実害は無いが、事故の芽を
- * 断つため明示的に除外する。
+ * `include` は `${locale}/*.md` とし、ロケール直下の `.md` だけを対象にする。
+ * `*` はディレクトリ区切りをまたがないため、`blog/` のようなサブディレクトリや
+ * `faq.csv` のような `.md` 以外のファイルは自動的に対象外になる。コレクションを
+ * 増やすたびに `exclude` を書き足す必要がないようにするための書き方。
  */
 function documentCollection(locale: string) {
   return defineCollection({
     type: 'page',
-    source: {
-      include: `${locale}/**`,
-      exclude: [`${locale}/blog/**`],
-      prefix: '',
-    },
+    source: { include: `${locale}/*.md`, prefix: '' },
     schema,
   })
 }
@@ -60,6 +55,31 @@ function blogCollection(locale: string) {
   })
 }
 
+const faqSchema = z.object({
+  question: z.string(),
+  answer: z.string(),
+})
+
+/**
+ * ロケール1つ分のFAQのコレクション。
+ *
+ * 質問と回答だけの単純な表形式データで、`/faq` に個別ページを持たせる予定も
+ * ないため、ページを前提にした `type: 'page'` ではなく `type: 'data'` にする。
+ *
+ * `include` にワイルドカードを含まない単一のCSVファイルパスを指定すると、
+ * ヘッダー行を除く各行が個別アイテムとして展開される（1件1ファイルのYAMLでは
+ * 質問を増減するたびにファイルの追加・削除が要るため、行を足すだけで済む
+ * CSVを選んだ）。アイテムのIDは `ja/faq.csv#1`, `#2`, ... のように行番号を
+ * 持つので、表示順を保持するための列は別途持たせていない。
+ */
+function faqCollection(locale: string) {
+  return defineCollection({
+    type: 'data',
+    source: { include: `${locale}/faq.csv` },
+    schema: faqSchema,
+  })
+}
+
 export default defineContentConfig({
   collections: {
     /**
@@ -78,5 +98,8 @@ export default defineContentConfig({
      */
     blog_ja: blogCollection('ja'),
     blog_en: blogCollection('en'),
+    /** よくある質問。`/faq` で全件をアコーディオン表示する。 */
+    faq_ja: faqCollection('ja'),
+    faq_en: faqCollection('en'),
   },
 })
