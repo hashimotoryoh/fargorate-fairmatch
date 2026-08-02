@@ -14,7 +14,7 @@ const { queryCollectionMock, firstMock, routeParams } = vi.hoisted(() => ({
 mockNuxtImport('useRoute', () => () => ({ params: routeParams }))
 mockNuxtImport('queryCollection', () => queryCollectionMock)
 
-describe('お知らせの詳細ページ', () => {
+describe('ニュースの詳細ページ', () => {
   it('ルートのslugから記事のパスを組み立ててNewsArticleへ渡す', async () => {
     const pathMock = vi.fn(() => ({ first: firstMock }))
     queryCollectionMock.mockReturnValue({ path: pathMock })

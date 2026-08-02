@@ -19,7 +19,7 @@ const { queryCollectionMock, allMock, orderMock } = vi.hoisted(() => {
 
 mockNuxtImport('queryCollection', () => queryCollectionMock)
 
-describe('お知らせの一覧ページ', () => {
+describe('ニュースの一覧ページ', () => {
   // useAsyncData はロケール単位でキャッシュするため、テストごとに一覧を洗い直す。
   beforeEach(() => {
     clearNuxtData()
