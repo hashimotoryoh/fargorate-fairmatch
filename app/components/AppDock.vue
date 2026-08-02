@@ -14,22 +14,7 @@ const localePath = useLocalePath()
       :to="localePath(item.to)"
       active-class="dock-active"
     >
-      <svg
-        class="size-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        aria-hidden="true"
-      >
-        <path
-          v-for="path in item.iconPaths"
-          :key="path"
-          :d="path"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+      <Icon :name="item.icon" class="size-5" />
       <span class="dock-label">{{ $t(item.labelKey) }}</span>
     </NuxtLink>
   </nav>

@@ -17,14 +17,13 @@ describe('AppDock', () => {
     )
   })
 
-  it('各項目にアイコンを描く', async () => {
+  it('各項目にMaterial Design Iconsのアイコンを描く', async () => {
     const component = await mountSuspended(AppDock)
+    const icons = component.findAllComponents({ name: 'NuxtIconSvg' })
 
-    component.findAll('a').forEach((link, index) => {
-      const paths = link.findAll('path').map((path) => path.attributes('d'))
-
-      expect(paths).toEqual(mainNavItems[index]?.iconPaths)
-    })
+    expect(icons.map((icon) => icon.props('name'))).toEqual(
+      mainNavItems.map((item) => item.icon),
+    )
   })
 
   // アイコンの隣に必ず表示名があるため、装飾として読み上げから外す。
