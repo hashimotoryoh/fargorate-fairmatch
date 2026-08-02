@@ -2,6 +2,9 @@
   "locale": {
     "switchLabel": "言語を切り替える"
   },
+  "theme": {
+    "switchLabel": "テーマを切り替える"
+  },
   "nav": {
     "dashboard": "ダッシュボード",
     "game": "ゲーム",
@@ -189,6 +192,8 @@
     "signedInAs": "{name}（{fargorateId}）としてサインインしています。",
     "signedInAsGuest": "{name}（ゲスト）としてサインインしています。レーティングは自己申告のため、FargoRateの記録とは結び付いていません。",
     "signOut": "サインアウト",
+    "theme": "テーマ",
+    "themeDescription": "画面の配色を選びます。",
     "language": "言語",
     "languageDescription": "画面の表示に使う言語を選びます。"
   }

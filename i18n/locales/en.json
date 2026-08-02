@@ -2,6 +2,9 @@
   "locale": {
     "switchLabel": "Change language"
   },
+  "theme": {
+    "switchLabel": "Switch theme"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "game": "Game",
@@ -189,6 +192,8 @@
     "signedInAs": "Signed in as {name} ({fargorateId}).",
     "signedInAsGuest": "Signed in as {name} (guest). Your rating is self-reported and is not tied to any FargoRate record.",
     "signOut": "Sign out",
+    "theme": "Theme",
+    "themeDescription": "Choose the color scheme used across the app.",
     "language": "Language",
     "languageDescription": "Choose the language used across the app."
   }
