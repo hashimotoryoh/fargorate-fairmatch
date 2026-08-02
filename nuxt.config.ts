@@ -1,5 +1,9 @@
 import { execSync } from 'node:child_process'
+import { createResolver } from 'nuxt/kit'
 import tailwindcss from '@tailwindcss/vite'
+import { mainNavItems } from './app/utils/navigation'
+
+const { resolve } = createResolver(import.meta.url)
 
 const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairmatch'
 
@@ -50,12 +54,37 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/content',
     '@nuxt/eslint',
+    '@nuxt/icon',
     'nuxt-auth-utils',
     '@nuxtjs/i18n',
     '@nuxtjs/sitemap',
   ],
   typescript: {
     strict: true,
+  },
+  icon: {
+    // アプリロゴを `custom:app-logo` として使えるようにする。
+    customCollections: [
+      {
+        prefix: 'custom',
+        dir: resolve('./app/assets/icons'),
+      },
+    ],
+    // vitestの `nuxt` プロジェクトはNitroのアイコン配信APIを持たないため、
+    // アイコンデータをクライアントバンドルへ静的に含めてネットワーク取得を
+    // 避ける。Vitestは既定で `NODE_ENV=test` を立てる。
+    ...(process.env.NODE_ENV === 'test'
+      ? {
+          provider: 'none',
+          clientBundle: {
+            // `mainNavItems` から動的に名前を渡す箇所は静的スキャンで拾えない
+            // ため、明示的に列挙する。
+            icons: mainNavItems.map((item) => item.icon),
+            scan: true,
+            includeCustomCollections: true,
+          },
+        }
+      : {}),
   },
   i18n: {
     defaultLocale: 'ja',
