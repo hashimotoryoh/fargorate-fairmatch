@@ -5,7 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 import SettingsPage from '../../../app/pages/settings.vue'
 import { jaMessage } from '../../helpers/i18n'
-import { createGuestPlayer, createPlayerProfile } from '../../helpers/fixtures'
+import {
+  createGuestPlayer,
+  createFargoRatePlayer,
+} from '../../helpers/fixtures'
 
 // セッションはテンプレートで自動アンラップされる ref として渡す必要がある。
 // ref はモジュールの読み込み後にしか作れないため、入れ物だけを巻き上げる。
@@ -37,7 +40,7 @@ describe('設定ページ', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     await useLocale('ja')
-    session.user = ref(createPlayerProfile())
+    session.user = ref(createFargoRatePlayer())
     clearMock.mockResolvedValue(undefined)
   })
 

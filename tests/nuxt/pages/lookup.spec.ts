@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, type VueWrapper } from '@vue/test-utils'
 import LookupPage from '../../../app/pages/lookup.vue'
 import { jaMessage } from '../../helpers/i18n'
-import { FARGORATE_ID, createPlayerProfile } from '../../helpers/fixtures'
+import { FARGORATE_ID, createFargoRatePlayer } from '../../helpers/fixtures'
 
 const {
   routeQuery,
@@ -91,8 +91,8 @@ describe('サインインページ', () => {
     await useLocale('ja')
     routeQuery.redirect = undefined
     executeRecaptchaMock.mockResolvedValue('test-token')
-    lookupHandler.mockReturnValue(createPlayerProfile())
-    sessionHandler.mockReturnValue(createPlayerProfile())
+    lookupHandler.mockReturnValue(createFargoRatePlayer())
+    sessionHandler.mockReturnValue(createFargoRatePlayer())
   })
 
   it('FargoRate IDの入力欄と検索ボタンを出す', async () => {
@@ -201,11 +201,11 @@ describe('サインインページ', () => {
   it('確認画面ではルックアップで得たプレイヤーのIDでサインインを確定する', async () => {
     const candidateId = '9900009999999'
     lookupHandler.mockReturnValue(
-      createPlayerProfile({ fargorateId: candidateId }),
+      createFargoRatePlayer({ fargorateId: candidateId }),
     )
     sessionHandler.mockImplementation(async (event) => {
       expect(await readBody(event)).toEqual({ fargorateId: candidateId })
-      return createPlayerProfile({ fargorateId: candidateId })
+      return createFargoRatePlayer({ fargorateId: candidateId })
     })
 
     const component = await mountSuspended(LookupPage)
@@ -434,7 +434,7 @@ describe('サインインページ', () => {
       JSON.stringify([SECOND_ACCOUNT]),
     )
     sessionHandler.mockReturnValue(
-      createPlayerProfile({
+      createFargoRatePlayer({
         fargorateId: SECOND_ACCOUNT.fargorateId,
         name: SECOND_ACCOUNT.name,
         rating: 450,

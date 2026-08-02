@@ -1,13 +1,16 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import PlayerProfileTable from '../../../app/components/PlayerProfileTable.vue'
-import { createGuestPlayer, createPlayerProfile } from '../../helpers/fixtures'
+import {
+  createGuestPlayer,
+  createFargoRatePlayer,
+} from '../../helpers/fixtures'
 import { jaMessage } from '../../helpers/i18n'
 
 describe('PlayerProfileTable', () => {
   it('レーティングと信頼度を独立した数値として見せる', async () => {
     const component = await mountSuspended(PlayerProfileTable, {
-      props: { player: createPlayerProfile() },
+      props: { player: createFargoRatePlayer() },
     })
     const values = component.findAll('.stat-value').map((node) => node.text())
 
@@ -18,7 +21,7 @@ describe('PlayerProfileTable', () => {
 
   it('名前を1つの行で見せる', async () => {
     const component = await mountSuspended(PlayerProfileTable, {
-      props: { player: createPlayerProfile({ name: 'Hanako Suzuki' }) },
+      props: { player: createFargoRatePlayer({ name: 'Hanako Suzuki' }) },
     })
 
     expect(component.find('tbody').text()).toContain('Hanako Suzuki')
@@ -26,7 +29,7 @@ describe('PlayerProfileTable', () => {
 
   it('リーグ・リージョン・チームを見せる', async () => {
     const component = await mountSuspended(PlayerProfileTable, {
-      props: { player: createPlayerProfile() },
+      props: { player: createFargoRatePlayer() },
     })
     const rows = component.findAll('tbody tr').map((row) => row.text())
 
@@ -40,7 +43,7 @@ describe('PlayerProfileTable', () => {
   it('値が null の項目をハイフンで見せる', async () => {
     const component = await mountSuspended(PlayerProfileTable, {
       props: {
-        player: createPlayerProfile({
+        player: createFargoRatePlayer({
           leagueName: null,
           region: null,
           teamNames: null,
@@ -55,7 +58,7 @@ describe('PlayerProfileTable', () => {
   // 確認画面ではユーザーが今まさに入力したIDなので出さない。
   it('既定ではFargoRate IDを出さない', async () => {
     const component = await mountSuspended(PlayerProfileTable, {
-      props: { player: createPlayerProfile() },
+      props: { player: createFargoRatePlayer() },
     })
 
     expect(component.text()).not.toContain(jaMessage('player.fargorateId'))
@@ -64,7 +67,7 @@ describe('PlayerProfileTable', () => {
 
   it('show-fargorate-id を付けるとFargoRate IDを先頭の行に出す', async () => {
     const component = await mountSuspended(PlayerProfileTable, {
-      props: { player: createPlayerProfile(), showFargorateId: true },
+      props: { player: createFargoRatePlayer(), showFargorateId: true },
     })
     const rows = component.findAll('tbody tr')
 

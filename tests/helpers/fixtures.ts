@@ -48,7 +48,7 @@ export function createDocument(path: string, title: string) {
   }
 }
 
-export function createPlayerProfile(
+export function createFargoRatePlayer(
   overrides: Partial<FargoRatePlayer> = {},
 ): FargoRatePlayer {
   return {

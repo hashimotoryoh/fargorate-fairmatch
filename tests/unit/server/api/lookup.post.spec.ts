@@ -2,7 +2,7 @@ import { createError } from 'h3'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import handler from '../../../../server/api/lookup.post'
 import { callHandler } from '../../../helpers/h3'
-import { FARGORATE_ID, createPlayerProfile } from '../../../helpers/fixtures'
+import { FARGORATE_ID, createFargoRatePlayer } from '../../../helpers/fixtures'
 
 /**
  * ルックアップのサーバールートを、リクエストからの一連の流れとして確かめる。
@@ -24,7 +24,7 @@ describe('POST /api/lookup', () => {
   })
 
   it('該当するプレイヤーの情報を返す', async () => {
-    const profile = createPlayerProfile()
+    const profile = createFargoRatePlayer()
     lookupPlayerProfile.mockResolvedValue(profile)
 
     const response = await callHandler(handler, {
@@ -101,7 +101,7 @@ describe('POST /api/lookup', () => {
   it('セッションを書き込まない', async () => {
     const setUserSession = vi.fn()
     vi.stubGlobal('setUserSession', setUserSession)
-    lookupPlayerProfile.mockResolvedValue(createPlayerProfile())
+    lookupPlayerProfile.mockResolvedValue(createFargoRatePlayer())
 
     await callHandler(handler, {
       fargorateId: FARGORATE_ID,
