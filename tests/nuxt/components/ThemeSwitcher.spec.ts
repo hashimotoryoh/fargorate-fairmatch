@@ -36,9 +36,11 @@ describe('ThemeSwitcher', () => {
   })
 
   // 読み上げ環境ではアイコンだけのボタンが何のためのものか分からない。
+  // `attributes()` は属性が無いと `undefined` を返すため、空文字との不一致
+  // ではなく真偽で検証しないと、属性そのものが無い場合を見逃す。
   it('読み上げ用のラベルを持つ', async () => {
     const component = await mountSuspended(ThemeSwitcher)
 
-    expect(component.find('button').attributes('aria-label')).not.toBe('')
+    expect(component.find('button').attributes('aria-label')).toBeTruthy()
   })
 })
