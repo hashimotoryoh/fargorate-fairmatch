@@ -126,6 +126,16 @@ describe('設定ページ', () => {
     expect(component.text()).toContain(jaMessage('settings.newsDescription'))
   })
 
+  // Dockやヘッダーのメインナビにはfaqを追加しない方針のため、フッターに加えて
+  // 設定画面もFAQへの導線になる。
+  it('FAQページへのリンクを出す', async () => {
+    const component = await mountSuspended(SettingsPage)
+    const link = component.find('a[href="/faq"]')
+
+    expect(link.exists()).toBe(true)
+    expect(component.text()).toContain(jaMessage('settings.faqDescription'))
+  })
+
   // 二度押しで破棄と移動が重ならないよう、処理中はボタンを無効にする。
   it('サインアウトの処理中はボタンを無効にする', async () => {
     let resolveClear: (() => void) | undefined
