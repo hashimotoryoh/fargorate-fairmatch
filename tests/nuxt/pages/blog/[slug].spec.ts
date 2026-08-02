@@ -1,7 +1,7 @@
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
-import NewsSlugPage from '../../../../app/pages/news/[slug].vue'
-import { createNewsArticle } from '../../../helpers/fixtures'
+import BlogSlugPage from '../../../../app/pages/blog/[slug].vue'
+import { createBlogArticle } from '../../../helpers/fixtures'
 
 const { queryCollectionMock, firstMock, routeParams } = vi.hoisted(() => ({
   firstMock: vi.fn(),
@@ -14,17 +14,17 @@ const { queryCollectionMock, firstMock, routeParams } = vi.hoisted(() => ({
 mockNuxtImport('useRoute', () => () => ({ params: routeParams }))
 mockNuxtImport('queryCollection', () => queryCollectionMock)
 
-describe('ニュースの詳細ページ', () => {
-  it('ルートのslugから記事のパスを組み立ててNewsArticleへ渡す', async () => {
+describe('ブログの詳細ページ', () => {
+  it('ルートのslugから記事のパスを組み立ててBlogArticleへ渡す', async () => {
     const pathMock = vi.fn(() => ({ first: firstMock }))
     queryCollectionMock.mockReturnValue({ path: pathMock })
     firstMock.mockResolvedValue(
-      createNewsArticle('/news/sample-article', 'サンプル記事'),
+      createBlogArticle('/blog/sample-article', 'サンプル記事'),
     )
 
-    const component = await mountSuspended(NewsSlugPage)
+    const component = await mountSuspended(BlogSlugPage)
 
-    expect(pathMock).toHaveBeenCalledWith('/news/sample-article')
+    expect(pathMock).toHaveBeenCalledWith('/blog/sample-article')
     expect(component.find('h1').text()).toBe('サンプル記事')
   })
 })

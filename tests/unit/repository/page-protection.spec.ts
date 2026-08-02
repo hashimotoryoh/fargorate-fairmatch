@@ -16,8 +16,8 @@ const PUBLIC_PAGES = [
   'guest',
   'privacy-policy',
   'terms-conditions',
-  'news/index',
-  'news/[slug]',
+  'blog/index',
+  'blog/[slug]',
 ]
 
 /** 認証済みのユーザーを追い返すページ。サインインの入口が対象。 */
@@ -25,7 +25,7 @@ const GUEST_ONLY_PAGES = ['lookup', 'guest']
 
 /**
  * `app/pages/` 配下を再帰的に辿り、`.vue` の拡張子を除いた相対パスを返す
- * （例: `news/index`、`news/[slug]`）。ニュース一覧・詳細のようにディレクトリを
+ * （例: `blog/index`、`blog/[slug]`）。ブログ一覧・詳細のようにディレクトリを
  * 持つページも同じ規約で検査できるようにするため、トップレベルに限定しない。
  */
 function pageNames(): string[] {
