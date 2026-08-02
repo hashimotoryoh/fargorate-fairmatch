@@ -1,4 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { Icon } from '#components'
 import { describe, expect, it } from 'vitest'
 import AppDock from '../../../app/components/AppDock.vue'
 import { mainNavItems } from '../../../app/utils/navigation'
@@ -17,23 +18,13 @@ describe('AppDock', () => {
     )
   })
 
-  it('各項目にアイコンを描く', async () => {
+  it('各項目にMaterial Design Iconsのアイコンを描く', async () => {
     const component = await mountSuspended(AppDock)
+    const icons = component.findAllComponents(Icon)
 
-    component.findAll('a').forEach((link, index) => {
-      const paths = link.findAll('path').map((path) => path.attributes('d'))
-
-      expect(paths).toEqual(mainNavItems[index]?.iconPaths)
-    })
-  })
-
-  // アイコンの隣に必ず表示名があるため、装飾として読み上げから外す。
-  it('アイコンを読み上げの対象から外す', async () => {
-    const component = await mountSuspended(AppDock)
-
-    for (const svg of component.findAll('svg')) {
-      expect(svg.attributes('aria-hidden')).toBe('true')
-    }
+    expect(icons.map((icon) => icon.props('name'))).toEqual(
+      mainNavItems.map((item) => item.icon),
+    )
   })
 
   // デスクトップ幅ではヘッダーのナビゲーションが出るため、ドックは隠す。

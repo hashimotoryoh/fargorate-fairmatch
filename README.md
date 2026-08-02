@@ -14,6 +14,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 - [Nuxt Auth Utils](https://github.com/atinux/nuxt-auth-utils)
 - [Nuxt Content](https://content.nuxt.com/)
 - [Nuxt I18n](https://i18n.nuxtjs.org/)
+- [Nuxt Icon](https://nuxt.com/modules/icon)
 
 ## ページ
 

@@ -1,4 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { Icon } from '#components'
 import { describe, expect, it } from 'vitest'
 import AppHeader from '../../../app/components/AppHeader.vue'
 import { mainNavItems } from '../../../app/utils/navigation'
@@ -11,7 +12,7 @@ describe('AppHeader', () => {
 
     expect(home.exists()).toBe(true)
     expect(home.text()).toContain('FargoRate FairMatch')
-    expect(home.find('svg').exists()).toBe(true)
+    expect(home.findComponent(Icon).props('name')).toBe('custom:app-logo')
   })
 
   /**

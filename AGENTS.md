@@ -123,6 +123,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 - daisyUI v5
 - Nuxt Content v3
 - Nuxt I18n v10
+- Nuxt Icon v2
 
 パッケージマネージャーはnpmを使用する。`package-lock.json` を管理しているため、yarnやpnpmに置き換えないこと。依存を追加した場合は `package.json` と `package-lock.json` の両方をコミットすること。
 
@@ -144,6 +145,7 @@ Node.js のバージョンは `.node-version` に従うこと。
   - `app/middleware/`: ルートミドルウェア。`.global.ts` の接尾辞で全ルートに適用される
   - `app/utils/`: 汎用の関数。自動インポートの対象
   - `app/assets/css/main.css`: Tailwind CSS と daisyUI の読み込み口
+  - `app/assets/icons/`: `@nuxt/icon` のカスタムコレクション（`custom:` プレフィックス）のSVG。アプリロゴなど既存のアイコンセットにない図形を置く
 - `server/`: Nitroのサーバールート。プロジェクトルート直下に置く
   - `server/api/`: APIのエンドポイント。ファイル名の `.post.ts` などがHTTPメソッドに対応する
   - `server/utils/`: サーバールートから自動インポートされるユーティリティ
@@ -319,6 +321,15 @@ FargoRateアプリの表示言語は端末の設定に従うため、案内の�
 - daisyUIのコンポーネントクラス（`btn`、`card` など）を優先し、細かな調整をTailwindのユーティリティクラスで行う
 - スコープ付きの `<style>` は、ユーティリティクラスで表現できない場合に限って使う
 
+### アイコン
+
+アイコンには [`@nuxt/icon`](https://nuxt.com/modules/icon) を使う。`<Icon name="..." />` に名前を渡すだけで描画され、生のSVGをコンポーネントへ書き下さない。
+
+- 一般的なアイコンは Material Design Icons（`mdi:` プレフィックス、例: `mdi:cog`）を使う。アイコン名は [icones.js.org](https://icones.js.org/collection/mdi) で探せる
+- このアプリ固有の図形（アプリロゴなど）は `app/assets/icons/` にSVGを置き、`custom:` プレフィックスで参照する（例: `custom:app-logo`）。コレクションの設定は `nuxt.config.ts` の `icon.customCollections` にある
+- 描画モードは `nuxt.config.ts` の `icon.mode` で `svg` に固定してある。既定の `css`（背景画像）では `currentColor` へ色を委ねたい箇所（daisyUIのドックなど）と相性が悪いため
+- `nuxt.config.ts` に `icon.clientBundle` や `icon.provider: 'none'` のようなテスト専用の分岐は加えないこと。`@nuxt/icon` のREADMEはVitest Browser ModeやCypress Component Testingのような、実サーバーを持たない環境向けにこの構成を案内しているが、Vitestの `nuxt` プロジェクトは `@nuxt/test-utils` が裏で実際にNitroを起動するため、アイコンはテスト中も本物のAPI経由で解決できる。動的に渡すアイコン名（`mainNavItems`の`icon`など）を検査する必要が生じても、まず本当に静的スキャンや事前バンドルが要るかを確かめてから足すこと
+
 ### コード品質
 
 以下のツールでコード品質を担保している。全てのコーディングはそれらのルールに従うこと。
@@ -355,6 +366,7 @@ Vitestでテストを書く。実行方法は `README.md` に記載している�
 - 外部APIへは決して実通信しないこと。`tests/setup/nitro-auto-imports.ts` が `$fetch` を既定で失敗させてあるので、テストごとに `vi.stubGlobal` で差し替える
 - サーバールートは `tests/helpers/h3.ts` の `callHandler` でWeb標準のリクエストとして叩く。`readBody` の解釈や `createError` の応答への変換まで含めて確かめるため、ハンドラーを関数として直接呼ばないこと
 - 認証やリダイレクトの制限は、緩めた場合にテストが落ちる形で書くこと。オープンリダイレクトの防止やセッションへの保存内容は、壊れても画面上は正常に見えてしまう
+- UIのテストはpropsや状態に応じて分岐する見た目（表示文言、href、状態を表すクラス、計算されたstyleなど）を確かめる。アイコンのSVGパスやライブラリの既定の`aria-hidden`のような、分岐なく描画されるだけの内容は、壊れようがないため検査しない
 - `tests/unit/repository/` にはリポジトリの規約そのものを守るテストを置いている。保護ページの宣言漏れやガイドのシンボリックリンクなど、レビューで見落とすと影響の大きいものが対象である
 - 表示文言はテストにベタ書きせず、`tests/helpers/i18n.ts` の `jaMessage()` でキーから引くこと。ベタ書きすると翻訳ファイルとの二重管理になり、キーの綴り間違いも検出できない。文面の改訂では落ちず、キーの取り違えでは落ちる状態に保つ
 - `nuxt` プロジェクトのブラウザの言語は `tests/setup/browser-locale.ts` で日本語に固定してある。happy-dom の既定は英語で、言語検出が働くとどちらの言語で描画されるかがテストごとに変わるためである。英語での描画は `setLocale('en')` で明示的に切り替えて確かめること

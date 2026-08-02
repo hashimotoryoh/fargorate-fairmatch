@@ -13,12 +13,12 @@ describe('mainNavItems', () => {
     ])
   })
 
-  it('すべての項目が自サイト内の絶対パスと表示名のキーとアイコンを持つ', () => {
+  it('すべての項目が自サイト内の絶対パスと表示名のキーとMaterial Design Iconsのアイコン名を持つ', () => {
     for (const item of mainNavItems) {
       expect(item.to.startsWith('/')).toBe(true)
       expect(item.to.startsWith('//')).toBe(false)
       expect(item.labelKey).not.toBe('')
-      expect(item.iconPaths.length).toBeGreaterThan(0)
+      expect(item.icon.startsWith('mdi:')).toBe(true)
     }
   })
 
@@ -28,11 +28,10 @@ describe('mainNavItems', () => {
     expect(new Set(paths).size).toBe(paths.length)
   })
 
-  // ヘッダーとドックはこの配列を `key` に使うため、重複すると描画が壊れる。
-  it('アイコンのパスが項目内で重複しない', () => {
-    for (const item of mainNavItems) {
-      expect(new Set(item.iconPaths).size).toBe(item.iconPaths.length)
-    }
+  it('ゲームタブは mdi:billiards-rack を使う', () => {
+    const game = mainNavItems.find((item) => item.to === '/game')
+
+    expect(game?.icon).toBe('mdi:billiards-rack')
   })
 })
 
