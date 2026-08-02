@@ -1,4 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { Icon } from '#components'
 import { describe, expect, it } from 'vitest'
 import AppDock from '../../../app/components/AppDock.vue'
 import { mainNavItems } from '../../../app/utils/navigation'
@@ -19,7 +20,7 @@ describe('AppDock', () => {
 
   it('各項目にMaterial Design Iconsのアイコンを描く', async () => {
     const component = await mountSuspended(AppDock)
-    const icons = component.findAllComponents({ name: 'NuxtIconSvg' })
+    const icons = component.findAllComponents(Icon)
 
     expect(icons.map((icon) => icon.props('name'))).toEqual(
       mainNavItems.map((item) => item.icon),
