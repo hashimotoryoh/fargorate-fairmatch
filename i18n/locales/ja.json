@@ -102,6 +102,10 @@
     "heading": "サインイン",
     "lead": "FargoRate IDであなたの情報を探します。",
     "idLabel": "FargoRate ID（13桁の数字）",
+    "recentAccounts": {
+      "label": "最近使用したアカウント:",
+      "remove": "{name} をサジェストから削除"
+    },
     "submit": "検索する",
     "confirmQuestion": "このプレイヤーはあなたですか？",
     "confirm": "はい、これは私です",

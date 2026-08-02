@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PlayerProfile } from '#shared/types/player'
+import type { RecentAccount } from '~/composables/useRecentAccounts'
 
 definePageMeta({ middleware: 'guest' })
 
@@ -16,11 +17,18 @@ useSeoMeta({
 const route = useRoute()
 const localePath = useLocalePath()
 const { fetch: refreshSession } = useUserSession()
+const { recentAccounts, addRecentAccount, removeRecentAccount } =
+  useRecentAccounts()
 const { execute: executeRecaptcha } = useRecaptcha()
 
 const fargorateId = ref('')
 // 'input' はID入力、'confirm' は本人確認のステップ。
 const step = ref<'input' | 'confirm'>('input')
+
+// サジェストの表示にも、削除ボタンのaria-label（対象の識別）にも使う。
+function accountLabel(account: RecentAccount) {
+  return `${account.firstName} ${account.lastName} (${account.effectiveRating})`
+}
 const candidate = ref<PlayerProfile | null>(null)
 const pending = ref(false)
 const errorMessage = ref('')
@@ -65,16 +73,19 @@ async function lookup() {
   }
 }
 
-// 本人だと確認できたので認証を確定し、元々開こうとしていたページへ移動する。
-async function confirm() {
+// 認証を確定し、アカウントを記憶したうえで元々開こうとしていたページへ移動する。
+// サーバーが再ルックアップした最新のプレイヤー情報を記憶に使う。呼び出し元が
+// 持つ情報（サジェストのlocalStorageの値など）は古い可能性があるため使わない。
+async function completeSignIn(id: string) {
   pending.value = true
   errorMessage.value = ''
 
   try {
-    await $fetch('/api/auth/session', {
+    const profile = await $fetch<PlayerProfile>('/api/auth/session', {
       method: 'POST',
-      body: { fargorateId: fargorateId.value },
+      body: { fargorateId: id },
     })
+    addRecentAccount(profile)
     await refreshSession()
     // `resolveRedirectPath` はロケールを知らない純粋な関数に保つ。オープン
     // リダイレクトの判定と、ロケールの付与を混ぜないため、ここで通す。
@@ -85,6 +96,18 @@ async function confirm() {
   } finally {
     pending.value = false
   }
+}
+
+// 本人だと確認できたので認証を確定する。
+async function confirm() {
+  if (!candidate.value) return
+  await completeSignIn(candidate.value.fargorateId)
+}
+
+// 過去に本人確認したアカウントは、選んだ時点で本人だとわかっているため、
+// 確認画面を経由せず直接サインインする。
+async function selectRecentAccount(account: RecentAccount) {
+  await completeSignIn(account.fargorateId)
 }
 
 // 本人ではなかったので、ID入力からやり直す。
@@ -128,6 +151,42 @@ function reject() {
               required
             />
           </label>
+
+          <div
+            v-if="recentAccounts.length"
+            class="flex flex-wrap items-center gap-2"
+          >
+            <span class="text-base-content/70 text-xs">
+              {{ $t('lookup.recentAccounts.label') }}
+            </span>
+            <div
+              v-for="account in recentAccounts"
+              :key="account.fargorateId"
+              class="join"
+            >
+              <button
+                type="button"
+                class="btn btn-outline btn-xs join-item"
+                :disabled="pending"
+                @click="selectRecentAccount(account)"
+              >
+                {{ accountLabel(account) }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline btn-xs join-item"
+                :aria-label="
+                  $t('lookup.recentAccounts.remove', {
+                    name: accountLabel(account),
+                  })
+                "
+                :disabled="pending"
+                @click="removeRecentAccount(account.fargorateId)"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
 
           <div class="text-center">
             <LookupGuideModal />
