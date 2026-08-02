@@ -52,6 +52,9 @@ export default defineNuxtConfig({
   // sitemap は i18n が組み立てたルートを読むため、最後に置く。
   modules: [
     '@nuxt/content',
+    // @nuxt/content が起動時にこのモジュールを検出し、page コレクションを
+    // llms.txt へ渡すフック連携を自動で行うため、@nuxt/content より後に置く。
+    'nuxt-llms',
     '@nuxt/eslint',
     '@nuxt/icon',
     '@nuxt/image',
@@ -119,6 +122,67 @@ export default defineNuxtConfig({
      * 自動で組み立てられる）。
      */
     sources: ['/api/__sitemap__/news'],
+  },
+  /**
+   * AIクローラー・エージェント向けの `/llms.txt`（https://llmstxt.org/）。
+   *
+   * このアプリの i18n は `prefix_except_default`（既定の `ja` は接頭辞なし、
+   * `en` は `/en`）だが、`nuxt-llms` はロケールを意識しない単一のルートしか
+   * 生成しない。ロケールごとに分けず、英語の単一ファイルとして公開する
+   * 方針にしてある（`robots.txt` も単一ファイルである前例に揃えた）。
+   * 本文中のリンクも英語ロケールのURL（`/en/...`）を指す。
+   *
+   * `sections` は `documents_en`・`news_en` だけを参照し、`documents_ja`・
+   * `news_ja` は参照しない。日本語コレクションを足すと英語限定の方針が
+   * 崩れるため、`tests/unit/repository/llms-txt.spec.ts` で機械的に
+   * 検査している。
+   */
+  llms: {
+    domain: SITE_URL,
+    title: 'FargoRate FairMatch',
+    // documents_ja/documents_en、news_ja/news_en はそれぞれ日英で同じパスを
+    // 共有しており（例: /privacy-policy、/news/<スラッグ>）、`/raw/*.md` は
+    // 最初に見つかったコレクションを返すだけでロケールを見分けない。日本語
+    // コレクションを対象から外すことで、`/raw/privacy-policy.md` が確実に
+    // documents_en の英語本文を返すようにする。
+    contentRawMarkdown: {
+      excludeCollections: ['documents_ja', 'news_ja'],
+    },
+    description:
+      'A web app that helps you enter and review pool match scores on top of FargoRate ratings. Your FargoRate ID is all you need to get started. It reads ratings from the official FargoRate system but never sends match results back, so it never updates your rating.',
+    sections: [
+      {
+        title: 'Getting Started',
+        links: [
+          {
+            title: 'Home',
+            description:
+              'What FargoRate FairMatch does and how FargoRate ratings work.',
+            href: '/en',
+          },
+          {
+            title: 'Sign in with your FargoRate ID',
+            description:
+              'Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app.',
+            href: '/en/lookup',
+          },
+          {
+            title: 'Start as a guest',
+            description:
+              'Sign in without a FargoRate ID by entering a name and a self-reported rating.',
+            href: '/en/guest',
+          },
+        ],
+      },
+      {
+        title: 'Legal',
+        contentCollection: 'documents_en',
+      },
+      {
+        title: 'News',
+        contentCollection: 'news_en',
+      },
+    ],
   },
   css: ['@/assets/css/main.css'],
   content: {
