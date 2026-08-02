@@ -40,7 +40,7 @@ describe('AppHeader', () => {
     for (const showNav of [false, true]) {
       const component = await mountSuspended(AppHeader, { props: { showNav } })
 
-      expect(component.find('input[type="checkbox"]').exists()).toBe(true)
+      expect(component.find('button').exists()).toBe(true)
     }
   })
 

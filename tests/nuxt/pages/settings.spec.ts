@@ -1,5 +1,6 @@
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { useNuxtApp } from '#imports'
+import { Icon } from '#components'
 import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
@@ -111,7 +112,9 @@ describe('設定ページ', () => {
     const component = await mountSuspended(SettingsPage)
 
     expect(component.text()).toContain(jaMessage('settings.theme'))
-    expect(component.find('input[type="checkbox"]').exists()).toBe(true)
+    expect(component.findComponent(Icon).props('name')).toBe(
+      'mdi:theme-light-dark',
+    )
   })
 
   // 二度押しで破棄と移動が重ならないよう、処理中はボタンを無効にする。
