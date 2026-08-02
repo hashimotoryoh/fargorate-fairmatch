@@ -7,8 +7,16 @@ const source = readFileSync(
   'utf8',
 )
 
-/** page-protection.spec.ts の PUBLIC_PAGES と対になる、保護対象のページ名。 */
-const PROTECTED_PAGES = ['dashboard', 'game', 'settings']
+/**
+ * 保護ページのパス一覧。ここで独自に列挙すると、保護ページが増えたときに
+ * このテストだけ追随せず検知が漏れる。`sitemap.exclude`（`app/pages/` との
+ * 網羅性は `page-protection.spec.ts` が検査済み）から取り出して使い回す。
+ */
+function protectedPagePaths(): string[] {
+  const exclude = source.match(/exclude: \[(.*?)\]/s)?.[1] ?? ''
+
+  return [...exclude.matchAll(/'([^']+)'/g)].map(([, path]) => path)
+}
 
 function llmsBlock(): string {
   const match = source.match(/\n {2}llms: \{[\s\S]*?\n {2}\},\n {2}css:/)
@@ -53,17 +61,21 @@ describe('llms.txt の設定', () => {
   })
 
   it('英語コレクション（documents_en・news_en）を raw markdown から除外していない', () => {
+    // 改行を挟んで折り返されても検査できるよう、dotAll（s）フラグを付ける。
     const excludeCollections =
-      llmsBlock().match(/excludeCollections: \[(.*?)\]/)?.[1] ?? ''
+      llmsBlock().match(/excludeCollections: \[(.*?)\]/s)?.[1] ?? ''
 
     expect(excludeCollections).not.toContain("'documents_en'")
     expect(excludeCollections).not.toContain("'news_en'")
   })
 
-  it.each(PROTECTED_PAGES)('保護ページ %s へのリンクを含んでいない', (name) => {
-    const block = llmsSectionsBlock()
+  it.each(protectedPagePaths())(
+    '保護ページ %s へのリンクを含んでいない',
+    (path) => {
+      const block = llmsSectionsBlock()
 
-    expect(block).not.toContain(`/${name}`)
-    expect(block).not.toContain(`/en/${name}`)
-  })
+      expect(block).not.toContain(path)
+      expect(block).not.toContain(`/en${path}`)
+    },
+  )
 })
