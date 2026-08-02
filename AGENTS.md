@@ -139,7 +139,6 @@ Node.js のバージョンは `.node-version` に従うこと。
 
 - `app/`: アプリケーションのソース。Nuxt v4 の `srcDir`
   - `app/app.vue`: ルートコンポーネント
-  - `app/app.config.ts`: 実行時に参照するアプリ設定。`@nuxt/icon` の描画モードなど
   - `app/components/`: コンポーネント。自動インポートの対象
   - `app/layouts/`: レイアウト
   - `app/pages/`: ページ。ファイル名がそのままルートになる
@@ -328,8 +327,8 @@ FargoRateアプリの表示言語は端末の設定に従うため、案内の�
 
 - 一般的なアイコンは Material Design Icons（`mdi:` プレフィックス、例: `mdi:cog`）を使う。アイコン名は [icones.js.org](https://icones.js.org/collection/mdi) で探せる
 - このアプリ固有の図形（アプリロゴなど）は `app/assets/icons/` にSVGを置き、`custom:` プレフィックスで参照する（例: `custom:app-logo`）。コレクションの設定は `nuxt.config.ts` の `icon.customCollections` にある
-- 描画モードは `app/app.config.ts` で `svg` に固定してある。既定の `css`（背景画像）ではテストで `<svg>` を検査できず、daisyUIのドックのように `currentColor` へ色を委ねる箇所とも相性が悪いため
-- アイコン名を動的に組み立てる（テンプレートリテラルなど）と、`nuxt.config.ts` の `icon.clientBundle`（テスト実行時のみ有効）が静的スキャンで拾えない。`mainNavItems`（`app/utils/navigation.ts`）のようにコンポーネント外の配列からアイコン名を渡す場合は、その配列を `nuxt.config.ts` 側でも読み、`clientBundle.icons` へ明示的に列挙すること
+- 描画モードは `nuxt.config.ts` の `icon.mode` で `svg` に固定してある。既定の `css`（背景画像）では `currentColor` へ色を委ねたい箇所（daisyUIのドックなど）と相性が悪いため
+- `nuxt.config.ts` の `icon.clientBundle`（テスト実行時のみ有効）は、Vitestの `nuxt` プロジェクトがNitroのアイコン配信APIを持たないための設定である。アイコン名をテンプレートに直接書いた箇所（`<Icon name="mdi:cog" />` など）は静的スキャンで拾えるが、`mainNavItems`（`app/utils/navigation.ts`）のようにコンポーネント外の配列から動的に渡す名前は拾えない。ただしUIテストの方針（後述）によりアイコンの描画結果そのものを検査することは無いため、動的な名前をテスト用に列挙する必要は無い
 
 ### コード品質
 
@@ -367,6 +366,7 @@ Vitestでテストを書く。実行方法は `README.md` に記載している�
 - 外部APIへは決して実通信しないこと。`tests/setup/nitro-auto-imports.ts` が `$fetch` を既定で失敗させてあるので、テストごとに `vi.stubGlobal` で差し替える
 - サーバールートは `tests/helpers/h3.ts` の `callHandler` でWeb標準のリクエストとして叩く。`readBody` の解釈や `createError` の応答への変換まで含めて確かめるため、ハンドラーを関数として直接呼ばないこと
 - 認証やリダイレクトの制限は、緩めた場合にテストが落ちる形で書くこと。オープンリダイレクトの防止やセッションへの保存内容は、壊れても画面上は正常に見えてしまう
+- UIのテストはpropsや状態に応じて分岐する見た目（表示文言、href、状態を表すクラス、計算されたstyleなど）を確かめる。アイコンのSVGパスやライブラリの既定の`aria-hidden`のような、分岐なく描画されるだけの内容は、壊れようがないため検査しない
 - `tests/unit/repository/` にはリポジトリの規約そのものを守るテストを置いている。保護ページの宣言漏れやガイドのシンボリックリンクなど、レビューで見落とすと影響の大きいものが対象である
 - 表示文言はテストにベタ書きせず、`tests/helpers/i18n.ts` の `jaMessage()` でキーから引くこと。ベタ書きすると翻訳ファイルとの二重管理になり、キーの綴り間違いも検出できない。文面の改訂では落ちず、キーの取り違えでは落ちる状態に保つ
 - `nuxt` プロジェクトのブラウザの言語は `tests/setup/browser-locale.ts` で日本語に固定してある。happy-dom の既定は英語で、言語検出が働くとどちらの言語で描画されるかがテストごとに変わるためである。英語での描画は `setLocale('en')` で明示的に切り替えて確かめること

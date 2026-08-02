@@ -1,7 +1,6 @@
 import { execSync } from 'node:child_process'
 import { createResolver } from 'nuxt/kit'
 import tailwindcss from '@tailwindcss/vite'
-import { mainNavItems } from './app/utils/navigation'
 
 const { resolve } = createResolver(import.meta.url)
 
@@ -63,6 +62,9 @@ export default defineNuxtConfig({
     strict: true,
   },
   icon: {
+    // daisyUIのドックやヘッダーでは `currentColor` に色を委ねたいため、
+    // CSSの背景画像ではなくインラインSVGで描く。
+    mode: 'svg',
     // アプリロゴを `custom:app-logo` として使えるようにする。
     customCollections: [
       {
@@ -72,14 +74,12 @@ export default defineNuxtConfig({
     ],
     // vitestの `nuxt` プロジェクトはNitroのアイコン配信APIを持たないため、
     // アイコンデータをクライアントバンドルへ静的に含めてネットワーク取得を
-    // 避ける。Vitestは既定で `NODE_ENV=test` を立てる。
+    // 避ける。ロゴは `<Icon name="custom:app-logo">` と静的に書いているため
+    // スキャンで拾える。Vitestは既定で `NODE_ENV=test` を立てる。
     ...(process.env.NODE_ENV === 'test'
       ? {
           provider: 'none',
           clientBundle: {
-            // `mainNavItems` から動的に名前を渡す箇所は静的スキャンで拾えない
-            // ため、明示的に列挙する。
-            icons: mainNavItems.map((item) => item.icon),
             scan: true,
             includeCustomCollections: true,
           },

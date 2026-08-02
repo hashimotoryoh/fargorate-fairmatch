@@ -26,15 +26,6 @@ describe('AppDock', () => {
     )
   })
 
-  // アイコンの隣に必ず表示名があるため、装飾として読み上げから外す。
-  it('アイコンを読み上げの対象から外す', async () => {
-    const component = await mountSuspended(AppDock)
-
-    for (const svg of component.findAll('svg')) {
-      expect(svg.attributes('aria-hidden')).toBe('true')
-    }
-  })
-
   // デスクトップ幅ではヘッダーのナビゲーションが出るため、ドックは隠す。
   it('デスクトップ幅では隠す', async () => {
     const component = await mountSuspended(AppDock)
