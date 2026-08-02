@@ -7,6 +7,13 @@ const source = readFileSync(
   'utf8',
 )
 
+const faqPluginSource = readFileSync(
+  fileURLToPath(
+    new URL('../../../server/plugins/llms-faq.ts', import.meta.url),
+  ),
+  'utf8',
+)
+
 /**
  * 保護ページのパス一覧。ここで独自に列挙すると、保護ページが増えたときに
  * このテストだけ追随せず検知が漏れる。`sitemap.exclude`（`app/pages/` との
@@ -76,6 +83,34 @@ describe('llms.txt の設定', () => {
 
       expect(block).not.toContain(path)
       expect(block).not.toContain(`/en${path}`)
+    },
+  )
+})
+
+/**
+ * FAQは `type: 'data'` のコレクションで `contentCollection` の対象にできない
+ * ため、`server/plugins/llms-faq.ts` の `llms:generate` フックで別途足している
+ * （`nuxt.config.ts` 側のコメント参照）。こちらも日本語コレクションを参照しない
+ * 方針・保護ページを指さない方針は変わらないため、同じ観点で検査する。
+ */
+describe('llms.txt のFAQセクション', () => {
+  it('英語コレクション（faq_en）を参照している', () => {
+    expect(faqPluginSource).toContain("'faq_en'")
+  })
+
+  it('日本語コレクション（faq_ja）を参照していない', () => {
+    expect(faqPluginSource).not.toContain("'faq_ja'")
+  })
+
+  it('英語ロケールのFAQページへリンクしている', () => {
+    expect(faqPluginSource).toContain("'/en/faq'")
+  })
+
+  it.each(protectedPagePaths())(
+    '保護ページ %s へのリンクを含んでいない',
+    (path) => {
+      expect(faqPluginSource).not.toContain(path)
+      expect(faqPluginSource).not.toContain(`/en${path}`)
     },
   )
 })

@@ -14,15 +14,7 @@ const { data: faqItems } = await useAsyncData(
   { watch: [locale] },
 )
 
-// CSVの各行のIDは `ja/faq.csv#1`, `#2`, ... のように行番号を持つ。文字列の
-// ままソートすると `#10` が `#2` より前に来てしまうため、数値に変換してから比較する。
-function rowNumber(id: string): number {
-  return Number(id.split('#').at(-1))
-}
-
-const sortedItems = computed(() =>
-  [...(faqItems.value ?? [])].sort((a, b) => rowNumber(a.id) - rowNumber(b.id)),
-)
+const sortedItems = computed(() => sortFaqItemsByRow(faqItems.value ?? []))
 
 const searchQuery = ref('')
 
