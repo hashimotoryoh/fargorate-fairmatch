@@ -71,7 +71,7 @@ async function searchPlayer() {
   errorMessage.value = ''
 
   try {
-    const recaptchaToken = await executeRecaptcha('lookup')
+    const recaptchaToken = await executeRecaptcha('link')
     candidate.value = await $fetch<FargoRatePlayer>('/api/lookup', {
       method: 'POST',
       body: { fargorateId: fargorateId.value, recaptchaToken },
@@ -84,10 +84,10 @@ async function searchPlayer() {
   }
 }
 
-// 認証を確定し、アカウントを記憶したうえで元々開こうとしていたページへ移動する。
+// リンクを確定し、アカウントを記憶したうえで元々開こうとしていたページへ移動する。
 // サーバーが再ルックアップした最新のプレイヤー情報を記憶に使う。呼び出し元が
 // 持つ情報（サジェストのlocalStorageの値など）は古い可能性があるため使わない。
-async function completeSignIn(id: string) {
+async function completeLink(id: string) {
   pending.value = true
   errorMessage.value = ''
 
@@ -109,16 +109,16 @@ async function completeSignIn(id: string) {
   }
 }
 
-// 本人だと確認できたので認証を確定する。
+// 本人だと確認できたのでリンクを確定する。
 async function confirm() {
   if (!candidate.value) return
-  await completeSignIn(candidate.value.fargorateId)
+  await completeLink(candidate.value.fargorateId)
 }
 
 // 過去に本人確認したアカウントは、選んだ時点で本人だとわかっているため、
-// 確認画面を経由せず直接サインインする。
+// 確認画面を経由せず直接リンクを確定する。
 async function selectRecentAccount(account: RecentAccount) {
-  await completeSignIn(account.fargorateId)
+  await completeLink(account.fargorateId)
 }
 
 // 本人ではなかったので、ID入力からやり直す。

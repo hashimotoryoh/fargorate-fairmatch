@@ -17,9 +17,7 @@ describe('POST /api/lookup', () => {
     // reCAPTCHA検証は既定で成功させる。失敗時の挙動は個別のテストで確かめる。
     vi.stubGlobal(
       '$fetch',
-      vi
-        .fn()
-        .mockResolvedValue({ success: true, score: 0.9, action: 'lookup' }),
+      vi.fn().mockResolvedValue({ success: true, score: 0.9, action: 'link' }),
     )
   })
 

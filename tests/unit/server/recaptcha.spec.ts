@@ -23,7 +23,7 @@ function stubFetch(response: MockedResponse) {
 }
 
 function verifyResponse(overrides: Record<string, unknown> = {}) {
-  return { success: true, score: 0.9, action: 'lookup', ...overrides }
+  return { success: true, score: 0.9, action: 'link', ...overrides }
 }
 
 describe('verifyRecaptchaToken', () => {
@@ -35,7 +35,7 @@ describe('verifyRecaptchaToken', () => {
     stubFetch(verifyResponse())
 
     await expect(
-      verifyRecaptchaToken('valid-token', 'lookup'),
+      verifyRecaptchaToken('valid-token', 'link'),
     ).resolves.toBeUndefined()
   })
 
@@ -43,7 +43,7 @@ describe('verifyRecaptchaToken', () => {
     stubFetch(verifyResponse({ success: false }))
 
     await expect(
-      verifyRecaptchaToken('valid-token', 'lookup'),
+      verifyRecaptchaToken('valid-token', 'link'),
     ).rejects.toMatchObject({
       statusCode: 422,
       statusMessage: 'reCAPTCHA verification failed',
@@ -54,7 +54,7 @@ describe('verifyRecaptchaToken', () => {
     stubFetch(verifyResponse({ score: 0.1 }))
 
     await expect(
-      verifyRecaptchaToken('valid-token', 'lookup'),
+      verifyRecaptchaToken('valid-token', 'link'),
     ).rejects.toMatchObject({ statusCode: 422 })
   })
 
@@ -62,7 +62,7 @@ describe('verifyRecaptchaToken', () => {
     stubFetch(verifyResponse({ action: 'other' }))
 
     await expect(
-      verifyRecaptchaToken('valid-token', 'lookup'),
+      verifyRecaptchaToken('valid-token', 'link'),
     ).rejects.toMatchObject({ statusCode: 422 })
   })
 
@@ -72,12 +72,12 @@ describe('verifyRecaptchaToken', () => {
   it('応答に score が無ければ 422 を投げる', async () => {
     stubFetch({
       success: true,
-      action: 'lookup',
+      action: 'link',
       challenge_ts: '2026-08-01T00:00:00Z',
     })
 
     await expect(
-      verifyRecaptchaToken('valid-token', 'lookup'),
+      verifyRecaptchaToken('valid-token', 'link'),
     ).rejects.toMatchObject({ statusCode: 422 })
   })
 
@@ -90,11 +90,9 @@ describe('verifyRecaptchaToken', () => {
     async (_label, token) => {
       const fetchMock = stubFetch(verifyResponse())
 
-      await expect(verifyRecaptchaToken(token, 'lookup')).rejects.toMatchObject(
-        {
-          statusCode: 422,
-        },
-      )
+      await expect(verifyRecaptchaToken(token, 'link')).rejects.toMatchObject({
+        statusCode: 422,
+      })
       expect(fetchMock).not.toHaveBeenCalled()
     },
   )
@@ -105,7 +103,7 @@ describe('verifyRecaptchaToken', () => {
     })
 
     await expect(
-      verifyRecaptchaToken('valid-token', 'lookup'),
+      verifyRecaptchaToken('valid-token', 'link'),
     ).rejects.toMatchObject({
       statusCode: 502,
       statusMessage: 'Failed to reach the reCAPTCHA verification API',
@@ -122,7 +120,7 @@ describe('verifyRecaptchaToken', () => {
     const fetchMock = stubFetch(verifyResponse())
 
     await expect(
-      verifyRecaptchaToken('valid-token', 'lookup'),
+      verifyRecaptchaToken('valid-token', 'link'),
     ).rejects.toMatchObject({
       statusCode: 500,
       statusMessage: 'NUXT_RECAPTCHA_SECRET_KEY is not configured',
