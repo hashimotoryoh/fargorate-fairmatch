@@ -6,9 +6,12 @@ import { describe, expect, it } from 'vitest'
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url))
 const PAGES_DIR = join(ROOT, 'app/pages')
 
-/** `description: () => t('seo.<キー>.description')` からキーを取り出す。 */
+/**
+ * `description: () => t('seo.<キー>.description')` からキーを取り出す。
+ * 正規表現は大文字小文字を区別するため、`ogDescription:` には当たらない。
+ */
 const DESCRIPTION_PATTERN =
-  /(?<!og)description: \(\) => t\('seo\.([\w[\]-]+)\.description'\)/g
+  /description: \(\) => t\('seo\.([\w[\]-]+)\.description'\)/g
 
 function pagePaths(): string[] {
   return readdirSync(PAGES_DIR, { recursive: true, withFileTypes: true })
