@@ -7,7 +7,7 @@ const { t } = useI18n()
 useSeoMeta({
   title: () => t('seo.lookup.title'),
   description: () => t('seo.lookup.description'),
-  ogDescription: () => t('seo.lookup.ogDescription'),
+  ogDescription: () => t('seo.lookup.description'),
 })
 
 const { loggedIn } = useUserSession()

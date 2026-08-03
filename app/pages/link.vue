@@ -10,7 +10,7 @@ const { t } = useI18n()
 useSeoMeta({
   title: () => t('seo.link.title'),
   description: () => t('seo.link.description'),
-  ogDescription: () => t('seo.link.ogDescription'),
+  ogDescription: () => t('seo.link.description'),
 })
 
 const route = useRoute()

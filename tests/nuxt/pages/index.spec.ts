@@ -22,6 +22,30 @@ describe('トップページ', () => {
     })
   })
 
+  /**
+   * og:description は description と同じ文言にする。OGPカードは長い説明を
+   * 切り詰めるため短い版を別に持つ意味が薄く、2本あると改訂のたびに片方だけ
+   * 古くなる。翻訳のキーも1つに保つ。
+   */
+  it('og:descriptionをdescriptionと同じ文言で出す', async () => {
+    await mountSuspended(IndexPage)
+
+    await vi.waitFor(() => {
+      const description = jaMessage('seo.index.description')
+
+      expect(
+        document.head
+          .querySelector('meta[name="description"]')
+          ?.getAttribute('content'),
+      ).toBe(description)
+      expect(
+        document.head
+          .querySelector('meta[property="og:description"]')
+          ?.getAttribute('content'),
+      ).toBe(description)
+    })
+  })
+
   it('アプリ名と概要を見出しに出す', async () => {
     const component = await mountSuspended(IndexPage)
 

@@ -326,6 +326,8 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 
 ページ側で `ogTitle` を書かないこと。書くと接尾辞の管理が二重になり、ページを足すたびに書き忘れが起きる。`title` だけを与えれば `og:title` は自動で揃う。プレースホルダは `%pageTitle`（そのページの `title`）・`%separator`・`%siteName` で、`%pageTitle` が空のときは区切りごと落ちてサイト名だけが残る。`%s` は `titleTemplate` でしか展開されないため、メタには使えない。
 
+`og:description` は `description` と同じ文言にする。OGPカードは長い説明を切り詰めるため、検索結果向けの説明と別に短い版を持つ意味が薄く、2本あると改訂のたびに片方だけ古くなる。翻訳のキーは `seo.<ページ>.description` の1つだけにし、ページ側では `description` と `ogDescription` の双方へ同じキーを渡すこと。
+
 SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る。`html` の `lang`、hreflang の alternate と `x-default`、canonical、`og:url`、`og:locale` が対象で、これらを手書きで足さないこと。言語を増やすたびに漏れる。
 
 公開URLは `NUXT_PUBLIC_SITE_URL` の1つだけを読み、i18n の `baseUrl`・`site.url`・`runtimeConfig` の全てへ渡す。環境変数を分けると片方だけ設定された状態が起き、誤ったドメインを指す canonical が出る。この形は `tests/unit/repository/site-url.spec.ts` で固定してある。
