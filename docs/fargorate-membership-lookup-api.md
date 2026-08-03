@@ -1,6 +1,6 @@
 # FargoRateメンバーシップルックアップAPI
 
-[FargoRateメンバーシップルックアップ](https://fairmatch.fargorate.com/)ページを開き、`Player name or id` のフォームに `Ryoh Hashimoto` を入力し検索した。
+[FargoRate](https://fairmatch.fargorate.com/)ページの `Find a Player` を開き、`Player name or id` のフォームに `Ryoh Hashimoto` を入力し検索した。
 
 Google Chrome の `検証 > ネットワーク` から該当のリクエストを `Copy as cURL` でコピーし、ターミナルで実行した。
 
