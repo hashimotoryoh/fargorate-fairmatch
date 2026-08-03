@@ -1,7 +1,7 @@
 ---
 title: 利用規約
 description: FargoRate FairRaceを使ううえでの条件、禁止事項、免責事項を定めた利用規約です。
-updatedAt: '2026-08-03'
+updatedAt: '2026-08-04'
 ---
 
 この利用規約（以下「本規約」）は、FargoRate FairRace（以下「本アプリ」）の利用条件を定めるものです。本アプリを利用した時点で、本規約に同意したものとみなします。
