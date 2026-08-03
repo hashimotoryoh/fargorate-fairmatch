@@ -2,7 +2,7 @@
 title: ブログページを公開しました
 description: アプリのアップデートやお知らせをまとめて確認できるブログページを追加しました。
 date: '2026-08-02'
-image: /img/blog/blog-page-launch.png
+image: /img/content/blog/blog-page-launch.png
 ---
 
 FargoRate FairMatchにブログページを追加しました。今後のアップデート内容やお知らせは、このページで随時お伝えします。

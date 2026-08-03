@@ -156,7 +156,7 @@ describe('BlogArticle', () => {
     // useAsyncData はパスごとにキャッシュするため、別の記事と別のパスを使う。
     firstMock.mockResolvedValue(
       createBlogArticle('/blog/with-image', '画像のある記事', {
-        image: '/img/blog/with-image.png',
+        image: '/img/content/blog/with-image.png',
       }),
     )
 
@@ -166,7 +166,7 @@ describe('BlogArticle', () => {
 
     await vi.waitFor(() => {
       expect(head('meta[property="og:image"]')?.getAttribute('content')).toBe(
-        `${SITE_URL}/img/blog/with-image.png`,
+        `${SITE_URL}/img/content/blog/with-image.png`,
       )
     })
   })
@@ -175,7 +175,7 @@ describe('BlogArticle', () => {
   it('記事固有の画像があれば見出し画像に使う', async () => {
     firstMock.mockResolvedValue(
       createBlogArticle('/blog/with-heading-image', '見出し画像のある記事', {
-        image: '/img/blog/with-heading-image.png',
+        image: '/img/content/blog/with-heading-image.png',
       }),
     )
 
@@ -185,7 +185,7 @@ describe('BlogArticle', () => {
 
     const image = component.find('img')
     expect(image.attributes('src')).toContain(
-      '/img/blog/with-heading-image.png',
+      '/img/content/blog/with-heading-image.png',
     )
     expect(image.attributes('alt')).toBe('見出し画像のある記事')
   })

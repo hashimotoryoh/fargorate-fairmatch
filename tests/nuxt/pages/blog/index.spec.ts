@@ -66,14 +66,16 @@ describe('ブログの一覧ページ', () => {
   it('記事固有の画像があればカードの画像に使う', async () => {
     allMock.mockResolvedValue([
       createBlogArticle('/blog/with-image', '画像のある記事', {
-        image: '/img/blog/with-image.png',
+        image: '/img/content/blog/with-image.png',
       }),
     ])
 
     const component = await mountSuspended(BlogIndexPage)
     const image = component.find('img')
 
-    expect(image.attributes('src')).toContain('/img/blog/with-image.png')
+    expect(image.attributes('src')).toContain(
+      '/img/content/blog/with-image.png',
+    )
     expect(image.attributes('alt')).toBe('画像のある記事')
   })
 
