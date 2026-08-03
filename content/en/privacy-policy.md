@@ -64,4 +64,4 @@ This policy is provided in Japanese and in English. If there is any discrepancy 
 
 ## Contact
 
-The App is open source, and anyone can review its source code. For questions about this policy, please use [the issues in the repository](https://github.com/hashimotoryoh/fargorate-fairmatch/issues).
+The App is open source, and anyone can review its source code. For questions about this policy, please use [the issues in the repository](https://github.com/hashimotoryoh/fargorate-fairrace/issues).

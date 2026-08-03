@@ -52,4 +52,4 @@ The contents of the Terms may be changed as needed. By using the App after a cha
 
 ## Contact
 
-For questions about the Terms, please use [the issues in the repository](https://github.com/hashimotoryoh/fargorate-fairmatch/issues).
+For questions about the Terms, please use [the issues in the repository](https://github.com/hashimotoryoh/fargorate-fairrace/issues).

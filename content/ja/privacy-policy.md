@@ -64,4 +64,4 @@ FargoRate FairRace（以下「本アプリ」）は、FargoRateを用いたビ�
 
 ## お問い合わせ
 
-本アプリはオープンソースで公開しており、ソースコードは誰でも確認できます。本ポリシーに関するお問い合わせは、[リポジトリのIssue](https://github.com/hashimotoryoh/fargorate-fairmatch/issues)からお願いします。
+本アプリはオープンソースで公開しており、ソースコードは誰でも確認できます。本ポリシーに関するお問い合わせは、[リポジトリのIssue](https://github.com/hashimotoryoh/fargorate-fairrace/issues)からお願いします。

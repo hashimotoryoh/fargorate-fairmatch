@@ -52,4 +52,4 @@ updatedAt: '2026-08-04'
 
 ## お問い合わせ
 
-本規約に関するお問い合わせは、[リポジトリのIssue](https://github.com/hashimotoryoh/fargorate-fairmatch/issues)からお願いします。
+本規約に関するお問い合わせは、[リポジトリのIssue](https://github.com/hashimotoryoh/fargorate-fairrace/issues)からお願いします。

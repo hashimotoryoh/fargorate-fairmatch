@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 const { resolve } = createResolver(import.meta.url)
 
-const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairmatch'
+const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairrace'
 
 /**
  * 公開URLのオリジン。OGPやcanonical、hreflang の絶対URLの組み立てに使う。
