@@ -17,8 +17,7 @@ import {
   lookupPlayerProfile,
   readFargorateId,
   readPlayerQuery,
-  searchPlayersByName,
-  toSearchResultFromProfile,
+  searchPlayers,
 } from '../../server/utils/lookup'
 import { verifyRecaptchaToken } from '../../server/utils/recaptcha'
 
@@ -49,8 +48,7 @@ Object.assign(globalThis, {
   readFargorateId,
   readGuestPlayer,
   readPlayerQuery,
-  searchPlayersByName,
-  toSearchResultFromProfile,
+  searchPlayers,
   verifyRecaptchaToken,
 })
 

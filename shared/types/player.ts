@@ -26,9 +26,16 @@ export type CsiLookupResponse = {
  * @see docs/fargorate-membership-lookup-api.md
  */
 export type FargoRateLookupPlayer = {
+  /**
+   * FargoRateの表示用ID。桁数は一定しない。名前の代わりにこの値でも検索できる。
+   * 13桁の `membershipId`（このアプリでいうFargoRate ID）とは別物である。
+   */
+  readableId: string | null
   membershipId: string | null
   firstName: string
   lastName: string
+  /** 所在地。空文字で返ることがある。 */
+  location: string | null
   effectiveRating: string
   robustness: string
 }
@@ -107,6 +114,12 @@ export type GuestPlayer = Player & {
  */
 export type FargoRateSearchResult = Player & {
   name: string
+  /**
+   * FargoRateの表示用ID。桁数は一定しない。リンクに使う13桁のFargoRate ID
+   * （`fargorateId`）とは別物なので、取り違えないこと。
+   */
+  readableId: string | null
   fargorateId: string | null
+  location: string | null
   robustness: number
 }

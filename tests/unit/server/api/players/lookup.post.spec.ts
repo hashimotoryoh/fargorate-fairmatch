@@ -2,23 +2,32 @@ import { createError } from 'h3'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import handler from '../../../../../server/api/players/lookup.post'
 import { callHandler } from '../../../../helpers/h3'
-import {
-  FARGORATE_ID,
-  createFargoRatePlayer,
-} from '../../../../helpers/fixtures'
+import { FARGORATE_ID } from '../../../../helpers/fixtures'
 import { PLAYER_QUERY_MAX_LENGTH } from '../../../../../shared/utils/playerQuery'
+
+function createSearchResult(overrides: Record<string, unknown> = {}) {
+  return {
+    name: 'Taro Yamada',
+    readableId: '1234567',
+    fargorateId: FARGORATE_ID,
+    location: 'Tokyo',
+    rating: 523,
+    robustness: 412,
+    ...overrides,
+  }
+}
 
 /**
  * プレイヤー検索のサーバールートを、リクエストからの一連の流れとして確かめる。
- * 検索そのものは差し替え、検証・分岐・応答の組み立ては本物を通す。
+ * 検索そのものは差し替え、検証・応答の組み立ては本物を通す。
  */
 describe('POST /api/players/lookup', () => {
-  const searchPlayersByName = vi.fn()
+  const searchPlayers = vi.fn()
   const lookupPlayerProfile = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.stubGlobal('searchPlayersByName', searchPlayersByName)
+    vi.stubGlobal('searchPlayers', searchPlayers)
     vi.stubGlobal('lookupPlayerProfile', lookupPlayerProfile)
     // reCAPTCHA検証は既定で成功させる。失敗時の挙動は個別のテストで確かめる。
     vi.stubGlobal(
@@ -31,16 +40,9 @@ describe('POST /api/players/lookup', () => {
     )
   })
 
-  it('名前で検索した結果をそのまま返す', async () => {
-    const players = [
-      {
-        name: 'Taro Yamada',
-        fargorateId: FARGORATE_ID,
-        rating: 523,
-        robustness: 412,
-      },
-    ]
-    searchPlayersByName.mockResolvedValue(players)
+  it('検索した結果をそのまま返す', async () => {
+    const players = [createSearchResult()]
+    searchPlayers.mockResolvedValue(players)
 
     const response = await callHandler(handler, {
       query: 'Taro Yamada',
@@ -49,12 +51,12 @@ describe('POST /api/players/lookup', () => {
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual(players)
-    expect(searchPlayersByName).toHaveBeenCalledWith('Taro Yamada')
+    expect(searchPlayers).toHaveBeenCalledWith('Taro Yamada')
   })
 
   // 該当が無いのは異常ではないため、404ではなく空配列で表す。
   it('該当が無ければ空配列を返す', async () => {
-    searchPlayersByName.mockResolvedValue([])
+    searchPlayers.mockResolvedValue([])
 
     const response = await callHandler(handler, {
       query: 'Nobody Here',
@@ -66,65 +68,46 @@ describe('POST /api/players/lookup', () => {
   })
 
   it('前後の空白を落として検索する', async () => {
-    searchPlayersByName.mockResolvedValue([])
+    searchPlayers.mockResolvedValue([])
 
     await callHandler(handler, {
       query: '  Taro Yamada  ',
       recaptchaToken: 'valid-token',
     })
 
-    expect(searchPlayersByName).toHaveBeenCalledWith('Taro Yamada')
+    expect(searchPlayers).toHaveBeenCalledWith('Taro Yamada')
   })
 
   /**
-   * 画面では案内していない経路。FargoRate側のAPIは名前でしか引けないため、
-   * IDでの検索はCSIを経由する `lookupPlayerProfile` に切り替わる。
+   * FargoRateのAPIは姓名のほか `readableId` でも引ける。画面ではその使い方を
+   * 案内していないが、数字だけの入力を弾いてはならない。
    */
-  it('13桁のFargoRate IDならIDでの検索に切り替える', async () => {
-    lookupPlayerProfile.mockResolvedValue(createFargoRatePlayer())
+  it('数字だけの検索語もそのまま検索へ渡す', async () => {
+    searchPlayers.mockResolvedValue([createSearchResult()])
 
     const response = await callHandler(handler, {
-      query: FARGORATE_ID,
+      query: '1234567',
       recaptchaToken: 'valid-token',
     })
 
     expect(response.status).toBe(200)
-    expect(lookupPlayerProfile).toHaveBeenCalledWith(FARGORATE_ID)
-    expect(searchPlayersByName).not.toHaveBeenCalled()
+    expect(searchPlayers).toHaveBeenCalledWith('1234567')
   })
 
   /**
-   * IDで引くとCSI由来のリーグなども得られるが、名前で引いた場合と応答の形が
-   * 変わると呼び出し側が分岐することになる。共通の項目だけに揃える。
+   * このルートが引くのはFargoRateのAPIだけである。CSIを経由する
+   * `lookupPlayerProfile` へ切り替える分岐を持ち込まないこと。
    */
-  it('IDでの検索でも名前での検索と同じ形で返す', async () => {
-    lookupPlayerProfile.mockResolvedValue(createFargoRatePlayer())
+  it('13桁の数字でもCSIを経由するルックアップへ切り替えない', async () => {
+    searchPlayers.mockResolvedValue([])
 
-    const response = await callHandler(handler, {
+    await callHandler(handler, {
       query: FARGORATE_ID,
       recaptchaToken: 'valid-token',
     })
 
-    expect(response.body).toEqual([
-      {
-        name: 'Taro Yamada',
-        fargorateId: FARGORATE_ID,
-        rating: 523,
-        robustness: 412,
-      },
-    ])
-  })
-
-  it('IDでの検索で該当が無ければ空配列を返す', async () => {
-    lookupPlayerProfile.mockResolvedValue(null)
-
-    const response = await callHandler(handler, {
-      query: FARGORATE_ID,
-      recaptchaToken: 'valid-token',
-    })
-
-    expect(response.status).toBe(200)
-    expect(response.body).toEqual([])
+    expect(searchPlayers).toHaveBeenCalledWith(FARGORATE_ID)
+    expect(lookupPlayerProfile).not.toHaveBeenCalled()
   })
 
   // 外部APIへの総当たりを防ぐための関門なので、ここで弾けば検索自体をさせない。
@@ -140,18 +123,18 @@ describe('POST /api/players/lookup', () => {
     })
 
     expect(response.status).toBe(422)
-    expect(searchPlayersByName).not.toHaveBeenCalled()
+    expect(searchPlayers).not.toHaveBeenCalled()
   })
 
   /**
-   * アクション名をクライアントから受け取ると、他の画面向けに取得したトークンを
-   * 選んで使えてしまう。ルート側で固定していることを固定する。
+   * アクション名をクライアントから受け取ると、機能ごとに分けた意味が無くなる。
+   * ルート側で固定していることを固定する。
    */
   it('reCAPTCHAのアクションは playerLookup で検証する', async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValue({ success: true, score: 0.9, action: 'link' })
-    vi.stubGlobal('$fetch', fetchMock)
+    vi.stubGlobal(
+      '$fetch',
+      vi.fn().mockResolvedValue({ success: true, score: 0.9, action: 'link' }),
+    )
 
     const response = await callHandler(handler, {
       query: 'Taro Yamada',
@@ -160,14 +143,14 @@ describe('POST /api/players/lookup', () => {
     })
 
     expect(response.status).toBe(422)
-    expect(searchPlayersByName).not.toHaveBeenCalled()
+    expect(searchPlayers).not.toHaveBeenCalled()
   })
 
   it('検索語が短すぎれば 400 を返し、検索を行わない', async () => {
     const response = await callHandler(handler, { query: 'a' })
 
     expect(response.status).toBe(400)
-    expect(searchPlayersByName).not.toHaveBeenCalled()
+    expect(searchPlayers).not.toHaveBeenCalled()
   })
 
   it('検索語が長すぎれば 400 を返す', async () => {
@@ -177,19 +160,19 @@ describe('POST /api/players/lookup', () => {
     })
 
     expect(response.status).toBe(400)
-    expect(searchPlayersByName).not.toHaveBeenCalled()
+    expect(searchPlayers).not.toHaveBeenCalled()
   })
 
   it('検索語が無ければ 400 を返す', async () => {
     const response = await callHandler(handler, {})
 
     expect(response.status).toBe(400)
-    expect(searchPlayersByName).not.toHaveBeenCalled()
+    expect(searchPlayers).not.toHaveBeenCalled()
   })
 
   // 「0件」と「外部APIに到達できない」を混同しないこと。
   it('外部APIに到達できなければ 502 をそのまま返す', async () => {
-    searchPlayersByName.mockRejectedValue(
+    searchPlayers.mockRejectedValue(
       createError({
         statusCode: 502,
         statusMessage: 'Failed to reach the FargoRate membership lookup API',
@@ -208,7 +191,7 @@ describe('POST /api/players/lookup', () => {
   it('セッションを書き込まない', async () => {
     const setUserSession = vi.fn()
     vi.stubGlobal('setUserSession', setUserSession)
-    searchPlayersByName.mockResolvedValue([])
+    searchPlayers.mockResolvedValue([])
 
     await callHandler(handler, {
       query: 'Taro Yamada',

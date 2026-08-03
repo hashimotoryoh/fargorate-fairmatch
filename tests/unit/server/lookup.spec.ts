@@ -3,14 +3,12 @@ import {
   lookupPlayerProfile,
   readFargorateId,
   readPlayerQuery,
-  searchPlayersByName,
-  toSearchResultFromProfile,
+  searchPlayers,
 } from '../../../server/utils/lookup'
 import {
   FARGORATE_ID,
   createCsiMember,
   createFargoRateLookupPlayer,
-  createFargoRatePlayer,
 } from '../../helpers/fixtures'
 import type {
   CsiMember,
@@ -301,7 +299,7 @@ describe('readFargorateId', () => {
   })
 })
 
-describe('searchPlayersByName', () => {
+describe('searchPlayers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -311,23 +309,25 @@ describe('searchPlayersByName', () => {
       fargorate: fargorateResponse([createFargoRateLookupPlayer()]),
     })
 
-    await expect(searchPlayersByName('Taro Yamada')).resolves.toEqual([
+    await expect(searchPlayers('Taro Yamada')).resolves.toEqual([
       {
         name: 'Taro Yamada',
+        readableId: '1234567',
         fargorateId: FARGORATE_ID,
+        location: 'Tokyo',
         rating: 523,
         robustness: 412,
       },
     ])
   })
 
-  // IDが分かっていない相手を探すための経路なので、CSIは引かない。
+  // 引くのはFargoRateのAPIだけで、CSIは経由しない。
   it('CSIを呼ばず、検索語をそのままFargoRateへ渡す', async () => {
     const fetchMock = stubFetch({
       fargorate: fargorateResponse([createFargoRateLookupPlayer()]),
     })
 
-    await searchPlayersByName('Taro Yamada')
+    await searchPlayers('Taro Yamada')
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     const [url, options] = fetchMock.mock.calls[0]!
@@ -343,13 +343,13 @@ describe('searchPlayersByName', () => {
       ]),
     })
 
-    await expect(searchPlayersByName('Yamada')).resolves.toHaveLength(2)
+    await expect(searchPlayers('Yamada')).resolves.toHaveLength(2)
   })
 
   it('該当が無ければ空配列を返す', async () => {
     stubFetch({ fargorate: fargorateResponse([]) })
 
-    await expect(searchPlayersByName('Nobody Here')).resolves.toEqual([])
+    await expect(searchPlayers('Nobody Here')).resolves.toEqual([])
   })
 
   /**
@@ -365,7 +365,7 @@ describe('searchPlayersByName', () => {
       ]),
     })
 
-    const players = await searchPlayersByName('Yamada')
+    const players = await searchPlayers('Yamada')
 
     expect(players).toHaveLength(1)
     expect(players[0]?.name).toBe('Jiro Yamada')
@@ -379,7 +379,7 @@ describe('searchPlayersByName', () => {
       ]),
     })
 
-    const players = await searchPlayersByName('Yamada')
+    const players = await searchPlayers('Yamada')
 
     expect(players[0]?.fargorateId).toBeNull()
   })
@@ -388,7 +388,7 @@ describe('searchPlayersByName', () => {
   it('外部APIに到達できなければ 502 を投げる', async () => {
     stubFetch({ fargorate: rejects() })
 
-    await expect(searchPlayersByName('Yamada')).rejects.toMatchObject({
+    await expect(searchPlayers('Yamada')).rejects.toMatchObject({
       statusCode: 502,
       statusMessage: 'Failed to reach the FargoRate membership lookup API',
     })
@@ -397,19 +397,37 @@ describe('searchPlayersByName', () => {
   it('応答の形が想定と違っても空配列として扱う', async () => {
     stubFetch({ fargorate: {} })
 
-    await expect(searchPlayersByName('Yamada')).resolves.toEqual([])
+    await expect(searchPlayers('Yamada')).resolves.toEqual([])
   })
-})
 
-describe('toSearchResultFromProfile', () => {
-  // IDで引いた場合だけリーグなどが増えると、呼び出し側が応答の形で分岐する。
-  it('リーグ・リージョン・チームを落として共通の項目だけにする', () => {
-    expect(toSearchResultFromProfile(createFargoRatePlayer())).toEqual({
-      name: 'Taro Yamada',
-      fargorateId: FARGORATE_ID,
-      rating: 523,
-      robustness: 412,
+  /**
+   * このAPIは姓名のほか `readableId` でも引ける。呼び分けは要らないため、
+   * 数字だけの検索語でも同じ経路をそのまま通す（CSIは経由しない）。
+   */
+  it('数字だけの検索語もそのままFargoRateへ渡す', async () => {
+    const fetchMock = stubFetch({
+      fargorate: fargorateResponse([createFargoRateLookupPlayer()]),
     })
+
+    await searchPlayers('1234567')
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, options] = fetchMock.mock.calls[0]!
+    expect(url).toBe(FARGORATE_LOOKUP_URL)
+    expect(options?.query?.q).toBe('1234567')
+  })
+
+  // 空文字で返ることがあるため、表示側で扱いやすいよう null に寄せる。
+  it('所在地が空文字なら null にする', async () => {
+    stubFetch({
+      fargorate: fargorateResponse([
+        createFargoRateLookupPlayer({ location: '' }),
+      ]),
+    })
+
+    const players = await searchPlayers('Yamada')
+
+    expect(players[0]?.location).toBeNull()
   })
 })
 

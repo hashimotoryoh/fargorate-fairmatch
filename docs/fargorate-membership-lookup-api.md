@@ -23,4 +23,9 @@ $ curl 'https://dashboard.fargorate.com/api/indexsearch?q=Ryoh%20Hashimoto' \
 
 ## 補足
 
-フォームには `Player name or id` とあるが、IDでの検索は `readableId` を対象としている。
+フォームには `Player name or id` とあるが、IDでの検索は `readableId` を対象としている。レスポンスにはIDが2つ含まれており、扱いが異なる。
+
+- `readableId`（例: `1181693`）: `q` で検索できる。桁数は一定しない
+- `membershipId`（例: `9900006315553`）: `q` では検索できない。13桁で、このアプリが「FargoRate ID」と呼びリンクに使っているのはこちら
+
+このアプリのプレイヤー検索（`POST /api/players/lookup`）は入力をそのまま `q` に渡すため、姓名でも `readableId` でも引ける。
