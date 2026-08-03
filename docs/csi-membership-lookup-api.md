@@ -1,5 +1,7 @@
 # CSIメンバーシップルックアップAPI
 
+> **注意: このAPIは現在アプリから使用していない。** かつてはリンクの導線でFargoRate IDから姓名を引くために使っていたが、FargoRate IDが必ずしもCSIに登録されていないことが判明したため、FargoRateのAPIだけでリンクする設計へ変更した。この文書は調査の記録として残している。
+
 [CSIメンバーシップルックアップ](https://csibbm.com/Public/MemberLookupweeksplayed)ページを開き、`Membership #` のフォームに `9900006315553` を入力し検索した。
 
 Google Chrome の `検証 > ネットワーク` から該当のリクエストを `Copy as cURL` でコピーし、ターミナルで実行した。

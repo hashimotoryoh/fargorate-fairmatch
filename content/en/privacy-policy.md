@@ -10,12 +10,12 @@ FargoRate FairRace (the "App") is an individually developed web app that support
 
 The App does not ask you to register an email address or a password. The only information it handles is the following.
 
-- **FargoRate ID**: the 13-digit number you enter to link your FargoRate
-- **Player information**: your name, league name, region, team name, rating, and rating robustness, all retrieved from external services using the FargoRate ID you entered
+- **Name and FargoRate ID**: the name and the numeric FargoRate ID you enter to link your FargoRate
+- **Player information**: your name, location, rating, and rating robustness, retrieved from an external service using the name and FargoRate ID you entered
 - **Guest details**: the name and rating you enter when you start without a FargoRate ID
 - **Match records**: the disciplines and scores you enter in the App
 
-You do not enter the player information yourself. It is retrieved from the public lookup features of CSI and FargoRate. The only things the App sends to those services are the FargoRate ID and the name needed for the search.
+You do not enter the player information yourself. It is retrieved from the public lookup feature of FargoRate. The only thing the App sends to FargoRate is the name needed for the search. Your FargoRate ID is never sent; it is used only to narrow the search results down to your player information.
 
 Guest details are the values you enter, taken as given. They are never sent to an external service and their contents are never verified. The name is optional; if you leave it out, no name is stored and the App simply shows "Guest Player" on screen.
 
@@ -41,14 +41,13 @@ The App reads your rating from FargoRate, but it never sends match results to th
 
 ## External services
 
-The App queries the following external services. Both are read-only, and neither receives your match results.
+The App queries the following external service. It is read-only and never receives your match results.
 
-- **CSI (CueSports International)**: to obtain your name and league information from a FargoRate ID
-- **FargoRate**: to obtain a rating and robustness from a name
+- **FargoRate**: to obtain player information (name, location, rating, and robustness) from a name
 
-Neither service is queried when you start as a guest.
+The service is not queried when you start as a guest.
 
-How those services handle information is governed by their own terms.
+How that service handles information is governed by its own terms.
 
 ## Analytics
 
