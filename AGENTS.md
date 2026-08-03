@@ -280,7 +280,7 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 - 読み取れない行が混じっても一覧全体は落とさず、行単位で除く。1件の異常で他の正常な結果まで見せられなくなるのを避けるため
 - 入力の長さの条件は `shared/utils/playerQuery.ts` の `PLAYER_QUERY_MIN_LENGTH`・`PLAYER_QUERY_MAX_LENGTH` に一本化してある。フォームとサーバールートの双方で `isValidPlayerQuery()` を使い、条件を二重に書かないこと
 
-導線はヘッダーとドックの `mainNavItems`、およびフッターの `footerNavItems` に置いてある。前者は `authenticated` レイアウトにしか出ないため、未認証のユーザーにとってはフッターが唯一の経路になる。`footerNavItems` から外すと未認証のユーザーが辿り着けなくなるので注意すること。
+導線はフッターの `footerNavItems` だけに置いてある。ブログと同じく、ヘッダーとドックの `mainNavItems` には足さない方針である。`footerNavItems` から外すと辿り着けなくなるので注意すること。
 
 ### レイアウト
 

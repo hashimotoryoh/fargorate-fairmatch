@@ -8,7 +8,7 @@
   "nav": {
     "dashboard": "ダッシュボード",
     "game": "ゲーム",
-    "lookup": "ルックアップ",
+    "lookup": "プレイヤーを探す",
     "settings": "設定"
   },
   "document": {
@@ -52,9 +52,9 @@
       "ogDescription": "FargoRate IDをお持ちでない方は、名前とレーティングを入力するだけで始められます。"
     },
     "lookup": {
-      "title": "プレイヤーのルックアップ",
+      "title": "プレイヤーを探す",
       "description": "FargoRateのプレイヤーを名前で検索し、レーティングと信頼度を確認できます。対戦相手の実力の目安を知りたいときに使えます。",
-      "ogTitle": "プレイヤーのルックアップ - FargoRate FairMatch",
+      "ogTitle": "プレイヤーを探す - FargoRate FairMatch",
       "ogDescription": "FargoRateのプレイヤーを名前で検索し、レーティングと信頼度を確認できます。"
     },
     "dashboard": {
@@ -165,7 +165,7 @@
     }
   },
   "lookup": {
-    "heading": "プレイヤーのルックアップ",
+    "heading": "プレイヤーを探す",
     "lead": "FargoRateのプレイヤーを名前で検索し、レーティングと信頼度を確認できます。",
     "queryLabel": "プレイヤー名",
     "submit": "検索する",

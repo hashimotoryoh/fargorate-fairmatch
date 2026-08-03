@@ -8,7 +8,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "game": "Game",
-    "lookup": "Lookup",
+    "lookup": "Lookup a Player",
     "settings": "Settings"
   },
   "document": {

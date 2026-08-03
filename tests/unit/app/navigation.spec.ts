@@ -7,13 +7,17 @@ import {
 } from '../../../app/utils/navigation'
 
 describe('mainNavItems', () => {
-  it('ダッシュボード・ゲーム・プレイヤー検索・設定の4項目を持つ', () => {
+  it('ダッシュボード・ゲーム・設定の3項目を持つ', () => {
     expect(mainNavItems.map((item) => item.to)).toEqual([
       '/dashboard',
       '/game',
-      '/lookup',
       '/settings',
     ])
+  })
+
+  // プレイヤー検索はフッターからだけ辿らせる方針。ドックに増やさない。
+  it('プレイヤー検索を含めない', () => {
+    expect(mainNavItems.map((item) => item.to)).not.toContain('/lookup')
   })
 
   it('すべての項目が自サイト内の絶対パスと表示名のキーとMaterial Design Iconsのアイコン名を持つ', () => {
@@ -40,9 +44,8 @@ describe('mainNavItems', () => {
 
 describe('footerNavItems', () => {
   /**
-   * ヘッダーとドックのナビは `authenticated` レイアウトにしか出ない。
-   * 未認証のユーザーがプレイヤー検索へ辿り着ける経路はフッターだけなので、
-   * ここから外れると導線が消える。
+   * プレイヤー検索はヘッダーにもドックにも置かないため、フッターが唯一の
+   * 経路になる。ここから外れると辿り着けなくなる。
    */
   it('プレイヤー検索とドキュメントへの導線を並べる', () => {
     expect(footerNavItems.map((item) => item.to)).toEqual([
