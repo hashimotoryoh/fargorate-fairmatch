@@ -97,3 +97,16 @@ export type FargoRatePlayer = Player & {
 export type GuestPlayer = Player & {
   kind: 'guest'
 }
+
+/**
+ * プレイヤー検索の結果1件。
+ *
+ * `FargoRatePlayer` と違い、リーグ・リージョン・チームを持たない。それらはCSIから
+ * 得る情報であり、名前での検索はFargoRate側しか引かないためである。IDが欠けている
+ * プレイヤーが混じるため、`fargorateId` は `null` を取りうる。
+ */
+export type FargoRateSearchResult = Player & {
+  name: string
+  fargorateId: string | null
+  robustness: number
+}

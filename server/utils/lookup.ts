@@ -1,7 +1,9 @@
 import type {
   CsiLookupResponse,
+  FargoRateLookupPlayer,
   FargoRateLookupResponse,
   FargoRatePlayer,
+  FargoRateSearchResult,
 } from '#shared/types/player'
 
 const CSI_LOOKUP_URL = 'https://csibbm.com/Public/_MembershipLookupWeeksPlayed'
@@ -127,6 +129,93 @@ export async function lookupPlayerProfile(
     rating,
     robustness,
   }
+}
+
+/**
+ * FargoRateメンバーシップルックアップAPIの1件を、検索結果の形へ変換する。
+ * レーティングか信頼度が数値として読めない行は `null` を返して呼び出し側で除く。
+ */
+function toSearchResult(
+  player: FargoRateLookupPlayer,
+): FargoRateSearchResult | null {
+  const rating = parseRating(player.effectiveRating)
+  const robustness = parseRating(player.robustness)
+
+  if (rating === null || robustness === null) {
+    return null
+  }
+
+  return {
+    name: `${player.firstName} ${player.lastName}`,
+    fargorateId: player.membershipId,
+    rating,
+    robustness,
+  }
+}
+
+/**
+ * 名前でFargoRateのプレイヤーを検索し、ヒットした全件を返す。
+ *
+ * `lookupPlayerProfile` と違い、CSIは経由しない。IDが分かっていない相手を探す
+ * ための経路であり、CSIはIDでしか引けないためである。したがってリーグ・
+ * リージョン・チームは得られない。
+ *
+ * 読み取れない行が1件混じっただけで一覧全体を落とすと、他が正常でも何も
+ * 見せられなくなる。行単位で除いて、読めたものだけを返す。外部APIに到達
+ * できなかった場合は「0件」と区別するため 502 を投げる。
+ */
+export async function searchPlayersByName(
+  query: string,
+): Promise<FargoRateSearchResult[]> {
+  let response
+  try {
+    response = await $fetch<FargoRateLookupResponse>(FARGORATE_LOOKUP_URL, {
+      query: { q: query },
+    })
+  } catch {
+    throw createError({
+      statusCode: 502,
+      statusMessage: 'Failed to reach the FargoRate membership lookup API',
+    })
+  }
+
+  return (response?.value ?? [])
+    .map(toSearchResult)
+    .filter((player): player is FargoRateSearchResult => player !== null)
+}
+
+/**
+ * `FargoRatePlayer` を検索結果の形へ落とす。
+ *
+ * IDで引いた場合はCSI由来のリーグなども得られるが、名前で引いた場合と応答の形が
+ * 変わってしまう。呼び出し側が分岐せずに済むよう、共通の項目だけに揃える。
+ */
+export function toSearchResultFromProfile(
+  profile: FargoRatePlayer,
+): FargoRateSearchResult {
+  return {
+    name: profile.name,
+    fargorateId: profile.fargorateId,
+    rating: profile.rating,
+    robustness: profile.robustness,
+  }
+}
+
+/**
+ * リクエストボディから検索語を取り出して検証する。
+ * 長さが範囲外の場合は 400 を投げる。前後の空白は落として返す。
+ */
+export function readPlayerQuery(body: { query?: unknown }): string {
+  const query = body?.query
+
+  if (typeof query !== 'string' || !isValidPlayerQuery(query)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `query must be between ${PLAYER_QUERY_MIN_LENGTH} and ${PLAYER_QUERY_MAX_LENGTH} characters`,
+    })
+  }
+
+  return query.trim()
 }
 
 /**

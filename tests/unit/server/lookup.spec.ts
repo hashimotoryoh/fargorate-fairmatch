@@ -2,11 +2,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   lookupPlayerProfile,
   readFargorateId,
+  readPlayerQuery,
+  searchPlayersByName,
+  toSearchResultFromProfile,
 } from '../../../server/utils/lookup'
 import {
   FARGORATE_ID,
   createCsiMember,
   createFargoRateLookupPlayer,
+  createFargoRatePlayer,
 } from '../../helpers/fixtures'
 import type {
   CsiMember,
@@ -293,6 +297,144 @@ describe('readFargorateId', () => {
   it('ボディ自体が無くても 400 を投げる', () => {
     expect(() =>
       readFargorateId(undefined as unknown as { fargorateId?: unknown }),
+    ).toThrowError(expect.objectContaining({ statusCode: 400 }))
+  })
+})
+
+describe('searchPlayersByName', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('姓名を結合した検索結果を返す', async () => {
+    stubFetch({
+      fargorate: fargorateResponse([createFargoRateLookupPlayer()]),
+    })
+
+    await expect(searchPlayersByName('Taro Yamada')).resolves.toEqual([
+      {
+        name: 'Taro Yamada',
+        fargorateId: FARGORATE_ID,
+        rating: 523,
+        robustness: 412,
+      },
+    ])
+  })
+
+  // IDが分かっていない相手を探すための経路なので、CSIは引かない。
+  it('CSIを呼ばず、検索語をそのままFargoRateへ渡す', async () => {
+    const fetchMock = stubFetch({
+      fargorate: fargorateResponse([createFargoRateLookupPlayer()]),
+    })
+
+    await searchPlayersByName('Taro Yamada')
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, options] = fetchMock.mock.calls[0]!
+    expect(url).toBe(FARGORATE_LOOKUP_URL)
+    expect(options?.query?.q).toBe('Taro Yamada')
+  })
+
+  it('ヒットしたぶんだけ複数件を返す', async () => {
+    stubFetch({
+      fargorate: fargorateResponse([
+        createFargoRateLookupPlayer({ firstName: 'Taro' }),
+        createFargoRateLookupPlayer({ firstName: 'Jiro' }),
+      ]),
+    })
+
+    await expect(searchPlayersByName('Yamada')).resolves.toHaveLength(2)
+  })
+
+  it('該当が無ければ空配列を返す', async () => {
+    stubFetch({ fargorate: fargorateResponse([]) })
+
+    await expect(searchPlayersByName('Nobody Here')).resolves.toEqual([])
+  })
+
+  /**
+   * 読み取れない行が1件混じっただけで一覧全体を落とすと、他が正常でも何も
+   * 見せられなくなる。行単位で除いて、読めたものだけを返す。
+   */
+  it('レーティングが読み取れない行だけを除く', async () => {
+    stubFetch({
+      fargorate: fargorateResponse([
+        createFargoRateLookupPlayer({ effectiveRating: '' }),
+        createFargoRateLookupPlayer({ robustness: 'unknown' }),
+        createFargoRateLookupPlayer({ firstName: 'Jiro' }),
+      ]),
+    })
+
+    const players = await searchPlayersByName('Yamada')
+
+    expect(players).toHaveLength(1)
+    expect(players[0]?.name).toBe('Jiro Yamada')
+  })
+
+  // IDを持たないプレイヤーも一覧には出す。除くと件数が合わなくなる。
+  it('メンバーシップIDが無いプレイヤーも null のまま返す', async () => {
+    stubFetch({
+      fargorate: fargorateResponse([
+        createFargoRateLookupPlayer({ membershipId: null }),
+      ]),
+    })
+
+    const players = await searchPlayersByName('Yamada')
+
+    expect(players[0]?.fargorateId).toBeNull()
+  })
+
+  // 「0件」と「外部APIに到達できない」を混同しないこと。
+  it('外部APIに到達できなければ 502 を投げる', async () => {
+    stubFetch({ fargorate: rejects() })
+
+    await expect(searchPlayersByName('Yamada')).rejects.toMatchObject({
+      statusCode: 502,
+      statusMessage: 'Failed to reach the FargoRate membership lookup API',
+    })
+  })
+
+  it('応答の形が想定と違っても空配列として扱う', async () => {
+    stubFetch({ fargorate: {} })
+
+    await expect(searchPlayersByName('Yamada')).resolves.toEqual([])
+  })
+})
+
+describe('toSearchResultFromProfile', () => {
+  // IDで引いた場合だけリーグなどが増えると、呼び出し側が応答の形で分岐する。
+  it('リーグ・リージョン・チームを落として共通の項目だけにする', () => {
+    expect(toSearchResultFromProfile(createFargoRatePlayer())).toEqual({
+      name: 'Taro Yamada',
+      fargorateId: FARGORATE_ID,
+      rating: 523,
+      robustness: 412,
+    })
+  })
+})
+
+describe('readPlayerQuery', () => {
+  it('検索語を前後の空白を落として取り出す', () => {
+    expect(readPlayerQuery({ query: '  Taro Yamada  ' })).toBe('Taro Yamada')
+  })
+
+  it.each([
+    ['未指定', {}],
+    ['null', { query: null }],
+    ['数値', { query: 12 }],
+    ['短すぎる文字列', { query: 'a' }],
+    ['空白だけの文字列', { query: '   ' }],
+    ['長すぎる文字列', { query: 'a'.repeat(65) }],
+    ['配列', { query: ['Taro Yamada'] }],
+  ])('%sなら 400 を投げる', (_label, body) => {
+    expect(() => readPlayerQuery(body)).toThrowError(
+      expect.objectContaining({ statusCode: 400 }),
+    )
+  })
+
+  it('ボディ自体が無くても 400 を投げる', () => {
+    expect(() =>
+      readPlayerQuery(undefined as unknown as { query?: unknown }),
     ).toThrowError(expect.objectContaining({ statusCode: 400 }))
   })
 })
