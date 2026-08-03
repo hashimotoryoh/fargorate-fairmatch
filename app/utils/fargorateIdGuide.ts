@@ -1,8 +1,8 @@
 import type { ScreenshotRect } from '~/components/ScreenshotFigure.vue'
 
 /** 案内の各手順で見せるスクリーンショット。文言は翻訳ファイルにある。 */
-export type LookupGuideScreenshot = {
-  /** 翻訳ファイルの `lookupGuide.steps` 配下のキー。 */
+export type FargoRateIdGuideScreenshot = {
+  /** 翻訳ファイルの `fargorateIdGuide.steps` 配下のキー。 */
   key: string
   src: string
   /** 元画像の原寸の幅。クロップの座標をこの幅の比率に直すために要る。 */
@@ -23,7 +23,7 @@ const SCREENSHOT_WIDTH = 1260
  * いない。backdrop-filter は祖先の opacity の影響を受け、モーダルはまさに
  * opacity を遷移させるため、環境によっては素通しになりうる。
  */
-const japaneseScreenshots: LookupGuideScreenshot[] = [
+const japaneseScreenshots: FargoRateIdGuideScreenshot[] = [
   {
     key: 'menu',
     src: '/img/fargorate-id-00.png',
@@ -54,14 +54,14 @@ const japaneseScreenshots: LookupGuideScreenshot[] = [
  * ロケールごとに撮り分ける必要がある。英語版の画像はまだ用意できていないので、
  * 当面は日本語版を流用する。画像が揃ったら `en` の配列だけ差し替えればよい。
  */
-const screenshotsByLocale: Record<string, LookupGuideScreenshot[]> = {
+const screenshotsByLocale: Record<string, FargoRateIdGuideScreenshot[]> = {
   ja: japaneseScreenshots,
   en: japaneseScreenshots,
 }
 
 /** 指定したロケールの案内用スクリーンショットを返す。 */
-export function lookupGuideScreenshots(
+export function fargorateIdGuideScreenshots(
   locale: string,
-): LookupGuideScreenshot[] {
+): FargoRateIdGuideScreenshot[] {
   return screenshotsByLocale[locale] ?? japaneseScreenshots
 }

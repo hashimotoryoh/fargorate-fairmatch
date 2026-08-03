@@ -1,4 +1,4 @@
-// 認証済みのユーザーには不要なページに付ける。ルックアップページが対象。
+// 認証済みのユーザーには不要なページに付ける。リンクページとゲストページが対象。
 export default defineNuxtRouteMiddleware(() => {
   const { loggedIn } = useUserSession()
 

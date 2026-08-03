@@ -62,7 +62,7 @@ async function submit(component: VueWrapper) {
   )
 }
 
-describe('ゲストのサインインページ', () => {
+describe('ゲストページ', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     await useLocale('ja')
@@ -88,7 +88,7 @@ describe('ゲストのサインインページ', () => {
     )
   })
 
-  it('名前とレーティングを送ってサインインする', async () => {
+  it('名前とレーティングを送ってゲストとして始める', async () => {
     const component = await mountSuspended(GuestPage)
     await nameInput(component).setValue('Jiro Suzuki')
     await ratingInput(component).setValue('450')
@@ -157,7 +157,7 @@ describe('ゲストのサインインページ', () => {
     })
   })
 
-  it('サインインに失敗したら知らせ、遷移しない', async () => {
+  it('開始に失敗したら知らせ、遷移しない', async () => {
     guestHandler.mockImplementation(() => {
       throw createError({ statusCode: 400, statusMessage: 'invalid' })
     })
@@ -172,7 +172,7 @@ describe('ゲストのサインインページ', () => {
     expect(navigateToMock).not.toHaveBeenCalled()
   })
 
-  // 保護ページから追い返された人を、サインイン後に元の行き先へ戻す。
+  // 保護ページから追い返された人を、認証後に元の行き先へ戻す。
   it('redirect クエリの行き先へ戻す', async () => {
     routeQuery.redirect = '/settings'
 
@@ -204,14 +204,14 @@ describe('ゲストのサインインページ', () => {
     expect(navigateToMock).toHaveBeenCalledWith('/en/dashboard')
   })
 
-  it('FargoRate IDでのサインインへ戻るリンクを出し、行き先を引き継ぐ', async () => {
+  it('FargoRateとのリンクへ戻るリンクを出し、行き先を引き継ぐ', async () => {
     routeQuery.redirect = '/settings'
 
     const component = await mountSuspended(GuestPage)
     const link = component
       .findAll('a')
-      .find((anchor) => anchor.text() === jaMessage('guest.lookupLink'))
+      .find((anchor) => anchor.text() === jaMessage('guest.fargorateLink'))
 
-    expect(link?.attributes('href')).toBe('/lookup?redirect=/settings')
+    expect(link?.attributes('href')).toBe('/link?redirect=/settings')
   })
 })

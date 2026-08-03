@@ -35,9 +35,9 @@ describe('トップページ', () => {
     ])
   })
 
-  it('サインインへの導線を上下に置く', async () => {
+  it('リンクページへの導線を上下に置く', async () => {
     const component = await mountSuspended(IndexPage)
-    const links = component.findAll('a[href="/lookup"]')
+    const links = component.findAll('a[href="/link"]')
 
     expect(links).toHaveLength(2)
     for (const link of links) {

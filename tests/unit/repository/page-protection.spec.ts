@@ -12,7 +12,7 @@ const PAGES_DIR = join(ROOT, 'app/pages')
  */
 const PUBLIC_PAGES = [
   'index',
-  'lookup',
+  'link',
   'guest',
   'privacy-policy',
   'terms-conditions',
@@ -21,8 +21,8 @@ const PUBLIC_PAGES = [
   'faq',
 ]
 
-/** 認証済みのユーザーを追い返すページ。サインインの入口が対象。 */
-const GUEST_ONLY_PAGES = ['lookup', 'guest']
+/** 認証済みのユーザーを追い返すページ。認証の入口が対象。 */
+const GUEST_ONLY_PAGES = ['link', 'guest']
 
 /**
  * `app/pages/` 配下を再帰的に辿り、`.vue` の拡張子を除いた相対パスを返す

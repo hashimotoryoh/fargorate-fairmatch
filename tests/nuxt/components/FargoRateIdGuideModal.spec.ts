@@ -1,6 +1,6 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
-import LookupGuideModal from '../../../app/components/LookupGuideModal.vue'
+import FargoRateIdGuideModal from '../../../app/components/FargoRateIdGuideModal.vue'
 import { jaMessage } from '../../helpers/i18n'
 
 function percent(style: string | undefined, property: string): number {
@@ -11,17 +11,17 @@ function percent(style: string | undefined, property: string): number {
   return Number(matched?.[1])
 }
 
-describe('LookupGuideModal', () => {
+describe('FargoRateIdGuideModal', () => {
   it('確認方法を開くきっかけをリンクとして出す', async () => {
-    const component = await mountSuspended(LookupGuideModal)
+    const component = await mountSuspended(FargoRateIdGuideModal)
     const trigger = component.find('button')
 
-    expect(trigger.text()).toBe(jaMessage('lookupGuide.trigger'))
+    expect(trigger.text()).toBe(jaMessage('fargorateIdGuide.trigger'))
     expect(trigger.attributes('type')).toBe('button')
   })
 
   it('きっかけを押すとモーダルを開く', async () => {
-    const component = await mountSuspended(LookupGuideModal)
+    const component = await mountSuspended(FargoRateIdGuideModal)
     const showModal = vi.fn()
     const dialog = component.find('dialog').element as HTMLDialogElement
     dialog.showModal = showModal
@@ -32,7 +32,7 @@ describe('LookupGuideModal', () => {
   })
 
   it('3つの手順を番号付きで縦に並べる', async () => {
-    const component = await mountSuspended(LookupGuideModal)
+    const component = await mountSuspended(FargoRateIdGuideModal)
     const steps = component.findAll('ol > li')
 
     expect(steps).toHaveLength(3)
@@ -42,18 +42,18 @@ describe('LookupGuideModal', () => {
       '3',
     ])
     expect(steps[0]?.text()).toContain(
-      jaMessage('lookupGuide.steps.menu.title'),
+      jaMessage('fargorateIdGuide.steps.menu.title'),
     )
     expect(steps[1]?.text()).toContain(
-      jaMessage('lookupGuide.steps.playerCard.title'),
+      jaMessage('fargorateIdGuide.steps.playerCard.title'),
     )
     expect(steps[2]?.text()).toContain(
-      jaMessage('lookupGuide.steps.number.title'),
+      jaMessage('fargorateIdGuide.steps.number.title'),
     )
   })
 
   it('手順ごとにスクリーンショットと代替テキストを添える', async () => {
-    const component = await mountSuspended(LookupGuideModal)
+    const component = await mountSuspended(FargoRateIdGuideModal)
     const images = component.findAll('ol img')
 
     expect(images.map((image) => image.attributes('src'))).toEqual([
@@ -72,7 +72,7 @@ describe('LookupGuideModal', () => {
    * 枠だけが切り取られて見えなくなり、どこを見ればよいかが伝わらない。
    */
   it('強調枠がクロップ範囲に収まっている', async () => {
-    const component = await mountSuspended(LookupGuideModal)
+    const component = await mountSuspended(FargoRateIdGuideModal)
 
     for (const highlight of component.findAll('.ring-primary')) {
       const style = highlight.attributes('style')
@@ -87,7 +87,7 @@ describe('LookupGuideModal', () => {
   })
 
   it('閉じる手段をモーダル内と背景の双方に置く', async () => {
-    const component = await mountSuspended(LookupGuideModal)
+    const component = await mountSuspended(FargoRateIdGuideModal)
     const forms = component.findAll('form[method="dialog"]')
 
     expect(forms).toHaveLength(2)

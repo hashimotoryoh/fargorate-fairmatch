@@ -38,11 +38,11 @@
       "ogTitle": "FargoRate FairMatch",
       "ogDescription": "A web app that helps you enter and review pool match scores on top of FargoRate ratings."
     },
-    "lookup": {
-      "title": "Sign in with your FargoRate ID",
-      "description": "Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app. The screen also shows you where to find it.",
-      "ogTitle": "Sign in with your FargoRate ID - FargoRate FairMatch",
-      "ogDescription": "Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app."
+    "link": {
+      "title": "Link your FargoRate",
+      "description": "Enter the 13-digit FargoRate ID shown on your player card in the FargoRate app to link your FargoRate player profile. The screen also shows you where to find it.",
+      "ogTitle": "Link your FargoRate - FargoRate FairMatch",
+      "ogDescription": "Enter the 13-digit FargoRate ID shown on your player card in the FargoRate app to link your FargoRate player profile."
     },
     "guest": {
       "title": "Start as a guest",
@@ -119,11 +119,11 @@
       }
     },
     "gettingStartedHeading": "Getting started",
-    "gettingStartedBody": "Just enter the 13-digit FargoRate ID shown on your player card in the FargoRate app. There is no password to register, and the sign-in screen shows you how to find your ID.",
+    "gettingStartedBody": "Just enter the 13-digit FargoRate ID shown on your player card in the FargoRate app. There is no password to register, and the linking screen shows you how to find your ID.",
     "gettingStartedNote": "This app reads your rating from FargoRate, but it never sends match results to the official system. Nothing you record here changes your rating."
   },
-  "lookup": {
-    "heading": "Sign in",
+  "link": {
+    "heading": "Link your FargoRate",
     "lead": "We will look up your information by FargoRate ID.",
     "idLabel": "FargoRate ID (13 digits)",
     "recentAccounts": {
@@ -149,7 +149,7 @@
     "ratingLabel": "Rating",
     "ratingHint": "Enter a whole number between {min} and {max}. If you're not sure, a beginner is around 200 and a typical amateur league player is around 450.",
     "submit": "Start as a guest",
-    "lookupLink": "Sign in with a FargoRate ID",
+    "fargorateLink": "Link your FargoRate",
     "errors": {
       "invalidRating": "Enter a whole number between {min} and {max}.",
       "invalidName": "Enter a name of at most {max} characters.",
@@ -157,7 +157,7 @@
       "unexpected": "The request failed. Please wait a moment and try again."
     }
   },
-  "lookupGuide": {
+  "fargorateIdGuide": {
     "trigger": "How to find your FargoRate ID",
     "heading": "How to find your FargoRate ID",
     "lead": "Follow these steps in the FargoRate app to find your 13-digit FargoRate ID.",
@@ -201,8 +201,8 @@
   "settings": {
     "heading": "Settings",
     "account": "Account",
-    "signedInAs": "Signed in as {name} ({fargorateId}).",
-    "signedInAsGuest": "Signed in as {name} (guest). Your rating is self-reported and is not tied to any FargoRate record.",
+    "playingAs": "You're using the app as {name} ({fargorateId}).",
+    "playingAsGuest": "You're using the app as {name} (guest). Your rating is self-reported and is not tied to any FargoRate record.",
     "signOut": "Sign out",
     "theme": "Theme",
     "themeDescription": "Choose the color scheme used across the app.",

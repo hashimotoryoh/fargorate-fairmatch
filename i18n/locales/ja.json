@@ -38,11 +38,11 @@
       "ogTitle": "FargoRate FairMatch",
       "ogDescription": "FargoRateのレーティングをもとに、ビリヤードの対戦スコアの入力と振り返りを補助するウェブアプリ。"
     },
-    "lookup": {
-      "title": "FargoRate IDでサインイン",
-      "description": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。IDの調べ方も画面上で案内します。",
-      "ogTitle": "FargoRate IDでサインイン - FargoRate FairMatch",
-      "ogDescription": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力してサインインします。"
+    "link": {
+      "title": "FargoRateとリンクする",
+      "description": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力して、FargoRateのプレイヤー情報とリンクします。IDの調べ方も画面上で案内します。",
+      "ogTitle": "FargoRateとリンクする - FargoRate FairMatch",
+      "ogDescription": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力して、FargoRateのプレイヤー情報とリンクします。"
     },
     "guest": {
       "title": "ゲストとして始める",
@@ -122,8 +122,8 @@
     "gettingStartedBody": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力するだけです。パスワードの登録は要りません。IDの調べ方は入力画面で案内します。",
     "gettingStartedNote": "このアプリはFargoRateからレーティングを取得しますが、対戦結果を公式システムへ送信することはありません。ここでの記録によってあなたのレーティングが変わることはありません。"
   },
-  "lookup": {
-    "heading": "サインイン",
+  "link": {
+    "heading": "FargoRateとリンクする",
     "lead": "FargoRate IDであなたの情報を探します。",
     "idLabel": "FargoRate ID（13桁の数字）",
     "recentAccounts": {
@@ -149,7 +149,7 @@
     "ratingLabel": "レーティング",
     "ratingHint": "{min} から {max} までの整数で入力してください。目安がわからない場合は、初級者なら200前後、アマチュアリーグの一般的なプレイヤーなら450前後です。",
     "submit": "ゲストとして始める",
-    "lookupLink": "FargoRate IDでサインインする",
+    "fargorateLink": "FargoRateとリンクする",
     "errors": {
       "invalidRating": "レーティングは {min} から {max} までの整数で入力してください。",
       "invalidName": "名前は {max} 文字以内で入力してください。",
@@ -157,7 +157,7 @@
       "unexpected": "通信に失敗しました。しばらくしてからもう一度お試しください。"
     }
   },
-  "lookupGuide": {
+  "fargorateIdGuide": {
     "trigger": "FargoRate IDの確認方法",
     "heading": "FargoRate IDの確認方法",
     "lead": "FargoRateアプリで次の手順をたどると、13桁のFargoRate IDを確認できます。",
@@ -201,8 +201,8 @@
   "settings": {
     "heading": "設定",
     "account": "アカウント",
-    "signedInAs": "{name}（{fargorateId}）としてサインインしています。",
-    "signedInAsGuest": "{name}（ゲスト）としてサインインしています。レーティングは自己申告のため、FargoRateの記録とは結び付いていません。",
+    "playingAs": "{name}（{fargorateId}）として利用しています。",
+    "playingAsGuest": "{name}（ゲスト）として利用しています。レーティングは自己申告のため、FargoRateの記録とは結び付いていません。",
     "signOut": "サインアウト",
     "theme": "テーマ",
     "themeDescription": "画面の配色を選びます。",

@@ -9,7 +9,7 @@
  * 自己申告であることは `kind: 'guest'` としてセッションに残り、表示側はこれを見て
  * FargoRateで確認が取れた値と区別する。
  *
- * reCAPTCHAは付けない。`lookup` に付けているのは非公式の外部APIへの総当たりを
+ * reCAPTCHAは付けない。`POST /api/link/lookup` に付けているのは非公式の外部APIへの総当たりを
  * 防ぐためであり、このルートは外部APIを一切呼ばないため理由が当てはまらない。
  *
  * サインアウトは nuxt-auth-utils 内蔵の DELETE /api/_auth/session を使うので

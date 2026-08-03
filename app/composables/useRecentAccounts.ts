@@ -5,7 +5,7 @@ const STORAGE_KEY = 'fairmatch:recentAccounts'
 const MAX_ENTRIES = 5
 
 /**
- * ゲストは対象外である。サインインのたびにサーバーが引き直すための鍵となる
+ * ゲストは対象外である。リンクのたびにサーバーが引き直すための鍵となる
  * FargoRate IDを持たず、レーティングも自己申告なので、記憶しても再現できない。
  */
 export type RecentAccount = Pick<

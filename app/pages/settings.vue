@@ -37,11 +37,11 @@ async function signOut() {
           <p v-if="user" class="text-base-content/70 mt-1 text-sm">
             {{
               isFargoRatePlayer(user)
-                ? $t('settings.signedInAs', {
+                ? $t('settings.playingAs', {
                     name: user.name,
                     fargorateId: user.fargorateId,
                   })
-                : $t('settings.signedInAsGuest', {
+                : $t('settings.playingAsGuest', {
                     name: user.name ?? $t('player.guestName'),
                   })
             }}

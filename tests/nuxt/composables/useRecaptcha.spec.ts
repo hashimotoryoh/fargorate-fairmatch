@@ -49,7 +49,7 @@ describe('useRecaptcha', () => {
     const { execute } = component.vm as unknown as Exposed
     const script = stubScriptTag()
 
-    const first = execute('lookup')
+    const first = execute('link')
     script.onerror?.()
     await expect(first).rejects.toThrow()
 
@@ -58,7 +58,7 @@ describe('useRecaptcha', () => {
       execute: async () => 'test-token',
     }
 
-    await expect(execute('lookup')).resolves.toBe('test-token')
+    await expect(execute('link')).resolves.toBe('test-token')
   })
 
   it('スクリプトは読み込めても grecaptcha が定義されなければ拒否する', async () => {
@@ -66,7 +66,7 @@ describe('useRecaptcha', () => {
     const { execute } = component.vm as unknown as Exposed
     const script = stubScriptTag()
 
-    const promise = execute('lookup')
+    const promise = execute('link')
     script.onload?.()
 
     await expect(promise).rejects.toThrow()

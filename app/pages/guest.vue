@@ -34,7 +34,7 @@ function toErrorMessage(error: unknown) {
   return t('guest.errors.unexpected')
 }
 
-async function signIn() {
+async function startAsGuest() {
   const parsedRating = Number(rating.value)
 
   // `Number('')` は 0 になるため、空欄は別に見る。
@@ -75,10 +75,10 @@ async function signIn() {
   }
 }
 
-// FargoRate IDでのサインインへ戻る。元々の行き先は引き継ぐ。
-const lookupPath = computed(() =>
+// FargoRateとのリンクへ戻る。元々の行き先は引き継ぐ。
+const linkPath = computed(() =>
   localePath({
-    path: '/lookup',
+    path: '/link',
     query:
       typeof route.query.redirect === 'string'
         ? { redirect: route.query.redirect }
@@ -103,7 +103,7 @@ const lookupPath = computed(() =>
           {{ errorMessage }}
         </div>
 
-        <form class="flex flex-col gap-4" @submit.prevent="signIn">
+        <form class="flex flex-col gap-4" @submit.prevent="startAsGuest">
           <label class="floating-label">
             <span>{{ $t('guest.nameLabel') }}</span>
             <input
@@ -145,8 +145,8 @@ const lookupPath = computed(() =>
         </form>
 
         <div class="text-center">
-          <NuxtLink :to="lookupPath" class="btn btn-link btn-sm">
-            {{ $t('guest.lookupLink') }}
+          <NuxtLink :to="linkPath" class="btn btn-link btn-sm">
+            {{ $t('guest.fargorateLink') }}
           </NuxtLink>
         </div>
       </div>

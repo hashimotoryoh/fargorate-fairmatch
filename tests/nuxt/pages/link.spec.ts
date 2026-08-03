@@ -7,7 +7,7 @@ import { useNuxtApp } from '#imports'
 import { createError, readBody } from 'h3'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, type VueWrapper } from '@vue/test-utils'
-import LookupPage from '../../../app/pages/lookup.vue'
+import LinkPage from '../../../app/pages/link.vue'
 import { jaMessage } from '../../helpers/i18n'
 import { FARGORATE_ID, createFargoRatePlayer } from '../../helpers/fixtures'
 
@@ -36,7 +36,7 @@ mockNuxtImport('useUserSession', () => () => ({
 // 実ブラウザでのreCAPTCHAスクリプト読み込みはテスト環境では発生させない。
 mockNuxtImport('useRecaptcha', () => () => ({ execute: executeRecaptchaMock }))
 
-registerEndpoint('/api/lookup', { method: 'POST', handler: lookupHandler })
+registerEndpoint('/api/link/lookup', { method: 'POST', handler: lookupHandler })
 registerEndpoint('/api/auth/session', {
   method: 'POST',
   handler: sessionHandler,
@@ -75,7 +75,7 @@ async function fillAndSubmit(component: VueWrapper, value: string) {
  * が含まれ一意になる。共通の末尾文言だけをキーから取り出し、それで絞り込む。
  */
 function findRemoveButtons(component: VueWrapper) {
-  const suffix = jaMessage('lookup.recentAccounts.remove', {
+  const suffix = jaMessage('link.recentAccounts.remove', {
     name: '',
   }).trim()
 
@@ -84,7 +84,7 @@ function findRemoveButtons(component: VueWrapper) {
     .filter((button) => button.attributes('aria-label')?.endsWith(suffix))
 }
 
-describe('サインインページ', () => {
+describe('リンクページ', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     localStorage.clear()
@@ -96,42 +96,42 @@ describe('サインインページ', () => {
   })
 
   it('FargoRate IDの入力欄と検索ボタンを出す', async () => {
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     const input = component.find('input[type="text"]')
 
-    expect(component.text()).toContain(jaMessage('lookup.heading'))
+    expect(component.text()).toContain(jaMessage('link.heading'))
     expect(input.attributes('inputmode')).toBe('numeric')
     expect(input.attributes('maxlength')).toBe('13')
     expect(component.find('button[type="submit"]').text()).toContain(
-      jaMessage('lookup.submit'),
+      jaMessage('link.submit'),
     )
   })
 
   it('IDの調べ方への導線を置く', async () => {
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
 
-    expect(component.text()).toContain(jaMessage('lookupGuide.trigger'))
+    expect(component.text()).toContain(jaMessage('fargorateIdGuide.trigger'))
   })
 
   // 形式が明らかに不正なうちは、外部APIまで問い合わせない。
   it('13桁でないIDは送信せずその場で知らせる', async () => {
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
 
     await fillAndSubmit(component, '123')
 
     expect(lookupHandler).not.toHaveBeenCalled()
     expect(component.find('[role="alert"]').text()).toContain(
-      jaMessage('lookup.errors.invalidId'),
+      jaMessage('link.errors.invalidId'),
     )
   })
 
   it('見つかったプレイヤーを本人確認の画面で見せる', async () => {
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
 
     await fillAndSubmit(component, FARGORATE_ID)
 
     expect(lookupHandler).toHaveBeenCalledTimes(1)
-    expect(component.text()).toContain(jaMessage('lookup.confirmQuestion'))
+    expect(component.text()).toContain(jaMessage('link.confirmQuestion'))
     expect(component.text()).toContain('Taro Yamada')
     expect(component.text()).toContain('523')
     expect(component.find('form').exists()).toBe(false)
@@ -139,7 +139,7 @@ describe('サインインページ', () => {
 
   // 確認画面ではユーザーが今まさに入力したIDなので、改めては出さない。
   it('本人確認の画面にFargoRate IDを出さない', async () => {
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
 
     await fillAndSubmit(component, FARGORATE_ID)
 
@@ -149,11 +149,11 @@ describe('サインインページ', () => {
   it('該当が無ければ見つからなかったことを知らせる', async () => {
     lookupHandler.mockImplementation(notFound)
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     expect(component.find('[role="alert"]').text()).toContain(
-      jaMessage('lookup.errors.notFound'),
+      jaMessage('link.errors.notFound'),
     )
     expect(component.find('form').exists()).toBe(true)
   })
@@ -163,11 +163,11 @@ describe('サインインページ', () => {
       throw createError({ statusCode: 502 })
     })
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     expect(component.find('[role="alert"]').text()).toContain(
-      jaMessage('lookup.errors.unexpected'),
+      jaMessage('link.errors.unexpected'),
     )
   })
 
@@ -176,16 +176,16 @@ describe('サインインページ', () => {
       throw createError({ statusCode: 422 })
     })
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     expect(component.find('[role="alert"]').text()).toContain(
-      jaMessage('lookup.errors.recaptchaFailed'),
+      jaMessage('link.errors.recaptchaFailed'),
     )
   })
 
   it('本人だと答えるとセッションを確定してダッシュボードへ移動する', async () => {
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     await component.findAll('button')[0]?.trigger('click')
@@ -196,9 +196,9 @@ describe('サインインページ', () => {
     expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
   })
 
-  // 入力欄の値ではなく、ルックアップで得たプレイヤーのIDでサインインを確定する。
-  // 状態が食い違った場合に、ユーザーが確認していない別IDでサインインしないため。
-  it('確認画面ではルックアップで得たプレイヤーのIDでサインインを確定する', async () => {
+  // 入力欄の値ではなく、ルックアップで得たプレイヤーのIDでリンクを確定する。
+  // 状態が食い違った場合に、ユーザーが確認していない別IDでリンクしないため。
+  it('確認画面ではルックアップで得たプレイヤーのIDでリンクを確定する', async () => {
     const candidateId = '9900009999999'
     lookupHandler.mockReturnValue(
       createFargoRatePlayer({ fargorateId: candidateId }),
@@ -208,7 +208,7 @@ describe('サインインページ', () => {
       return createFargoRatePlayer({ fargorateId: candidateId })
     })
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     await component.findAll('button')[0]?.trigger('click')
@@ -220,7 +220,7 @@ describe('サインインページ', () => {
   it('元々開こうとしていたページへ戻す', async () => {
     routeQuery.redirect = '/game'
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     await component.findAll('button')[0]?.trigger('click')
@@ -233,7 +233,7 @@ describe('サインインページ', () => {
   it('外部サイトを指す redirect を既定の遷移先へ倒す', async () => {
     routeQuery.redirect = 'https://example.com'
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     await component.findAll('button')[0]?.trigger('click')
@@ -250,7 +250,7 @@ describe('サインインページ', () => {
   it('英語で見ているときは英語のページへ戻す', async () => {
     await useLocale('en')
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     await component.findAll('button')[0]?.trigger('click')
@@ -265,7 +265,7 @@ describe('サインインページ', () => {
     routeQuery.redirect = '/en/game'
     await useLocale('en')
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     await component.findAll('button')[0]?.trigger('click')
@@ -277,7 +277,7 @@ describe('サインインページ', () => {
   it('確定に失敗したら移動せずに知らせる', async () => {
     sessionHandler.mockImplementation(notFound)
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     await component.findAll('button')[0]?.trigger('click')
@@ -295,7 +295,7 @@ describe('サインインページ', () => {
       throw createError({ statusCode: 400 })
     })
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     await component.findAll('button')[0]?.trigger('click')
@@ -304,26 +304,26 @@ describe('サインインページ', () => {
     )
 
     expect(component.find('[role="alert"]').text()).toContain(
-      jaMessage('lookup.errors.invalidId'),
+      jaMessage('link.errors.invalidId'),
     )
     expect(navigateToMock).not.toHaveBeenCalled()
   })
 
   it('本人でないと答えるとID入力へ戻す', async () => {
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     await component.findAll('button')[1]?.trigger('click')
     await component.vm.$nextTick()
 
     expect(component.find('form').exists()).toBe(true)
-    expect(component.text()).not.toContain(jaMessage('lookup.confirmQuestion'))
+    expect(component.text()).not.toContain(jaMessage('link.confirmQuestion'))
   })
 
   it('やり直したときに前の失敗を残さない', async () => {
     lookupHandler.mockImplementationOnce(notFound)
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     expect(component.find('[role="alert"]').exists()).toBe(true)
@@ -340,22 +340,22 @@ describe('サインインページ', () => {
   }
 
   // FargoRate IDを持たない人が行き止まりにならないようにする。
-  it('ゲストのサインインへのリンクを出し、行き先を引き継ぐ', async () => {
+  it('ゲストページへの導線を出し、行き先を引き継ぐ', async () => {
     routeQuery.redirect = '/settings'
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     const link = component
       .findAll('a')
-      .find((anchor) => anchor.text() === jaMessage('lookup.guestLink'))
+      .find((anchor) => anchor.text() === jaMessage('link.guestLink'))
 
     expect(link?.attributes('href')).toBe('/guest?redirect=/settings')
   })
 
   it('過去に本人確認したアカウントが無ければサジェストを出さない', async () => {
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
 
     expect(component.text()).not.toContain(
-      jaMessage('lookup.recentAccounts.label'),
+      jaMessage('link.recentAccounts.label'),
     )
   })
 
@@ -368,9 +368,9 @@ describe('サインインページ', () => {
       ]),
     )
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
 
-    expect(component.text()).toContain(jaMessage('lookup.recentAccounts.label'))
+    expect(component.text()).toContain(jaMessage('link.recentAccounts.label'))
     expect(component.text()).toContain('Taro Yamada (523)')
     expect(component.text()).not.toContain(FARGORATE_ID)
   })
@@ -379,10 +379,10 @@ describe('サインインページ', () => {
   it('localStorageの値が壊れていてもサジェスト無しで続行する', async () => {
     localStorage.setItem('fairmatch:recentAccounts', '{not valid json')
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
 
     expect(component.text()).not.toContain(
-      jaMessage('lookup.recentAccounts.label'),
+      jaMessage('link.recentAccounts.label'),
     )
   })
 
@@ -395,13 +395,13 @@ describe('サインインページ', () => {
     }))
     localStorage.setItem('fairmatch:recentAccounts', JSON.stringify(accounts))
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
 
     expect(findRemoveButtons(component)).toHaveLength(5)
   })
 
   // 選んだ時点で本人だとわかっているため、IDの入力や確認画面を経由しない。
-  it('サジェストを選ぶと確認画面を経ずに直接サインインする', async () => {
+  it('サジェストを選ぶと確認画面を経ずに直接リンクを確定する', async () => {
     localStorage.setItem(
       'fairmatch:recentAccounts',
       JSON.stringify([
@@ -409,7 +409,7 @@ describe('サインインページ', () => {
       ]),
     )
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await component
       .findAll('button')
       .find((button) => button.text() === 'Taro Yamada (523)')
@@ -428,7 +428,7 @@ describe('サインインページ', () => {
 
   // サジェストは古いスナップショットの可能性があるため、サーバーが
   // 再ルックアップした最新の情報で記憶を上書きする。
-  it('サジェストからのサインインでは、サーバーが返した最新の情報を記憶する', async () => {
+  it('サジェストからのリンクでは、サーバーが返した最新の情報を記憶する', async () => {
     localStorage.setItem(
       'fairmatch:recentAccounts',
       JSON.stringify([SECOND_ACCOUNT]),
@@ -441,7 +441,7 @@ describe('サインインページ', () => {
       }),
     )
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await component
       .findAll('button')
       .find((button) => button.text() === 'Jiro Suzuki (400)')
@@ -453,14 +453,14 @@ describe('サインインページ', () => {
     ).toEqual([{ ...SECOND_ACCOUNT, rating: 450 }])
   })
 
-  it('サジェストでの直接サインインに失敗したら知らせる', async () => {
+  it('サジェストでの直接リンクに失敗したら知らせる', async () => {
     sessionHandler.mockImplementation(notFound)
     localStorage.setItem(
       'fairmatch:recentAccounts',
       JSON.stringify([SECOND_ACCOUNT]),
     )
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await component
       .findAll('button')
       .find((button) => button.text() === 'Jiro Suzuki (400)')
@@ -481,7 +481,7 @@ describe('サインインページ', () => {
       ]),
     )
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     const removeButtons = findRemoveButtons(component)
     expect(removeButtons).toHaveLength(2)
 
@@ -500,16 +500,16 @@ describe('サインインページ', () => {
       JSON.stringify([SECOND_ACCOUNT]),
     )
 
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await findRemoveButtons(component)[0]?.trigger('click')
 
     expect(component.text()).not.toContain(
-      jaMessage('lookup.recentAccounts.label'),
+      jaMessage('link.recentAccounts.label'),
     )
   })
 
   it('本人だと確認すると次回のために名前とレーティングを記憶する', async () => {
-    const component = await mountSuspended(LookupPage)
+    const component = await mountSuspended(LinkPage)
     await fillAndSubmit(component, FARGORATE_ID)
 
     await component.findAll('button')[0]?.trigger('click')

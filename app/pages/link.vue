@@ -8,10 +8,10 @@ const { t } = useI18n()
 
 // ロケールを切り替えたときに追随させるため、値ではなくゲッターで渡す。
 useSeoMeta({
-  title: () => t('seo.lookup.title'),
-  description: () => t('seo.lookup.description'),
-  ogTitle: () => t('seo.lookup.ogTitle'),
-  ogDescription: () => t('seo.lookup.ogDescription'),
+  title: () => t('seo.link.title'),
+  description: () => t('seo.link.description'),
+  ogTitle: () => t('seo.link.ogTitle'),
+  ogDescription: () => t('seo.link.ogDescription'),
 })
 
 const route = useRoute()
@@ -50,20 +50,20 @@ function toErrorMessage(error: unknown) {
   const statusCode = (error as { statusCode?: number }).statusCode
 
   if (statusCode === 404) {
-    return t('lookup.errors.notFound')
+    return t('link.errors.notFound')
   }
   if (statusCode === 400) {
-    return t('lookup.errors.invalidId')
+    return t('link.errors.invalidId')
   }
   if (statusCode === 422) {
-    return t('lookup.errors.recaptchaFailed')
+    return t('link.errors.recaptchaFailed')
   }
-  return t('lookup.errors.unexpected')
+  return t('link.errors.unexpected')
 }
 
-async function lookup() {
+async function searchPlayer() {
   if (!isValidFargorateId(fargorateId.value)) {
-    errorMessage.value = t('lookup.errors.invalidId')
+    errorMessage.value = t('link.errors.invalidId')
     return
   }
 
@@ -71,8 +71,8 @@ async function lookup() {
   errorMessage.value = ''
 
   try {
-    const recaptchaToken = await executeRecaptcha('lookup')
-    candidate.value = await $fetch<FargoRatePlayer>('/api/lookup', {
+    const recaptchaToken = await executeRecaptcha('link')
+    candidate.value = await $fetch<FargoRatePlayer>('/api/link/lookup', {
       method: 'POST',
       body: { fargorateId: fargorateId.value, recaptchaToken },
     })
@@ -84,10 +84,10 @@ async function lookup() {
   }
 }
 
-// 認証を確定し、アカウントを記憶したうえで元々開こうとしていたページへ移動する。
+// リンクを確定し、アカウントを記憶したうえで元々開こうとしていたページへ移動する。
 // サーバーが再ルックアップした最新のプレイヤー情報を記憶に使う。呼び出し元が
 // 持つ情報（サジェストのlocalStorageの値など）は古い可能性があるため使わない。
-async function completeSignIn(id: string) {
+async function completeLink(id: string) {
   pending.value = true
   errorMessage.value = ''
 
@@ -109,16 +109,16 @@ async function completeSignIn(id: string) {
   }
 }
 
-// 本人だと確認できたので認証を確定する。
+// 本人だと確認できたのでリンクを確定する。
 async function confirm() {
   if (!candidate.value) return
-  await completeSignIn(candidate.value.fargorateId)
+  await completeLink(candidate.value.fargorateId)
 }
 
 // 過去に本人確認したアカウントは、選んだ時点で本人だとわかっているため、
-// 確認画面を経由せず直接サインインする。
+// 確認画面を経由せず直接リンクを確定する。
 async function selectRecentAccount(account: RecentAccount) {
-  await completeSignIn(account.fargorateId)
+  await completeLink(account.fargorateId)
 }
 
 // 本人ではなかったので、ID入力からやり直す。
@@ -135,9 +135,9 @@ function reject() {
     <div class="card bg-base-200 w-full max-w-md">
       <div class="card-body gap-4">
         <div>
-          <h1 class="text-xl font-bold">{{ $t('lookup.heading') }}</h1>
+          <h1 class="text-xl font-bold">{{ $t('link.heading') }}</h1>
           <p class="text-base-content/70 mt-1 text-sm">
-            {{ $t('lookup.lead') }}
+            {{ $t('link.lead') }}
           </p>
         </div>
 
@@ -148,10 +148,10 @@ function reject() {
         <form
           v-if="step === 'input'"
           class="flex flex-col gap-4"
-          @submit.prevent="lookup"
+          @submit.prevent="searchPlayer"
         >
           <label class="floating-label">
-            <span>{{ $t('lookup.idLabel') }}</span>
+            <span>{{ $t('link.idLabel') }}</span>
             <input
               v-model.trim="fargorateId"
               class="input input-bordered w-full"
@@ -168,7 +168,7 @@ function reject() {
             class="flex flex-wrap items-center gap-2"
           >
             <span class="text-base-content/70 text-xs">
-              {{ $t('lookup.recentAccounts.label') }}
+              {{ $t('link.recentAccounts.label') }}
             </span>
             <div
               v-for="account in recentAccounts"
@@ -187,7 +187,7 @@ function reject() {
                 type="button"
                 class="btn btn-outline btn-xs join-item"
                 :aria-label="
-                  $t('lookup.recentAccounts.remove', {
+                  $t('link.recentAccounts.remove', {
                     name: accountLabel(account),
                   })
                 "
@@ -200,23 +200,23 @@ function reject() {
           </div>
 
           <div class="text-center">
-            <LookupGuideModal />
+            <FargoRateIdGuideModal />
           </div>
 
           <button class="btn btn-primary" type="submit" :disabled="pending">
             <span v-if="pending" class="loading loading-spinner" />
-            {{ $t('lookup.submit') }}
+            {{ $t('link.submit') }}
           </button>
 
           <div class="text-center">
             <NuxtLink :to="guestPath" class="btn btn-link btn-sm">
-              {{ $t('lookup.guestLink') }}
+              {{ $t('link.guestLink') }}
             </NuxtLink>
           </div>
         </form>
 
         <div v-else-if="candidate" class="flex flex-col gap-4">
-          <p class="text-sm">{{ $t('lookup.confirmQuestion') }}</p>
+          <p class="text-sm">{{ $t('link.confirmQuestion') }}</p>
 
           <PlayerProfileTable :player="candidate" />
 
@@ -228,7 +228,7 @@ function reject() {
               @click="confirm"
             >
               <span v-if="pending" class="loading loading-spinner" />
-              {{ $t('lookup.confirm') }}
+              {{ $t('link.confirm') }}
             </button>
             <button
               class="btn flex-1"
@@ -236,7 +236,7 @@ function reject() {
               :disabled="pending"
               @click="reject"
             >
-              {{ $t('lookup.reject') }}
+              {{ $t('link.reject') }}
             </button>
           </div>
         </div>
