@@ -24,11 +24,15 @@ function createSearchResult(overrides: Record<string, unknown> = {}) {
 describe('POST /api/players/lookup', () => {
   const searchPlayers = vi.fn()
   const lookupPlayerProfile = vi.fn()
+  const getUserSession = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
     vi.stubGlobal('searchPlayers', searchPlayers)
     vi.stubGlobal('lookupPlayerProfile', lookupPlayerProfile)
+    // 既定は未認証。認証済みの挙動は個別のテストで確かめる。
+    getUserSession.mockResolvedValue({})
+    vi.stubGlobal('getUserSession', getUserSession)
     // reCAPTCHA検証は既定で成功させる。失敗時の挙動は個別のテストで確かめる。
     vi.stubGlobal(
       '$fetch',
@@ -187,7 +191,40 @@ describe('POST /api/players/lookup', () => {
     expect(response.status).toBe(502)
   })
 
-  // 他人を調べるだけのルートであり、セッションには一切触れない。
+  /**
+   * 認証済みの利用者は `/link` か `/guest` で一度reCAPTCHAを通っている。
+   * 二重に課すと、画面を開くたびにスクリプトを読み込ませることになる。
+   */
+  it('認証済みならreCAPTCHAを通さずに検索する', async () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal('$fetch', fetchMock)
+    getUserSession.mockResolvedValue({ user: { kind: 'guest', rating: 450 } })
+    searchPlayers.mockResolvedValue([])
+
+    const response = await callHandler(handler, { query: 'Taro Yamada' })
+
+    expect(response.status).toBe(200)
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(searchPlayers).toHaveBeenCalledWith('Taro Yamada')
+  })
+
+  // 免除はあくまでセッションがあるときだけ。無いのに素通ししてはならない。
+  it('未認証ならreCAPTCHAを通す', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue({ success: true, score: 0.9, action: 'playerLookup' })
+    vi.stubGlobal('$fetch', fetchMock)
+    searchPlayers.mockResolvedValue([])
+
+    await callHandler(handler, {
+      query: 'Taro Yamada',
+      recaptchaToken: 'valid-token',
+    })
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  // 他人を調べるだけのルートであり、セッションを書き換えることはない。
   it('セッションを書き込まない', async () => {
     const setUserSession = vi.fn()
     vi.stubGlobal('setUserSession', setUserSession)

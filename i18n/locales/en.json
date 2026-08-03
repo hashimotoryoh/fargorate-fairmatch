@@ -161,6 +161,7 @@
       "invalidRating": "Enter a whole number between {min} and {max}.",
       "invalidName": "Enter a name of at most {max} characters.",
       "invalidInput": "Please check what you entered.",
+      "recaptchaFailed": "We couldn't verify that you're not a robot. Please wait a moment and try again.",
       "unexpected": "The request failed. Please wait a moment and try again."
     }
   },

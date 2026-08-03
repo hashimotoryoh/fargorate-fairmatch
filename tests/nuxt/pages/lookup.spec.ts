@@ -14,13 +14,15 @@ import {
   PLAYER_QUERY_MIN_LENGTH,
 } from '../../../shared/utils/playerQuery'
 
-const { executeRecaptchaMock, lookupHandler } = vi.hoisted(() => ({
+const { executeRecaptchaMock, lookupHandler, loggedIn } = vi.hoisted(() => ({
   executeRecaptchaMock: vi.fn(),
   lookupHandler: vi.fn(),
+  loggedIn: { value: false },
 }))
 
 // 実ブラウザでのreCAPTCHAスクリプト読み込みはテスト環境では発生させない。
 mockNuxtImport('useRecaptcha', () => () => ({ execute: executeRecaptchaMock }))
+mockNuxtImport('useUserSession', () => () => ({ loggedIn }))
 
 registerEndpoint('/api/players/lookup', {
   method: 'POST',
@@ -52,6 +54,7 @@ async function fillAndSubmit(component: VueWrapper, value: string) {
 describe('プレイヤー検索ページ', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    loggedIn.value = false
     executeRecaptchaMock.mockResolvedValue('test-token')
     lookupHandler.mockReturnValue([createSearchResult()])
   })
@@ -229,11 +232,26 @@ describe('プレイヤー検索ページ', () => {
    * アクション名は機能ごとに分けてある。ここが `link` になっていると、
    * reCAPTCHAの管理コンソールでリンクの導線と区別が付かなくなる。
    */
-  it('reCAPTCHAのアクションに playerLookup を使う', async () => {
+  it('未認証ならreCAPTCHAのアクションに playerLookup を使う', async () => {
     const component = await mountSuspended(LookupPage)
 
     await fillAndSubmit(component, 'Taro Yamada')
 
     expect(executeRecaptchaMock).toHaveBeenCalledWith('playerLookup')
+  })
+
+  /**
+   * 認証済みの利用者は `/link` か `/guest` で一度reCAPTCHAを通っている。
+   * 二重に課さず、スクリプトの読み込みごと省く。
+   */
+  it('認証済みならreCAPTCHAのトークンを取らない', async () => {
+    loggedIn.value = true
+
+    const component = await mountSuspended(LookupPage)
+
+    await fillAndSubmit(component, 'Taro Yamada')
+
+    expect(executeRecaptchaMock).not.toHaveBeenCalled()
+    expect(lookupHandler).toHaveBeenCalledTimes(1)
   })
 })

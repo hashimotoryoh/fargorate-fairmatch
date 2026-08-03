@@ -78,6 +78,9 @@ Object.assign(globalThis, {
   setUserSession: () => {
     throw new Error('setUserSession は vi.stubGlobal で差し替えること')
   },
+  getUserSession: () => {
+    throw new Error('getUserSession は vi.stubGlobal で差し替えること')
+  },
   queryCollection: () => {
     throw new Error('queryCollection は vi.stubGlobal で差し替えること')
   },
