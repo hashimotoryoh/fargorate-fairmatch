@@ -38,7 +38,7 @@ export const documentNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
 ]
 
 /** 認証後の既定の遷移先。 */
-const DEFAULT_AFTER_SIGN_IN = '/dashboard'
+const DEFAULT_AFTER_AUTH = '/dashboard'
 
 /**
  * `redirect` クエリの値を、遷移して良いパスに正規化する。
@@ -49,12 +49,12 @@ const DEFAULT_AFTER_SIGN_IN = '/dashboard'
  */
 export function resolveRedirectPath(value: unknown): string {
   if (typeof value !== 'string' || !value.startsWith('/')) {
-    return DEFAULT_AFTER_SIGN_IN
+    return DEFAULT_AFTER_AUTH
   }
 
   // `//example.com` や `/\example.com` はプロトコル相対URLとして解釈されうる。
   if (value.startsWith('//') || value.startsWith('/\\')) {
-    return DEFAULT_AFTER_SIGN_IN
+    return DEFAULT_AFTER_AUTH
   }
 
   return value
