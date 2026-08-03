@@ -37,6 +37,16 @@ export const documentNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
   { to: '/terms-conditions', labelKey: 'document.termsConditions' },
 ]
 
+/**
+ * フッターに出す導線。ドキュメントに加えて、認証の有無によらず使える機能も
+ * 並べる。プレイヤー検索はヘッダーにもドックにも置かない方針なので、
+ * ここが唯一の経路になる。外すと辿り着けなくなるため注意すること。
+ */
+export const footerNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
+  { to: '/lookup', labelKey: 'nav.lookup' },
+  ...documentNavItems,
+]
+
 /** 認証後の既定の遷移先。 */
 const DEFAULT_AFTER_AUTH = '/dashboard'
 

@@ -9,14 +9,18 @@
  * 自己申告であることは `kind: 'guest'` としてセッションに残り、表示側はこれを見て
  * FargoRateで確認が取れた値と区別する。
  *
- * reCAPTCHAは付けない。`POST /api/link/lookup` に付けているのは非公式の外部APIへの総当たりを
- * 防ぐためであり、このルートは外部APIを一切呼ばないため理由が当てはまらない。
+ * reCAPTCHAを付けるかどうかは「外部APIを呼ぶか」ではなく「ボットに攻撃されうるか」で
+ * 決める。このルートは外部APIを呼ばないが、未認証で誰でも叩けてセッションを無制限に
+ * 発行できる。そのセッションは `POST /api/players/lookup` のreCAPTCHAを免れる鍵にも
+ * なるため、ここを素通しにすると外部APIへの総当たりの入口が開く。
  *
  * サインアウトは nuxt-auth-utils 内蔵の DELETE /api/_auth/session を使うので
  * ここでは実装しない。
  */
 export default defineEventHandler(async (event) => {
-  const player = readGuestPlayer(await readBody(event))
+  const body = await readBody(event)
+  const player = readGuestPlayer(body)
+  await verifyRecaptchaToken(body?.recaptchaToken, 'guest')
 
   await setUserSession(event, { user: player })
 

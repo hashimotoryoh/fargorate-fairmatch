@@ -44,7 +44,6 @@ const ogImage = computed(() => {
 useSeoMeta({
   title: article.value.title,
   description: article.value.description,
-  ogTitle: `${article.value.title} | FargoRate FairRace`,
   ogDescription: article.value.description,
   // 一覧記事はブログ的な更新情報のため、既定の website ではなく article を使う。
   ogType: 'article',

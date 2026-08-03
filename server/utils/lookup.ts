@@ -1,7 +1,9 @@
 import type {
   CsiLookupResponse,
+  FargoRateLookupPlayer,
   FargoRateLookupResponse,
   FargoRatePlayer,
+  FargoRateSearchResult,
 } from '#shared/types/player'
 
 const CSI_LOOKUP_URL = 'https://csibbm.com/Public/_MembershipLookupWeeksPlayed'
@@ -127,6 +129,84 @@ export async function lookupPlayerProfile(
     rating,
     robustness,
   }
+}
+
+/**
+ * FargoRateメンバーシップルックアップAPIの1件を、検索結果の形へ変換する。
+ * レーティングか信頼度が数値として読めない行は `null` を返して呼び出し側で除く。
+ *
+ * `location` は空文字で返ることがある。表示側で「値が無い」と扱えるよう、
+ * ここで `null` に寄せておく。
+ */
+function toSearchResult(
+  player: FargoRateLookupPlayer,
+): FargoRateSearchResult | null {
+  const rating = parseRating(player.effectiveRating)
+  const robustness = parseRating(player.robustness)
+
+  if (rating === null || robustness === null) {
+    return null
+  }
+
+  return {
+    name: `${player.firstName} ${player.lastName}`,
+    readableId: player.readableId || null,
+    fargorateId: player.membershipId || null,
+    location: player.location || null,
+    rating,
+    robustness,
+  }
+}
+
+/**
+ * FargoRateのプレイヤーを検索し、ヒットした全件を返す。
+ *
+ * `lookupPlayerProfile` と違い、CSIは経由せずFargoRateのAPIだけを引く。
+ * したがってリーグ・リージョン・チームは得られない。
+ *
+ * 検索語はそのまま `q` に渡す。このAPIは姓名のほか、レスポンスの `readableId`
+ * でも引ける（13桁の `membershipId` では引けない）。どちらで来ても呼び分けは
+ * 要らないため、ここでは判定しない。
+ *
+ * 読み取れない行が1件混じっただけで一覧全体を落とすと、他が正常でも何も
+ * 見せられなくなる。行単位で除いて、読めたものだけを返す。外部APIに到達
+ * できなかった場合は「0件」と区別するため 502 を投げる。
+ */
+export async function searchPlayers(
+  query: string,
+): Promise<FargoRateSearchResult[]> {
+  let response
+  try {
+    response = await $fetch<FargoRateLookupResponse>(FARGORATE_LOOKUP_URL, {
+      query: { q: query },
+    })
+  } catch {
+    throw createError({
+      statusCode: 502,
+      statusMessage: 'Failed to reach the FargoRate membership lookup API',
+    })
+  }
+
+  return (response?.value ?? [])
+    .map(toSearchResult)
+    .filter((player): player is FargoRateSearchResult => player !== null)
+}
+
+/**
+ * リクエストボディから検索語を取り出して検証する。
+ * 長さが範囲外の場合は 400 を投げる。前後の空白は落として返す。
+ */
+export function readPlayerQuery(body: { query?: unknown }): string {
+  const query = body?.query
+
+  if (typeof query !== 'string' || !isValidPlayerQuery(query)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `query must be between ${PLAYER_QUERY_MIN_LENGTH} and ${PLAYER_QUERY_MAX_LENGTH} characters`,
+    })
+  }
+
+  return query.trim()
 }
 
 /**

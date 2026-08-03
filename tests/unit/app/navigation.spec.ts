@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  documentNavItems,
+  footerNavItems,
   mainNavItems,
   resolveRedirectPath,
 } from '../../../app/utils/navigation'
@@ -11,6 +13,11 @@ describe('mainNavItems', () => {
       '/game',
       '/settings',
     ])
+  })
+
+  // プレイヤー検索はフッターからだけ辿らせる方針。ドックに増やさない。
+  it('プレイヤー検索を含めない', () => {
+    expect(mainNavItems.map((item) => item.to)).not.toContain('/lookup')
   })
 
   it('すべての項目が自サイト内の絶対パスと表示名のキーとMaterial Design Iconsのアイコン名を持つ', () => {
@@ -32,6 +39,25 @@ describe('mainNavItems', () => {
     const game = mainNavItems.find((item) => item.to === '/game')
 
     expect(game?.icon).toBe('mdi:billiards-rack')
+  })
+})
+
+describe('footerNavItems', () => {
+  /**
+   * プレイヤー検索はヘッダーにもドックにも置かないため、フッターが唯一の
+   * 経路になる。ここから外れると辿り着けなくなる。
+   */
+  it('プレイヤー検索とドキュメントへの導線を並べる', () => {
+    expect(footerNavItems.map((item) => item.to)).toEqual([
+      '/lookup',
+      ...documentNavItems.map((item) => item.to),
+    ])
+  })
+
+  it('遷移先が重複しない', () => {
+    const paths = footerNavItems.map((item) => item.to)
+
+    expect(new Set(paths).size).toBe(paths.length)
   })
 })
 

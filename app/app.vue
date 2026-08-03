@@ -8,7 +8,13 @@ const { siteUrl } = useRuntimeConfig().public
 // 分かっているときだけ出す。記事固有の画像を持つページ（ブログ詳細）は
 // 自身の useSeoMeta でこの既定値を上書きする。
 useSeoMeta({
-  ogSiteName: 'FargoRate FairRace',
+  // `<title>` と同じ「タイトル - サイト名」に揃える。`%pageTitle` はそのページの
+  // title で、空のときは `%separator` ごと落ちてサイト名だけになる。ページ側で
+  // og:title を書かないこと。書くと接尾辞の管理が二重になる。
+  ogTitle: '%pageTitle %separator %siteName',
+  // サイト名は `nuxt.config.ts` の `templateParams` に一本化してある。
+  // ここで書き写すと、名前を変えたときに片方だけ古くなる。
+  ogSiteName: '%siteName',
   ogType: 'website',
   ogImage: () => (siteUrl ? `${siteUrl}/img/ogp.png` : undefined),
   twitterCard: 'summary_large_image',

@@ -6,8 +6,7 @@ const localePath = useLocalePath()
 useSeoMeta({
   title: () => t('seo.blog.title'),
   description: () => t('seo.blog.description'),
-  ogTitle: () => t('seo.blog.ogTitle'),
-  ogDescription: () => t('seo.blog.ogDescription'),
+  ogDescription: () => t('seo.blog.description'),
 })
 
 const { data: articles } = await useAsyncData(

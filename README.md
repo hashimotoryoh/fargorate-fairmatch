@@ -23,6 +23,8 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 | ------------------- | -------------------------------- | ---- |
 | `/`                 | アプリの紹介                     | 不要 |
 | `/link`             | FargoRateとのリンク              | 不要 |
+| `/guest`            | ゲストとして利用を開始する       | 不要 |
+| `/lookup`           | プレイヤーの検索                 | 不要 |
 | `/privacy-policy`   | プライバシーポリシー             | 不要 |
 | `/terms-conditions` | 利用規約                         | 不要 |
 | `/blog`             | ブログの一覧                     | 不要 |
@@ -110,7 +112,7 @@ cp .env.example .env
 
 この値はコミットハッシュと同じくビルド時に解決する。実行時に渡しても反映されないため、ビルドを行う環境で設定すること。
 
-`NUXT_PUBLIC_RECAPTCHA_SITE_KEY` と `NUXT_RECAPTCHA_SECRET_KEY` は `/link` のBot対策に使う reCAPTCHA v3 のキー。[reCAPTCHA admin console](https://www.google.com/recaptcha/admin) でv3のサイトを登録して取得する。ドメインに `localhost` を加えておけば、ローカル開発でも同じキーで動作を確認できる。
+`NUXT_PUBLIC_RECAPTCHA_SITE_KEY` と `NUXT_RECAPTCHA_SECRET_KEY` は `/link`・`/guest`・`/lookup` のBot対策に使う reCAPTCHA v3 のキー（`/lookup` は未認証のときのみ）。[reCAPTCHA admin console](https://www.google.com/recaptcha/admin) でv3のサイトを登録して取得する。ドメインに `localhost` を加えておけば、ローカル開発でも同じキーで動作を確認できる。
 
 Googleが公開しているテストキー（`6LeIxAcT...`）はv2用なので使わないこと。v2の `siteverify` の応答にはv3の `score` が含まれず、スコア判定で必ず失敗する。v3用のテストキーは公開されていない。
 

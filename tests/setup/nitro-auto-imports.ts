@@ -7,8 +7,18 @@ import {
   isValidGuestName,
   isValidGuestRating,
 } from '../../shared/utils/guestPlayer'
+import {
+  PLAYER_QUERY_MAX_LENGTH,
+  PLAYER_QUERY_MIN_LENGTH,
+  isValidPlayerQuery,
+} from '../../shared/utils/playerQuery'
 import { readGuestPlayer } from '../../server/utils/guest'
-import { lookupPlayerProfile, readFargorateId } from '../../server/utils/lookup'
+import {
+  lookupPlayerProfile,
+  readFargorateId,
+  readPlayerQuery,
+  searchPlayers,
+} from '../../server/utils/lookup'
 import { verifyRecaptchaToken } from '../../server/utils/recaptcha'
 
 /**
@@ -31,9 +41,14 @@ Object.assign(globalThis, {
   GUEST_RATING_MIN,
   isValidGuestName,
   isValidGuestRating,
+  PLAYER_QUERY_MAX_LENGTH,
+  PLAYER_QUERY_MIN_LENGTH,
+  isValidPlayerQuery,
   lookupPlayerProfile,
   readFargorateId,
   readGuestPlayer,
+  readPlayerQuery,
+  searchPlayers,
   verifyRecaptchaToken,
 })
 
@@ -62,6 +77,9 @@ Object.assign(globalThis, {
   },
   setUserSession: () => {
     throw new Error('setUserSession は vi.stubGlobal で差し替えること')
+  },
+  getUserSession: () => {
+    throw new Error('getUserSession は vi.stubGlobal で差し替えること')
   },
   queryCollection: () => {
     throw new Error('queryCollection は vi.stubGlobal で差し替えること')

@@ -6,8 +6,7 @@ const localePath = useLocalePath()
 useSeoMeta({
   title: () => t('seo.index.title'),
   description: () => t('seo.index.description'),
-  ogTitle: () => t('seo.index.ogTitle'),
-  ogDescription: () => t('seo.index.ogDescription'),
+  ogDescription: () => t('seo.index.description'),
 })
 
 // 文言は翻訳ファイルにあるため、ここではキーの並びだけを持つ。

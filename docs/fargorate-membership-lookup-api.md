@@ -23,4 +23,4 @@ $ curl 'https://dashboard.fargorate.com/api/indexsearch?q=Ryoh%20Hashimoto' \
 
 ## 補足
 
-フォームには `Player name or id` とあるが、IDでの検索は `No players found.` と出て失敗する。
+フォームには `Player name or id` とあるが、IDでの検索は `readableId` を対象としている。
