@@ -16,13 +16,19 @@ import {
   GUEST_RATING_MIN,
 } from '../../../shared/utils/guestPlayer'
 
-const { routeQuery, navigateToMock, refreshSessionMock, guestHandler } =
-  vi.hoisted(() => ({
-    routeQuery: { redirect: undefined as unknown },
-    navigateToMock: vi.fn(),
-    refreshSessionMock: vi.fn(),
-    guestHandler: vi.fn(),
-  }))
+const {
+  routeQuery,
+  navigateToMock,
+  refreshSessionMock,
+  executeRecaptchaMock,
+  guestHandler,
+} = vi.hoisted(() => ({
+  routeQuery: { redirect: undefined as unknown },
+  navigateToMock: vi.fn(),
+  refreshSessionMock: vi.fn(),
+  executeRecaptchaMock: vi.fn(),
+  guestHandler: vi.fn(),
+}))
 
 mockNuxtImport('useRoute', () => () => ({ query: routeQuery }))
 mockNuxtImport('navigateTo', () => navigateToMock)
@@ -30,6 +36,8 @@ mockNuxtImport('useUserSession', () => () => ({
   fetch: refreshSessionMock,
   loggedIn: { value: false },
 }))
+// 実ブラウザでのreCAPTCHAスクリプト読み込みはテスト環境では発生させない。
+mockNuxtImport('useRecaptcha', () => () => ({ execute: executeRecaptchaMock }))
 
 registerEndpoint('/api/auth/guest', { method: 'POST', handler: guestHandler })
 
@@ -67,7 +75,44 @@ describe('ゲストページ', () => {
     vi.clearAllMocks()
     await useLocale('ja')
     routeQuery.redirect = undefined
+    executeRecaptchaMock.mockResolvedValue('test-token')
     guestHandler.mockReturnValue(createGuestPlayer())
+  })
+
+  /**
+   * 未認証で誰でも叩けるルートなので、ボットにセッションを量産されないよう
+   * reCAPTCHAを通す。アクション名を機能ごとに分けているため、ここが他の機能の
+   * 名前になっていると管理コンソールでの分析が濁る。
+   */
+  it('reCAPTCHAのアクションに guest を使い、トークンを送る', async () => {
+    const component = await mountSuspended(GuestPage)
+
+    await ratingInput(component).setValue('450')
+    await submit(component)
+
+    expect(executeRecaptchaMock).toHaveBeenCalledWith('guest')
+    expect(await readBody(guestHandler.mock.calls[0]![0])).toMatchObject({
+      recaptchaToken: 'test-token',
+    })
+  })
+
+  it('reCAPTCHAで弾かれたら知らせ、遷移しない', async () => {
+    guestHandler.mockImplementation(() => {
+      throw createError({
+        statusCode: 422,
+        statusMessage: 'reCAPTCHA verification failed',
+      })
+    })
+
+    const component = await mountSuspended(GuestPage)
+
+    await ratingInput(component).setValue('450')
+    await submit(component)
+
+    expect(component.find('[role="alert"]').text()).toContain(
+      jaMessage('guest.errors.recaptchaFailed'),
+    )
+    expect(navigateToMock).not.toHaveBeenCalled()
   })
 
   it('名前とレーティングの入力欄を出す', async () => {
@@ -98,6 +143,7 @@ describe('ゲストページ', () => {
     await expect(readBody(guestHandler.mock.calls[0]![0])).resolves.toEqual({
       name: 'Jiro Suzuki',
       rating: 450,
+      recaptchaToken: 'test-token',
     })
     expect(refreshSessionMock).toHaveBeenCalledTimes(1)
     expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
@@ -112,6 +158,7 @@ describe('ゲストページ', () => {
     await expect(readBody(guestHandler.mock.calls[0]![0])).resolves.toEqual({
       name: null,
       rating: 450,
+      recaptchaToken: 'test-token',
     })
   })
 
@@ -124,6 +171,7 @@ describe('ゲストページ', () => {
     await expect(readBody(guestHandler.mock.calls[0]![0])).resolves.toEqual({
       name: 'Jiro Suzuki',
       rating: 450,
+      recaptchaToken: 'test-token',
     })
   })
 
@@ -154,6 +202,7 @@ describe('ゲストページ', () => {
     await expect(readBody(guestHandler.mock.calls[0]![0])).resolves.toEqual({
       name: null,
       rating: 0,
+      recaptchaToken: 'test-token',
     })
   })
 

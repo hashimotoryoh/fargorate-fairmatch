@@ -232,7 +232,7 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 ゲストは `POST /api/auth/guest` という別のルートに分けてある。`auth/session` に相乗りさせると、IDを送るだけのつもりの経路に自称の値が紛れ込む余地が生まれるためである。ハンドラーはボディを展開せず、`readGuestPlayer()` が読み取った項目だけでオブジェクトを組み立てる。`fargorateId` や `kind: 'fargorate'` を送られても効かないのはこのためで、`tests/unit/server/api/auth/guest.post.spec.ts` がそれを固定している。
 
-このルートにreCAPTCHAは付けていない。`POST /api/link/lookup` に付けているのは非公式の外部APIへの総当たりを防ぐためであり、ゲストは外部APIを一切呼ばないため理由が当てはまらない。
+このルートにもreCAPTCHAを付けている（アクションは `guest`）。外部APIは一切呼ばないが、未認証で誰でも叩けてセッションを無制限に発行できるためである。そのセッションは `POST /api/players/lookup` のreCAPTCHAを免れる鍵にもなるので、ここを素通しにすると外部APIへの総当たりの入口が開く。
 
 #### プレイヤーの型
 
@@ -247,7 +247,18 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 どちらであるかの判別には必ず `isFargoRatePlayer()`（`shared/utils/player.ts`）を使い、`robustness` や `fargorateId` の有無を見る形にしないこと。ゲストの自己申告値を、FargoRateで確認が取れた値と取り違えないためである。`GuestPlayer` がFargoRate固有の項目を型として持たないのも同じ理由による。
 
-CSI・FargoRateの両APIは非公式で利用制約が不明なため、外部APIを叩くルート（`POST /api/link/lookup` と `POST /api/players/lookup`）ではreCAPTCHA v3のスコア判定を通してから検索を呼ぶ（`server/utils/recaptcha.ts` の `verifyRecaptchaToken`）。クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。`POST /api/auth/session` は `POST /api/link/lookup` を通過した画面遷移でしか呼ばれないため、reCAPTCHAは付けていない。
+**reCAPTCHAを付けるかどうかは「外部APIを呼ぶか」ではなく「ボットに攻撃されうるか」で決める。** 未認証で誰でも叩けるルートは、外部APIを呼ばなくても対象になる。判定は `server/utils/recaptcha.ts` の `verifyRecaptchaToken`、クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。
+
+現状の対象は次のとおり。
+
+| ルート                     | アクション     | 付ける／付けない理由                                              |
+| -------------------------- | -------------- | ----------------------------------------------------------------- |
+| `POST /api/link/lookup`    | `link`         | 未認証で叩け、非公式の外部APIへ総当たりできる                     |
+| `POST /api/players/lookup` | `playerLookup` | 同上。ただしセッションがあるときは免除する（後述）                |
+| `POST /api/auth/guest`     | `guest`        | 外部APIは呼ばないが、未認証で叩けてセッションを無制限に発行できる |
+| `POST /api/auth/session`   | なし           | `POST /api/link/lookup` を通過した画面遷移でしか呼ばれない        |
+
+`POST /api/players/lookup` はセッションがあるときreCAPTCHAを省く。セッションを持つ利用者は `/link` か `/guest` のどちらかで一度reCAPTCHAを通っており、二重に課すと画面を開くたびにスクリプトを読み込ませることになるためである。この免除が成立するのは**セッションを作る経路の両方にreCAPTCHAが付いている**ことが前提なので、`POST /api/auth/guest` から外さないこと。
 
 Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり、このアプリでは使えない。v2の `siteverify` の応答には `score` も `action` も含まれず、スコア判定で必ず落ちるためである。v3用のテストキーは公開されていないので、ローカル開発でも `localhost` をドメインに加えた自分のv3キーを使うこと。検証が通らないことを理由に `score` や `action` のチェックを緩めてはならない。
 
@@ -272,7 +283,7 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 
 `/lookup` はFargoRateのプレイヤーを名前で検索し、レーティングと信頼度を見るページである。対戦相手の実力の目安を知るためのもので、認証を要さない公開ページとして置いてある。セッションには一切触れない。
 
-- 検索は `POST /api/players/lookup`。reCAPTCHAのアクションは `playerLookup`
+- 検索は `POST /api/players/lookup`。reCAPTCHAのアクションは `playerLookup` で、未認証のときだけ通す（認証済みは免除。前述の「reCAPTCHA」を参照）
 - 検索の実体は `server/utils/lookup.ts` の `searchPlayers` で、**FargoRateのAPIだけ**を引く。CSIはIDでしか引けず、この経路の主な入力は名前であるため経由しない。したがってリーグ・リージョン・チームは得られず、結果は `FargoRateSearchResult`（名前・ID・所在地・レーティング・信頼度）になる
 - 検索語はそのまま `q` に渡す。このAPIは姓名のほかレスポンスの `readableId` でも引けるため、入力を名前に限定する検証を入れないこと。`readableId` は桁数が一定せず、リンクに使う13桁のFargoRate ID（`membershipId`）とは別物である。両者を取り違えないこと
 - 結果の一覧は `card` で見せ、レーティングと信頼度は `stat` に置く。所在地は名前の下に小さく添える

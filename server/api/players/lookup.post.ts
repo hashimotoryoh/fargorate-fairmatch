@@ -13,15 +13,24 @@
  * FargoRate IDで1件に絞る確認のための経路で、こちらは複数件を返す一覧の経路であり、
  * 応答の形が違う。検索の実装は `server/utils/lookup.ts` を共有している。
  *
- * reCAPTCHAのアクションは呼び出し元の機能を表す `playerLookup` で、値はここに
- * 直書きする。機能ごとに分けておくと、管理コンソールでスコアの分布を機能ごとに
- * 見分けられ、しきい値も個別に調整できる。ただしアクション名はアクセス制御では
- * ない。総当たりを止めているのはスコアの方である。
+ * reCAPTCHAは未認証のときだけ通す。セッションを持つ利用者は `/link` か `/guest` の
+ * どちらかで一度reCAPTCHAを通っており、二重に課すと画面を開くたびにスクリプトを
+ * 読み込ませることになる。セッションの有無は「どのゲートを通すか」の判断であって、
+ * このルートが本人性を見ているわけではない。
+ *
+ * アクション名は呼び出し元の機能を表す `playerLookup` で、値はここに直書きする。
+ * 機能ごとに分けておくと、管理コンソールでスコアの分布を機能ごとに見分けられ、
+ * しきい値も個別に調整できる。ただしアクション名はアクセス制御ではない。
+ * 総当たりを止めているのはスコアの方である。
  */
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const query = readPlayerQuery(body)
-  await verifyRecaptchaToken(body?.recaptchaToken, 'playerLookup')
+  const { user } = await getUserSession(event)
+
+  if (!user) {
+    await verifyRecaptchaToken(body?.recaptchaToken, 'playerLookup')
+  }
 
   return await searchPlayers(query)
 })

@@ -16,6 +16,7 @@ useSeoMeta({
 const route = useRoute()
 const localePath = useLocalePath()
 const { fetch: refreshSession } = useUserSession()
+const { execute: executeRecaptcha } = useRecaptcha()
 
 const name = ref('')
 // 空欄と 0 を区別する必要があるため、数値ではなく入力された文字列のまま持つ。
@@ -30,6 +31,9 @@ function toErrorMessage(error: unknown) {
 
   if (statusCode === 400) {
     return t('guest.errors.invalidInput')
+  }
+  if (statusCode === 422) {
+    return t('guest.errors.recaptchaFailed')
   }
   return t('guest.errors.unexpected')
 }
@@ -59,10 +63,11 @@ async function startAsGuest() {
   errorMessage.value = ''
 
   try {
+    const recaptchaToken = await executeRecaptcha('guest')
     await $fetch<GuestPlayer>('/api/auth/guest', {
       method: 'POST',
       // 未入力は null で送り、既定名は表示側の言語で補わせる。
-      body: { name: trimmedName || null, rating: parsedRating },
+      body: { name: trimmedName || null, rating: parsedRating, recaptchaToken },
     })
     await refreshSession()
     // `resolveRedirectPath` はロケールを知らない純粋な関数に保つ。オープン

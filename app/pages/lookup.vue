@@ -11,6 +11,7 @@ useSeoMeta({
   ogDescription: () => t('seo.lookup.ogDescription'),
 })
 
+const { loggedIn } = useUserSession()
 const { execute: executeRecaptcha } = useRecaptcha()
 
 const query = ref('')
@@ -54,7 +55,10 @@ async function search() {
   errorMessage.value = ''
 
   try {
-    const recaptchaToken = await executeRecaptcha('playerLookup')
+    // 認証済みなら reCAPTCHA は要らない。スクリプトの読み込みごと省く。
+    const recaptchaToken = loggedIn.value
+      ? undefined
+      : await executeRecaptcha('playerLookup')
     players.value = await $fetch<FargoRateSearchResult[]>(
       '/api/players/lookup',
       {
