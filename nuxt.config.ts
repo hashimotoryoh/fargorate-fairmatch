@@ -190,9 +190,9 @@ export default defineNuxtConfig({
             href: '/en/guest',
           },
           {
-            title: 'Find a player',
+            title: 'Lookup a Player',
             description:
-              'Search FargoRate players by name to check their rating and robustness. No account needed.',
+              'Look up FargoRate players by name to check their rating and robustness. No account needed.',
             href: '/en/lookup',
           },
         ],

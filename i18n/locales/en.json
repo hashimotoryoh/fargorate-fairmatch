@@ -8,7 +8,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "game": "Game",
-    "lookup": "Find a Player",
+    "lookup": "Lookup",
     "settings": "Settings"
   },
   "document": {
@@ -52,10 +52,10 @@
       "ogDescription": "No FargoRate ID? Enter a name and a rating to get started."
     },
     "lookup": {
-      "title": "Find a player",
-      "description": "Search FargoRate players by name to check their rating and robustness. Useful when you want a sense of how strong an opponent is.",
-      "ogTitle": "Find a player - FargoRate FairMatch",
-      "ogDescription": "Search FargoRate players by name to check their rating and robustness."
+      "title": "Lookup a Player",
+      "description": "Look up FargoRate players by name to check their rating and robustness. Useful when you want a sense of how strong an opponent is.",
+      "ogTitle": "Lookup a Player - FargoRate FairMatch",
+      "ogDescription": "Look up FargoRate players by name to check their rating and robustness."
     },
     "dashboard": {
       "title": "Dashboard"
@@ -165,8 +165,8 @@
     }
   },
   "lookup": {
-    "heading": "Find a player",
-    "lead": "Search FargoRate players by name to check their rating and robustness.",
+    "heading": "Lookup a Player",
+    "lead": "Look up FargoRate players by name to check their rating and robustness.",
     "queryLabel": "Player name",
     "submit": "Search",
     "resultsHeading": "Results",
