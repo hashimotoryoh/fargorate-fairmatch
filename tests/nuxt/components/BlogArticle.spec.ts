@@ -28,7 +28,7 @@ mockNuxtImport('queryCollection', () => queryCollectionMock)
 mockNuxtImport('createError', () => createErrorMock)
 mockNuxtImport('navigateTo', () => navigateToMock)
 
-const SITE_URL = 'https://fairmatch.example'
+const SITE_URL = 'https://fairrace.example'
 
 function setSiteUrl(siteUrl: string) {
   Object.assign(useRuntimeConfig().public, { siteUrl })

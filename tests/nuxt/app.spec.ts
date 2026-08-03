@@ -3,7 +3,7 @@ import { useRuntimeConfig } from '#imports'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../app/app.vue'
 
-const SITE_URL = 'https://fairmatch.example'
+const SITE_URL = 'https://fairrace.example'
 
 /**
  * 公開URLを差し替える。
