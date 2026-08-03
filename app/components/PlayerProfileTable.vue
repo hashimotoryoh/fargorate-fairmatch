@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { SessionPlayer } from '#shared/types/player'
 
-const { player, showFargorateId = false } = defineProps<{
+const { player, showMembershipId = false } = defineProps<{
   player: SessionPlayer
   /**
-   * ルックアップの確認画面ではユーザーが今まさに入力したIDなので表示しない。
+   * リンクの確認画面ではユーザーが今まさに入力したIDなので表示しない。
    * ダッシュボードでは自分のIDを確認する手段として表示する。
    */
-  showFargorateId?: boolean
+  showMembershipId?: boolean
 }>()
 
 const { t } = useI18n()
@@ -35,13 +35,11 @@ const rows = computed(() => {
   }
 
   return [
-    ...(showFargorateId
-      ? [{ key: 'fargorateId', value: player.fargorateId }]
+    ...(showMembershipId
+      ? [{ key: 'membershipId', value: player.membershipId }]
       : []),
     { key: 'name', value: name.value },
-    { key: 'league', value: player.leagueName },
-    { key: 'region', value: player.region },
-    { key: 'team', value: player.teamNames },
+    { key: 'location', value: player.location },
   ]
 })
 </script>

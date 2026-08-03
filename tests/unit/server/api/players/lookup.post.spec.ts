@@ -2,14 +2,14 @@ import { createError } from 'h3'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import handler from '../../../../../server/api/players/lookup.post'
 import { callHandler } from '../../../../helpers/h3'
-import { FARGORATE_ID } from '../../../../helpers/fixtures'
+import { MEMBERSHIP_ID } from '../../../../helpers/fixtures'
 import { PLAYER_QUERY_MAX_LENGTH } from '../../../../../shared/utils/playerQuery'
 
 function createSearchResult(overrides: Record<string, unknown> = {}) {
   return {
     name: 'Taro Yamada',
     readableId: '1234567',
-    fargorateId: FARGORATE_ID,
+    membershipId: MEMBERSHIP_ID,
     location: 'Tokyo',
     rating: 523,
     robustness: 412,
@@ -99,18 +99,18 @@ describe('POST /api/players/lookup', () => {
   })
 
   /**
-   * このルートが引くのはFargoRateのAPIだけである。CSIを経由する
-   * `lookupPlayerProfile` へ切り替える分岐を持ち込まないこと。
+   * このルートは名前で複数件を返す一覧の経路である。メンバーシップIDの一致で
+   * 1件に絞る `lookupPlayerProfile` へ切り替える分岐を持ち込まないこと。
    */
-  it('13桁の数字でもCSIを経由するルックアップへ切り替えない', async () => {
+  it('数字だけの検索語でもリンク用のルックアップへ切り替えない', async () => {
     searchPlayers.mockResolvedValue([])
 
     await callHandler(handler, {
-      query: FARGORATE_ID,
+      query: MEMBERSHIP_ID,
       recaptchaToken: 'valid-token',
     })
 
-    expect(searchPlayers).toHaveBeenCalledWith(FARGORATE_ID)
+    expect(searchPlayers).toHaveBeenCalledWith(MEMBERSHIP_ID)
     expect(lookupPlayerProfile).not.toHaveBeenCalled()
   })
 

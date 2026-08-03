@@ -22,12 +22,10 @@
     "commitTitle": "Running on commit {sha}"
   },
   "player": {
-    "fargorateId": "FargoRate ID",
+    "membershipId": "FargoRate ID",
     "name": "Name",
     "guestName": "Guest Player",
-    "league": "League",
-    "region": "Region",
-    "team": "Team",
+    "location": "Location",
     "rating": "Rating",
     "robustness": "Robustness",
     "robustnessNone": "None"
@@ -35,11 +33,11 @@
   "seo": {
     "index": {
       "title": "Record your matches with FargoRate",
-      "description": "A web app that helps you enter and review pool match scores on top of FargoRate ratings. Your FargoRate ID is all you need to get started."
+      "description": "A web app that helps you enter and review pool match scores on top of FargoRate ratings. Your name and FargoRate ID are all you need to get started."
     },
     "link": {
       "title": "Link your FargoRate",
-      "description": "Enter the 13-digit FargoRate ID shown on your player card in the FargoRate app to link your FargoRate player profile. The screen also shows you where to find it."
+      "description": "Enter your name and the FargoRate ID shown on your player card in the FargoRate app to link your FargoRate player profile. The screen also shows you where to find the ID."
     },
     "guest": {
       "title": "Start as a guest",
@@ -116,13 +114,14 @@
       }
     },
     "gettingStartedHeading": "Getting started",
-    "gettingStartedBody": "Just enter the 13-digit FargoRate ID shown on your player card in the FargoRate app. There is no password to register, and the linking screen shows you how to find your ID.",
+    "gettingStartedBody": "Just enter your name and the FargoRate ID shown on your player card in the FargoRate app. There is no password to register, and the linking screen shows you how to find your ID.",
     "gettingStartedNote": "This app reads your rating from FargoRate, but it never sends match results to the official system. Nothing you record here changes your rating."
   },
   "link": {
     "heading": "Link your FargoRate",
-    "lead": "We will look up your information by FargoRate ID.",
-    "idLabel": "FargoRate ID (13 digits)",
+    "lead": "We will look up your information by your name and FargoRate ID. Enter your name as it appears on FargoRate.",
+    "nameLabel": "Name",
+    "idLabel": "FargoRate ID",
     "recentAccounts": {
       "label": "Recently used accounts:",
       "remove": "Remove {name} from suggestions"
@@ -133,8 +132,10 @@
     "confirm": "Yes, that is me",
     "reject": "No",
     "errors": {
-      "invalidId": "Enter your FargoRate ID as 13 digits.",
-      "notFound": "No player was found for that FargoRate ID.",
+      "invalidName": "Enter a name between {min} and {max} characters.",
+      "invalidId": "Enter your FargoRate ID using digits only.",
+      "invalidInput": "Please check what you entered.",
+      "notFound": "No player matched that name and FargoRate ID. Check that the name matches how it appears on FargoRate.",
       "recaptchaFailed": "We couldn't verify that you're not a robot. Please wait a moment and try again.",
       "unexpected": "The request failed. Please wait a moment and try again."
     }
@@ -171,7 +172,7 @@
   "fargorateIdGuide": {
     "trigger": "How to find your FargoRate ID",
     "heading": "How to find your FargoRate ID",
-    "lead": "Follow these steps in the FargoRate app to find your 13-digit FargoRate ID.",
+    "lead": "Follow these steps in the FargoRate app to find your FargoRate ID.",
     "steps": {
       "menu": {
         "title": "Open the menu at the top left",
@@ -182,8 +183,8 @@
         "alt": "The menu of the FargoRate app, with Player Card as the first item."
       },
       "number": {
-        "title": "Read the 13-digit number at the bottom",
-        "alt": "The player card in the FargoRate app, with a 13-digit number below the barcode."
+        "title": "Read the number at the bottom",
+        "alt": "The player card in the FargoRate app, with the FargoRate ID below the barcode."
       }
     },
     "close": "Close"
@@ -212,7 +213,7 @@
   "settings": {
     "heading": "Settings",
     "account": "Account",
-    "playingAs": "You're using the app as {name} ({fargorateId}).",
+    "playingAs": "You're using the app as {name} ({membershipId}).",
     "playingAsGuest": "You're using the app as {name} (guest). Your rating is self-reported and is not tied to any FargoRate record.",
     "signOut": "Sign out",
     "theme": "Theme",

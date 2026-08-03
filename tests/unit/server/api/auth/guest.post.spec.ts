@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import handler from '../../../../../server/api/auth/guest.post'
 import { callHandler } from '../../../../helpers/h3'
-import { FARGORATE_ID } from '../../../../helpers/fixtures'
+import { MEMBERSHIP_ID } from '../../../../helpers/fixtures'
 import {
   GUEST_NAME_MAX_LENGTH,
   GUEST_RATING_MAX,
@@ -135,11 +135,9 @@ describe('POST /api/auth/guest', () => {
       rating: 450,
       recaptchaToken: 'valid-token',
       kind: 'fargorate',
-      fargorateId: FARGORATE_ID,
+      membershipId: MEMBERSHIP_ID,
       robustness: 9999,
-      leagueName: 'Tokyo League',
-      region: 'Kanto',
-      teamNames: 'Team Alpha',
+      location: 'Tokyo',
     })
 
     const saved = setUserSession.mock.calls[0]?.[1]

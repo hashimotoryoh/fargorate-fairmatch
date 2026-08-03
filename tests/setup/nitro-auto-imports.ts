@@ -1,5 +1,5 @@
 import { createError, defineEventHandler, readBody } from 'h3'
-import { isValidFargorateId } from '../../shared/utils/fargorateId'
+import { isValidMembershipId } from '../../shared/utils/membershipId'
 import {
   GUEST_NAME_MAX_LENGTH,
   GUEST_RATING_MAX,
@@ -15,7 +15,8 @@ import {
 import { readGuestPlayer } from '../../server/utils/guest'
 import {
   lookupPlayerProfile,
-  readFargorateId,
+  readMembershipId,
+  readPlayerName,
   readPlayerQuery,
   searchPlayers,
 } from '../../server/utils/lookup'
@@ -35,7 +36,7 @@ Object.assign(globalThis, {
   // @nuxtjs/sitemap の実体もh3の defineEventHandler そのままの再エクスポート。
   defineSitemapEventHandler: defineEventHandler,
   readBody,
-  isValidFargorateId,
+  isValidMembershipId,
   GUEST_NAME_MAX_LENGTH,
   GUEST_RATING_MAX,
   GUEST_RATING_MIN,
@@ -45,8 +46,9 @@ Object.assign(globalThis, {
   PLAYER_QUERY_MIN_LENGTH,
   isValidPlayerQuery,
   lookupPlayerProfile,
-  readFargorateId,
   readGuestPlayer,
+  readMembershipId,
+  readPlayerName,
   readPlayerQuery,
   searchPlayers,
   verifyRecaptchaToken,

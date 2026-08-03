@@ -39,7 +39,7 @@ async function signOut() {
               isFargoRatePlayer(user)
                 ? $t('settings.playingAs', {
                     name: user.name,
-                    fargorateId: user.fargorateId,
+                    membershipId: user.membershipId,
                   })
                 : $t('settings.playingAsGuest', {
                     name: user.name ?? $t('player.guestName'),

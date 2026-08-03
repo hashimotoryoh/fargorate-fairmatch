@@ -1,9 +1,10 @@
 /**
- * `/link` の確認画面に見せるプレイヤー情報を、FargoRate IDから引く。
+ * `/link` の確認画面に見せるプレイヤー情報を、名前とFargoRate IDから引く。
  * この時点ではまだセッションを作らない。該当が無ければ 404 を返す。
  *
- * リンクの導線のためのルートである。IDで1件に絞る確認のための経路であり、名前で
- * 複数件を返す `POST /api/players/lookup` とは応答の形が違うため別に立ててある。
+ * リンクの導線のためのルートである。名前で検索した候補をメンバーシップIDの
+ * 一致で1件に絞る確認のための経路であり、名前で複数件を返す
+ * `POST /api/players/lookup` とは応答の形が違うため別に立ててある。
  * 検索そのものは `lookupPlayerProfile` にあるので、他の機能から同じ検索を使う
  * ときはその関数を共有し、ルートは機能ごとに分けること。
  *
@@ -22,9 +23,10 @@
  */
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const fargorateId = readFargorateId(body)
+  const name = readPlayerName(body)
+  const membershipId = readMembershipId(body)
   await verifyRecaptchaToken(body?.recaptchaToken, 'link')
-  const profile = await lookupPlayerProfile(fargorateId)
+  const profile = await lookupPlayerProfile(name, membershipId)
 
   if (!profile) {
     throw createError({

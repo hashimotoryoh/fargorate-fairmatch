@@ -112,8 +112,8 @@ async function search() {
 
       <ul v-else class="flex flex-col gap-3">
         <!--
-          `readableId` はこのAPIの表示用IDで、リンクに使う13桁のFargoRate ID
-          （`fargorateId`）とは別物。欠けることもあるため、無ければ添字で補う。
+          `readableId` はこのAPIの表示用IDで、リンクに使うFargoRate ID
+          （`membershipId`）とは別物。欠けることもあるため、無ければ添字で補う。
         -->
         <li
           v-for="(player, index) in players"

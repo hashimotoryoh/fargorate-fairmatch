@@ -1,52 +1,29 @@
 import type {
-  CsiLookupResponse,
   FargoRateLookupPlayer,
   FargoRateLookupResponse,
   FargoRatePlayer,
   FargoRateSearchResult,
 } from '#shared/types/player'
 
-const CSI_LOOKUP_URL = 'https://csibbm.com/Public/_MembershipLookupWeeksPlayed'
 const FARGORATE_LOOKUP_URL = 'https://dashboard.fargorate.com/api/indexsearch'
 
 /**
- * CSIメンバーシップルックアップAPIをFargoRate IDで検索する。
- * IDでの検索なので、ヒットしても最大1件。
+ * FargoRateメンバーシップルックアップAPIを検索語で引く。
+ * 外部APIに到達できなかった場合は「見つからない」と区別するため 502 を投げる。
  */
-async function fetchCsiMember(fargorateId: string) {
-  const response = await $fetch<CsiLookupResponse>(CSI_LOOKUP_URL, {
-    method: 'POST',
-    headers: {
-      accept: 'text/plain, */*; q=0.01',
-      'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      'x-requested-with': 'XMLHttpRequest',
-    },
-    body: new URLSearchParams({
-      page: '1',
-      firstName: '',
-      lastName: '',
-      membershipNumber: fargorateId,
-    }),
-    // このAPIは JSON を text/plain として返すため、明示的にパースする。
-    parseResponse: JSON.parse,
-  })
-
-  return response.data?.[0] ?? null
-}
-
-/**
- * FargoRateメンバーシップルックアップAPIを姓名で検索し、
- * メンバーシップIDの一致で1件に絞り込む。
- */
-async function fetchFargoRateLookupPlayer(fargorateId: string, query: string) {
-  const response = await $fetch<FargoRateLookupResponse>(FARGORATE_LOOKUP_URL, {
-    query: { q: query },
-  })
-
-  return (
-    response.value?.find((player) => player.membershipId === fargorateId) ??
-    null
-  )
+async function fetchFargoRateLookup(
+  query: string,
+): Promise<FargoRateLookupResponse> {
+  try {
+    return await $fetch<FargoRateLookupResponse>(FARGORATE_LOOKUP_URL, {
+      query: { q: query },
+    })
+  } catch {
+    throw createError({
+      statusCode: 502,
+      statusMessage: 'Failed to reach the FargoRate membership lookup API',
+    })
+  }
 }
 
 /**
@@ -66,42 +43,23 @@ function parseRating(value: unknown): number | null {
 }
 
 /**
- * FargoRate IDからプレイヤー情報を引く。
+ * 名前とメンバーシップIDからプレイヤー情報を引く。
  *
- * CSI側で姓名を引き当て、その姓名でFargoRate側を検索してレーティングを得る。
- * どちらかで該当が無ければ `null` を返す。外部APIに到達できなかった場合や、
- * 期待する形のレスポンスが得られなかった場合は「見つからない」と区別するため
- * 502 を投げる。
+ * FargoRateのAPIはメンバーシップIDでの検索を受け付けないため、名前で検索して
+ * 同姓同名を含む候補を得て、メンバーシップIDの一致で1件に絞り込む。一致する
+ * 候補が無ければ `null` を返す。外部APIに到達できなかった場合や、期待する形の
+ * レスポンスが得られなかった場合は「見つからない」と区別するため 502 を投げる。
  */
 export async function lookupPlayerProfile(
-  fargorateId: string,
+  name: string,
+  membershipId: string,
 ): Promise<FargoRatePlayer | null> {
-  let member
-  try {
-    member = await fetchCsiMember(fargorateId)
-  } catch {
-    throw createError({
-      statusCode: 502,
-      statusMessage: 'Failed to reach the CSI membership lookup API',
-    })
-  }
+  const response = await fetchFargoRateLookup(name)
 
-  if (!member) {
-    return null
-  }
-
-  let player
-  try {
-    player = await fetchFargoRateLookupPlayer(
-      fargorateId,
-      `${member.FirstName} ${member.LastName}`,
-    )
-  } catch {
-    throw createError({
-      statusCode: 502,
-      statusMessage: 'Failed to reach the FargoRate membership lookup API',
-    })
-  }
+  const player =
+    response?.value?.find(
+      (candidate) => candidate.membershipId === membershipId,
+    ) ?? null
 
   if (!player) {
     return null
@@ -121,11 +79,10 @@ export async function lookupPlayerProfile(
   return {
     kind: 'fargorate',
     // 姓名の結合はここだけで行い、表示側には結合済みの名前だけを渡す。
-    name: `${member.FirstName} ${member.LastName}`,
-    fargorateId,
-    leagueName: member.LeagueName,
-    region: member.Region,
-    teamNames: member.TeamNames,
+    // 検索語ではなく応答の表記を使う。検索は大文字小文字などの揺れを許すため。
+    name: `${player.firstName} ${player.lastName}`,
+    membershipId,
+    location: player.location || null,
     rating,
     robustness,
   }
@@ -151,7 +108,7 @@ function toSearchResult(
   return {
     name: `${player.firstName} ${player.lastName}`,
     readableId: player.readableId || null,
-    fargorateId: player.membershipId || null,
+    membershipId: player.membershipId || null,
     location: player.location || null,
     rating,
     robustness,
@@ -161,11 +118,11 @@ function toSearchResult(
 /**
  * FargoRateのプレイヤーを検索し、ヒットした全件を返す。
  *
- * `lookupPlayerProfile` と違い、CSIは経由せずFargoRateのAPIだけを引く。
- * したがってリーグ・リージョン・チームは得られない。
+ * `lookupPlayerProfile` がメンバーシップIDの一致で1件に絞るのに対し、こちらは
+ * 絞り込まずヒットした全件を返す。
  *
  * 検索語はそのまま `q` に渡す。このAPIは姓名のほか、レスポンスの `readableId`
- * でも引ける（13桁の `membershipId` では引けない）。どちらで来ても呼び分けは
+ * でも引ける（`membershipId` では引けない）。どちらで来ても呼び分けは
  * 要らないため、ここでは判定しない。
  *
  * 読み取れない行が1件混じっただけで一覧全体を落とすと、他が正常でも何も
@@ -175,17 +132,7 @@ function toSearchResult(
 export async function searchPlayers(
   query: string,
 ): Promise<FargoRateSearchResult[]> {
-  let response
-  try {
-    response = await $fetch<FargoRateLookupResponse>(FARGORATE_LOOKUP_URL, {
-      query: { q: query },
-    })
-  } catch {
-    throw createError({
-      statusCode: 502,
-      statusMessage: 'Failed to reach the FargoRate membership lookup API',
-    })
-  }
+  const response = await fetchFargoRateLookup(query)
 
   return (response?.value ?? [])
     .map(toSearchResult)
@@ -210,18 +157,41 @@ export function readPlayerQuery(body: { query?: unknown }): string {
 }
 
 /**
- * リクエストボディからFargoRate IDを取り出して検証する。
- * 形式が不正な場合は 400 を投げる。
+ * リクエストボディからリンクに使う名前を取り出して検証する。
+ * 長さが範囲外の場合は 400 を投げる。前後の空白は落として返す。
+ *
+ * 名前はFargoRateの検索語としてそのまま使うため、長さの条件はプレイヤー検索の
+ * 検索語と同じものを使い、条件を二重に持たない。
  */
-export function readFargorateId(body: { fargorateId?: unknown }): string {
-  const fargorateId = body?.fargorateId
+export function readPlayerName(body: { name?: unknown }): string {
+  const name = body?.name
 
-  if (typeof fargorateId !== 'string' || !isValidFargorateId(fargorateId)) {
+  if (typeof name !== 'string' || !isValidPlayerQuery(name)) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'fargorateId must be a 13-digit number',
+      statusMessage: `name must be between ${PLAYER_QUERY_MIN_LENGTH} and ${PLAYER_QUERY_MAX_LENGTH} characters`,
     })
   }
 
-  return fargorateId
+  return name.trim()
+}
+
+/**
+ * リクエストボディからメンバーシップID（UIでいうFargoRate ID）を取り出して
+ * 検証する。形式が不正な場合は 400 を投げる。
+ *
+ * かつては13桁の固定長としていたが、桁数が一定しないことが判明したため、
+ * 数字だけで構成されていることのみを確かめる。
+ */
+export function readMembershipId(body: { membershipId?: unknown }): string {
+  const membershipId = body?.membershipId
+
+  if (typeof membershipId !== 'string' || !isValidMembershipId(membershipId)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'membershipId must be a string of digits',
+    })
+  }
+
+  return membershipId
 }
