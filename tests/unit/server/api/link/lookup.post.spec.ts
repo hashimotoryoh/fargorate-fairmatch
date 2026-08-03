@@ -1,14 +1,17 @@
 import { createError } from 'h3'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import handler from '../../../../server/api/lookup.post'
-import { callHandler } from '../../../helpers/h3'
-import { FARGORATE_ID, createFargoRatePlayer } from '../../../helpers/fixtures'
+import handler from '../../../../../server/api/link/lookup.post'
+import { callHandler } from '../../../../helpers/h3'
+import {
+  FARGORATE_ID,
+  createFargoRatePlayer,
+} from '../../../../helpers/fixtures'
 
 /**
  * ルックアップのサーバールートを、リクエストからの一連の流れとして確かめる。
  * 外部APIとの通信だけを差し替え、検証・ルックアップ・応答の組み立ては本物を通す。
  */
-describe('POST /api/lookup', () => {
+describe('POST /api/link/lookup', () => {
   const lookupPlayerProfile = vi.fn()
 
   beforeEach(() => {

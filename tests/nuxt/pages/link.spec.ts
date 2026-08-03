@@ -36,7 +36,7 @@ mockNuxtImport('useUserSession', () => () => ({
 // 実ブラウザでのreCAPTCHAスクリプト読み込みはテスト環境では発生させない。
 mockNuxtImport('useRecaptcha', () => () => ({ execute: executeRecaptchaMock }))
 
-registerEndpoint('/api/lookup', { method: 'POST', handler: lookupHandler })
+registerEndpoint('/api/link/lookup', { method: 'POST', handler: lookupHandler })
 registerEndpoint('/api/auth/session', {
   method: 'POST',
   handler: sessionHandler,

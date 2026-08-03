@@ -72,7 +72,7 @@ async function searchPlayer() {
 
   try {
     const recaptchaToken = await executeRecaptcha('link')
-    candidate.value = await $fetch<FargoRatePlayer>('/api/lookup', {
+    candidate.value = await $fetch<FargoRatePlayer>('/api/link/lookup', {
       method: 'POST',
       body: { fargorateId: fargorateId.value, recaptchaToken },
     })
