@@ -7,7 +7,7 @@ describe('トップページ', () => {
   it('アプリ名と概要を見出しに出す', async () => {
     const component = await mountSuspended(IndexPage)
 
-    expect(component.find('h1').text()).toBe('FargoRate FairMatch')
+    expect(component.find('h1').text()).toBe('FargoRate FairRace')
     expect(component.text()).toContain(jaMessage('index.lead'))
   })
 

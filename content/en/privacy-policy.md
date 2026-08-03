@@ -1,10 +1,10 @@
 ---
 title: Privacy Policy
-description: Explains what information FargoRate FairMatch handles, why it is used, where it is stored, and how to delete it.
+description: Explains what information FargoRate FairRace handles, why it is used, where it is stored, and how to delete it.
 updatedAt: '2026-08-03'
 ---
 
-FargoRate FairMatch (the "App") is an individually developed web app that supports pool matches played on FargoRate. This policy sets out what information the App handles and how it is handled.
+FargoRate FairRace (the "App") is an individually developed web app that supports pool matches played on FargoRate. This policy sets out what information the App handles and how it is handled.
 
 ## Information we collect
 

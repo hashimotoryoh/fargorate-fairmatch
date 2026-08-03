@@ -156,7 +156,7 @@ export default defineNuxtConfig({
    */
   llms: {
     domain: SITE_URL,
-    title: 'FargoRate FairMatch',
+    title: 'FargoRate FairRace',
     // documents_ja/documents_en、blog_ja/blog_en はそれぞれ日英で同じパスを
     // 共有しており（例: /privacy-policy、/blog/<スラッグ>）、`/raw/*.md` は
     // 最初に見つかったコレクションを返すだけでロケールを見分けない。日本語
@@ -174,7 +174,7 @@ export default defineNuxtConfig({
           {
             title: 'Home',
             description:
-              'What FargoRate FairMatch does and how FargoRate ratings work.',
+              'What FargoRate FairRace does and how FargoRate ratings work.',
             href: '/en',
           },
           {
@@ -216,7 +216,7 @@ export default defineNuxtConfig({
       // ここで固定すると二重指定になる。
       // daisyUI の dock がセーフエリアを避けるために viewport-fit=cover が要る。
       viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
-      titleTemplate: '%s | FargoRate FairMatch',
+      titleTemplate: '%s | FargoRate FairRace',
     },
   },
   runtimeConfig: {

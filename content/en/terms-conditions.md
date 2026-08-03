@@ -1,10 +1,10 @@
 ---
 title: Terms and Conditions
-description: The conditions, prohibited conduct, and disclaimers that apply when you use FargoRate FairMatch.
+description: The conditions, prohibited conduct, and disclaimers that apply when you use FargoRate FairRace.
 updatedAt: '2026-08-03'
 ---
 
-These terms and conditions (the "Terms") set out the conditions for using FargoRate FairMatch (the "App"). By using the App, you are deemed to have agreed to the Terms.
+These terms and conditions (the "Terms") set out the conditions for using FargoRate FairRace (the "App"). By using the App, you are deemed to have agreed to the Terms.
 
 ## About the App
 

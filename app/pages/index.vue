@@ -27,7 +27,7 @@ const ratingGuideKeys = [
         <Icon name="custom:app-logo" class="text-primary size-20" />
 
         <div class="flex flex-col gap-4">
-          <h1 class="text-3xl font-bold sm:text-4xl">FargoRate FairMatch</h1>
+          <h1 class="text-3xl font-bold sm:text-4xl">FargoRate FairRace</h1>
           <p class="text-base-content/80 mx-auto max-w-xl">
             {{ $t('index.lead') }}
           </p>

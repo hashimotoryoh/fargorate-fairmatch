@@ -8,7 +8,7 @@ const { siteUrl } = useRuntimeConfig().public
 // 分かっているときだけ出す。記事固有の画像を持つページ（ブログ詳細）は
 // 自身の useSeoMeta でこの既定値を上書きする。
 useSeoMeta({
-  ogSiteName: 'FargoRate FairMatch',
+  ogSiteName: 'FargoRate FairRace',
   ogType: 'website',
   ogImage: () => (siteUrl ? `${siteUrl}/img/ogp.png` : undefined),
   twitterCard: 'summary_large_image',

@@ -5,7 +5,7 @@ date: '2026-08-02'
 image: /img/content/blog/blog-page-launch.png
 ---
 
-FargoRate FairMatchにブログページを追加しました。今後のアップデート内容やお知らせは、このページで随時お伝えします。
+FargoRate FairRaceにブログページを追加しました。今後のアップデート内容やお知らせは、このページで随時お伝えします。
 
 ## 確認方法
 

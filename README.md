@@ -1,4 +1,4 @@
-# FargoRate FairMatch
+# FargoRate FairRace
 
 FargoRateを用いたビリヤード対戦を補助するウェブアプリ。対戦中のスコアの入力や、対戦成績の振り返りなどを補助する。
 

@@ -5,7 +5,7 @@ date: '2026-08-02'
 image: /img/content/blog/blog-page-launch-en.png
 ---
 
-We added a blog page to FargoRate FairMatch. From now on, we will share updates and announcements here.
+We added a blog page to FargoRate FairRace. From now on, we will share updates and announcements here.
 
 ## Where to find it
 

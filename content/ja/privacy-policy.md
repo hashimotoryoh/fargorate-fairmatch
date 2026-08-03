@@ -1,10 +1,10 @@
 ---
 title: プライバシーポリシー
-description: FargoRate FairMatchが扱う情報の種類と、その利用目的・保存場所・削除の方法を説明します。
+description: FargoRate FairRaceが扱う情報の種類と、その利用目的・保存場所・削除の方法を説明します。
 updatedAt: '2026-08-03'
 ---
 
-FargoRate FairMatch（以下「本アプリ」）は、FargoRateを用いたビリヤード対戦を補助する個人開発のウェブアプリです。本アプリが扱う情報と、その扱い方をここに定めます。
+FargoRate FairRace（以下「本アプリ」）は、FargoRateを用いたビリヤード対戦を補助する個人開発のウェブアプリです。本アプリが扱う情報と、その扱い方をここに定めます。
 
 ## 取得する情報
 

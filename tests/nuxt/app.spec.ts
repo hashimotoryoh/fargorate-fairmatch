@@ -36,7 +36,7 @@ describe('アプリのルートコンポーネント（公開URLが設定済み�
     await vi.waitFor(() => {
       expect(
         head('meta[property="og:site_name"]')?.getAttribute('content'),
-      ).toBe('FargoRate FairMatch')
+      ).toBe('FargoRate FairRace')
     })
   })
 

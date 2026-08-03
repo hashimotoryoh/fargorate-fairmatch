@@ -35,19 +35,19 @@
     "index": {
       "title": "Record your matches with FargoRate",
       "description": "A web app that helps you enter and review pool match scores on top of FargoRate ratings. Your FargoRate ID is all you need to get started.",
-      "ogTitle": "FargoRate FairMatch",
+      "ogTitle": "FargoRate FairRace",
       "ogDescription": "A web app that helps you enter and review pool match scores on top of FargoRate ratings."
     },
     "link": {
       "title": "Link your FargoRate",
       "description": "Enter the 13-digit FargoRate ID shown on your player card in the FargoRate app to link your FargoRate player profile. The screen also shows you where to find it.",
-      "ogTitle": "Link your FargoRate - FargoRate FairMatch",
+      "ogTitle": "Link your FargoRate - FargoRate FairRace",
       "ogDescription": "Enter the 13-digit FargoRate ID shown on your player card in the FargoRate app to link your FargoRate player profile."
     },
     "guest": {
       "title": "Start as a guest",
       "description": "No FargoRate ID? Enter a name and a rating to get started. The name is optional.",
-      "ogTitle": "Start as a guest - FargoRate FairMatch",
+      "ogTitle": "Start as a guest - FargoRate FairRace",
       "ogDescription": "No FargoRate ID? Enter a name and a rating to get started."
     },
     "dashboard": {
@@ -61,13 +61,13 @@
     },
     "blog": {
       "title": "Blog",
-      "description": "Keep up with FargoRate FairMatch updates and press releases in one place.",
-      "ogTitle": "Blog - FargoRate FairMatch",
-      "ogDescription": "Keep up with FargoRate FairMatch updates and press releases in one place."
+      "description": "Keep up with FargoRate FairRace updates and press releases in one place.",
+      "ogTitle": "Blog - FargoRate FairRace",
+      "ogDescription": "Keep up with FargoRate FairRace updates and press releases in one place."
     },
     "faq": {
       "title": "FAQ",
-      "description": "Answers to common questions about how to use FargoRate FairMatch and how it relates to FargoRate."
+      "description": "Answers to common questions about how to use FargoRate FairRace and how it relates to FargoRate."
     }
   },
   "index": {

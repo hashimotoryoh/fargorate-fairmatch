@@ -32,7 +32,7 @@ if (!document.value) {
 useSeoMeta({
   title: document.value.title,
   description: document.value.description,
-  ogTitle: `${document.value.title} | FargoRate FairMatch`,
+  ogTitle: `${document.value.title} | FargoRate FairRace`,
   ogDescription: document.value.description,
 })
 

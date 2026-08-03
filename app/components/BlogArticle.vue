@@ -44,7 +44,7 @@ const ogImage = computed(() => {
 useSeoMeta({
   title: article.value.title,
   description: article.value.description,
-  ogTitle: `${article.value.title} | FargoRate FairMatch`,
+  ogTitle: `${article.value.title} | FargoRate FairRace`,
   ogDescription: article.value.description,
   // 一覧記事はブログ的な更新情報のため、既定の website ではなく article を使う。
   ogType: 'article',
@@ -71,10 +71,10 @@ useHead(() => ({
             datePublished: article.value!.date,
             dateModified: article.value!.updatedAt ?? article.value!.date,
             image: ogImage.value,
-            author: { '@type': 'Organization', name: 'FargoRate FairMatch' },
+            author: { '@type': 'Organization', name: 'FargoRate FairRace' },
             publisher: {
               '@type': 'Organization',
-              name: 'FargoRate FairMatch',
+              name: 'FargoRate FairRace',
             },
             mainEntityOfPage: `${siteUrl}${localePath(path)}`,
           }),
