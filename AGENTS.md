@@ -202,7 +202,7 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 いっぽう、外部APIへの問い合わせそのものは「検索」であり、`server/utils/lookup.ts` の `lookupPlayerProfile`・`server/api/*/lookup.post.ts`・`docs/*-lookup-api.md` は名前と実態が合っているため `lookup` のまま残してある。機能の名前（`link`）と操作の名前（`lookup`）を混ぜないこと。
 
-この検索は CSI で姓名を引き、その姓名で FargoRate を引く二段で固定である。三段目が増えることはないため、段数を可変にする作りにはしないこと。
+リンクの導線での検索は、CSI で姓名を引き、その姓名で FargoRate を引く二段で固定である。三段目が増えることはないため、段数を可変にする作りにはしないこと。いっぽうプレイヤー検索（`/lookup`）は FargoRate だけを引く一段で、CSI は経由しない。
 
 このルックアップ層は認証の一部ではなく、認証から使われている共有部品である。他プレイヤーのレーティングを閲覧するような、セッションと無関係の用途からも同じ層を呼べる状態に保つこと。具体的には次を守る。
 
@@ -273,7 +273,9 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 `/lookup` はFargoRateのプレイヤーを名前で検索し、レーティングと信頼度を見るページである。対戦相手の実力の目安を知るためのもので、認証を要さない公開ページとして置いてある。セッションには一切触れない。
 
 - 検索は `POST /api/players/lookup`。reCAPTCHAのアクションは `playerLookup`
-- 検索の実体は `server/utils/lookup.ts` の `searchPlayersByName` で、FargoRateのAPIだけを引く。CSIはIDでしか引けないため、名前で探す経路では使わない。したがってリーグ・リージョン・チームは得られず、結果は `FargoRateSearchResult`（名前・ID・レーティング・信頼度）になる
+- 検索の実体は `server/utils/lookup.ts` の `searchPlayers` で、**FargoRateのAPIだけ**を引く。CSIはIDでしか引けず、この経路の主な入力は名前であるため経由しない。したがってリーグ・リージョン・チームは得られず、結果は `FargoRateSearchResult`（名前・ID・所在地・レーティング・信頼度）になる
+- 検索語はそのまま `q` に渡す。このAPIは姓名のほかレスポンスの `readableId` でも引けるため、入力を名前に限定する検証を入れないこと。`readableId` は桁数が一定せず、リンクに使う13桁のFargoRate ID（`membershipId`）とは別物である。両者を取り違えないこと
+- 結果の一覧は `card` で見せ、レーティングと信頼度は `stat` に置く。所在地は名前の下に小さく添える
 - 該当が無いことは異常ではないため、404ではなく空配列を返す
 - 読み取れない行が混じっても一覧全体は落とさず、行単位で除く。1件の異常で他の正常な結果まで見せられなくなるのを避けるため
 - 入力の長さの条件は `shared/utils/playerQuery.ts` の `PLAYER_QUERY_MIN_LENGTH`・`PLAYER_QUERY_MAX_LENGTH` に一本化してある。フォームとサーバールートの双方で `isValidPlayerQuery()` を使い、条件を二重に書かないこと
