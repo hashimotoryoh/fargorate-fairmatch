@@ -6,7 +6,6 @@ const localePath = useLocalePath()
 useSeoMeta({
   title: () => t('seo.index.title'),
   description: () => t('seo.index.description'),
-  ogTitle: () => t('seo.index.ogTitle'),
   ogDescription: () => t('seo.index.ogDescription'),
 })
 

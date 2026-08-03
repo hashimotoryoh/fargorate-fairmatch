@@ -8,6 +8,10 @@ const { siteUrl } = useRuntimeConfig().public
 // 分かっているときだけ出す。記事固有の画像を持つページ（ブログ詳細）は
 // 自身の useSeoMeta でこの既定値を上書きする。
 useSeoMeta({
+  // `<title>` と同じ「タイトル - サイト名」に揃える。`%pageTitle` はそのページの
+  // title で、空のときは `%separator` ごと落ちてサイト名だけになる。ページ側で
+  // og:title を書かないこと。書くと接尾辞の管理が二重になる。
+  ogTitle: '%pageTitle %separator %siteName',
   ogSiteName: 'FargoRate FairMatch',
   ogType: 'website',
   ogImage: () => (siteUrl ? `${siteUrl}/img/ogp.png` : undefined),

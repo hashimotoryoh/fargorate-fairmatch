@@ -222,7 +222,16 @@ export default defineNuxtConfig({
       // ここで固定すると二重指定になる。
       // daisyUI の dock がセーフエリアを避けるために viewport-fit=cover が要る。
       viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
-      titleTemplate: '%s | FargoRate FairMatch',
+      /**
+       * `<title>` と og:title を「タイトル - サイト名」で揃える。
+       *
+       * unhead の `templateParams` は `titleTemplate` だけでなく各メタの
+       * `content` でも展開されるため、サイト名と区切りをここに一本化できる。
+       * og:title 側の指定は `app/app.vue` にある。ページごとに接尾辞を
+       * 書き写さないこと。
+       */
+      titleTemplate: '%s %separator %siteName',
+      templateParams: { siteName: 'FargoRate FairMatch', separator: '-' },
     },
   },
   runtimeConfig: {

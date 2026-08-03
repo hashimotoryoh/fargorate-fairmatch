@@ -7,7 +7,6 @@ const { t } = useI18n()
 useSeoMeta({
   title: () => t('seo.lookup.title'),
   description: () => t('seo.lookup.description'),
-  ogTitle: () => t('seo.lookup.ogTitle'),
   ogDescription: () => t('seo.lookup.ogDescription'),
 })
 

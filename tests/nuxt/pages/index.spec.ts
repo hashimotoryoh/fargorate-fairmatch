@@ -1,9 +1,27 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import IndexPage from '../../../app/pages/index.vue'
 import { jaMessage } from '../../helpers/i18n'
 
 describe('トップページ', () => {
+  /**
+   * タイトルは「タイトル - サイト名」で組み立てる。接尾辞と区切りは
+   * `nuxt.config.ts` の `templateParams` に一本化してあり、ページ側では
+   * 書かない。ここが崩れると、ページを足すたびに書き忘れが起きる。
+   *
+   * og:title が同じテンプレートを使うことは `tests/nuxt/app.spec.ts` で見る。
+   * 既定のOGPは `app.vue` にあり、ページ単体のマウントでは載らないため。
+   */
+  it('タイトルをサイト名と組み合わせて出す', async () => {
+    await mountSuspended(IndexPage)
+
+    await vi.waitFor(() => {
+      expect(document.title).toBe(
+        `${jaMessage('seo.index.title')} - FargoRate FairMatch`,
+      )
+    })
+  })
+
   it('アプリ名と概要を見出しに出す', async () => {
     const component = await mountSuspended(IndexPage)
 

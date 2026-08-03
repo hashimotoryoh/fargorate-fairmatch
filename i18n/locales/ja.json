@@ -36,25 +36,21 @@
     "index": {
       "title": "FargoRateで対戦を記録する",
       "description": "FargoRateのレーティングをもとに、ビリヤードの対戦スコアの入力と振り返りを補助するウェブアプリ。FargoRate IDだけで使い始められます。",
-      "ogTitle": "FargoRate FairMatch",
       "ogDescription": "FargoRateのレーティングをもとに、ビリヤードの対戦スコアの入力と振り返りを補助するウェブアプリ。"
     },
     "link": {
       "title": "FargoRateとリンクする",
       "description": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力して、FargoRateのプレイヤー情報とリンクします。IDの調べ方も画面上で案内します。",
-      "ogTitle": "FargoRateとリンクする - FargoRate FairMatch",
       "ogDescription": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力して、FargoRateのプレイヤー情報とリンクします。"
     },
     "guest": {
       "title": "ゲストとして始める",
       "description": "FargoRate IDをお持ちでない方は、名前とレーティングを入力するだけで始められます。名前の入力は任意です。",
-      "ogTitle": "ゲストとして始める - FargoRate FairMatch",
       "ogDescription": "FargoRate IDをお持ちでない方は、名前とレーティングを入力するだけで始められます。"
     },
     "lookup": {
       "title": "プレイヤーを探す",
       "description": "FargoRateのプレイヤーを名前で検索し、レーティングと信頼度を確認できます。対戦相手の実力の目安を知りたいときに使えます。",
-      "ogTitle": "プレイヤーを探す - FargoRate FairMatch",
       "ogDescription": "FargoRateのプレイヤーを名前で検索し、レーティングと信頼度を確認できます。"
     },
     "dashboard": {
@@ -69,7 +65,6 @@
     "blog": {
       "title": "ブログ",
       "description": "FargoRate FairMatchのアップデートやプレスリリースなど、ブログをまとめて確認できます。",
-      "ogTitle": "ブログ - FargoRate FairMatch",
       "ogDescription": "FargoRate FairMatchのアップデートやプレスリリースなど、ブログをまとめて確認できます。"
     },
     "faq": {
