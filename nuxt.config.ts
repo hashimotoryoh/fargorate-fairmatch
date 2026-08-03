@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 const { resolve } = createResolver(import.meta.url)
 
-const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairmatch'
+const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairrace'
 
 /**
  * 公開URLのオリジン。OGPやcanonical、hreflang の絶対URLの組み立てに使う。
@@ -156,7 +156,7 @@ export default defineNuxtConfig({
    */
   llms: {
     domain: SITE_URL,
-    title: 'FargoRate FairMatch',
+    title: 'FargoRate FairRace',
     // documents_ja/documents_en、blog_ja/blog_en はそれぞれ日英で同じパスを
     // 共有しており（例: /privacy-policy、/blog/<スラッグ>）、`/raw/*.md` は
     // 最初に見つかったコレクションを返すだけでロケールを見分けない。日本語
@@ -174,7 +174,7 @@ export default defineNuxtConfig({
           {
             title: 'Home',
             description:
-              'What FargoRate FairMatch does and how FargoRate ratings work.',
+              'What FargoRate FairRace does and how FargoRate ratings work.',
             href: '/en',
           },
           {
@@ -231,7 +231,7 @@ export default defineNuxtConfig({
        * 書き写さないこと。
        */
       titleTemplate: '%s %separator %siteName',
-      templateParams: { siteName: 'FargoRate FairMatch', separator: '-' },
+      templateParams: { siteName: 'FargoRate FairRace', separator: '-' },
     },
   },
   runtimeConfig: {

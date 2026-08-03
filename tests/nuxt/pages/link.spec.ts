@@ -362,7 +362,7 @@ describe('リンクページ', () => {
   // 生のFargoRate IDではなく、名前とレーティングでサジェストする。
   it('過去に本人確認したアカウントを名前とレーティングでサジェストする', async () => {
     localStorage.setItem(
-      'fairmatch:recentAccounts',
+      'fairrace:recentAccounts',
       JSON.stringify([
         { fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 },
       ]),
@@ -377,7 +377,7 @@ describe('リンクページ', () => {
 
   // 壊れた値でも例外を握りつぶし、サジェスト無しで入力を続けられるようにする。
   it('localStorageの値が壊れていてもサジェスト無しで続行する', async () => {
-    localStorage.setItem('fairmatch:recentAccounts', '{not valid json')
+    localStorage.setItem('fairrace:recentAccounts', '{not valid json')
 
     const component = await mountSuspended(LinkPage)
 
@@ -393,7 +393,7 @@ describe('リンクページ', () => {
       name: `Player ${i}`,
       rating: 400 + i,
     }))
-    localStorage.setItem('fairmatch:recentAccounts', JSON.stringify(accounts))
+    localStorage.setItem('fairrace:recentAccounts', JSON.stringify(accounts))
 
     const component = await mountSuspended(LinkPage)
 
@@ -403,7 +403,7 @@ describe('リンクページ', () => {
   // 選んだ時点で本人だとわかっているため、IDの入力や確認画面を経由しない。
   it('サジェストを選ぶと確認画面を経ずに直接リンクを確定する', async () => {
     localStorage.setItem(
-      'fairmatch:recentAccounts',
+      'fairrace:recentAccounts',
       JSON.stringify([
         { fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 },
       ]),
@@ -430,7 +430,7 @@ describe('リンクページ', () => {
   // 再ルックアップした最新の情報で記憶を上書きする。
   it('サジェストからのリンクでは、サーバーが返した最新の情報を記憶する', async () => {
     localStorage.setItem(
-      'fairmatch:recentAccounts',
+      'fairrace:recentAccounts',
       JSON.stringify([SECOND_ACCOUNT]),
     )
     sessionHandler.mockReturnValue(
@@ -449,14 +449,14 @@ describe('リンクページ', () => {
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
 
     expect(
-      JSON.parse(localStorage.getItem('fairmatch:recentAccounts') ?? '[]'),
+      JSON.parse(localStorage.getItem('fairrace:recentAccounts') ?? '[]'),
     ).toEqual([{ ...SECOND_ACCOUNT, rating: 450 }])
   })
 
   it('サジェストでの直接リンクに失敗したら知らせる', async () => {
     sessionHandler.mockImplementation(notFound)
     localStorage.setItem(
-      'fairmatch:recentAccounts',
+      'fairrace:recentAccounts',
       JSON.stringify([SECOND_ACCOUNT]),
     )
 
@@ -474,7 +474,7 @@ describe('リンクページ', () => {
 
   it('サジェストを個別に削除できる', async () => {
     localStorage.setItem(
-      'fairmatch:recentAccounts',
+      'fairrace:recentAccounts',
       JSON.stringify([
         { fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 },
         SECOND_ACCOUNT,
@@ -490,13 +490,13 @@ describe('リンクページ', () => {
     expect(component.text()).not.toContain('Taro Yamada (523)')
     expect(component.text()).toContain('Jiro Suzuki (400)')
     expect(
-      JSON.parse(localStorage.getItem('fairmatch:recentAccounts') ?? '[]'),
+      JSON.parse(localStorage.getItem('fairrace:recentAccounts') ?? '[]'),
     ).toEqual([SECOND_ACCOUNT])
   })
 
   it('最後のサジェストを削除すると一覧ごと消える', async () => {
     localStorage.setItem(
-      'fairmatch:recentAccounts',
+      'fairrace:recentAccounts',
       JSON.stringify([SECOND_ACCOUNT]),
     )
 
@@ -516,7 +516,7 @@ describe('リンクページ', () => {
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
 
     expect(
-      JSON.parse(localStorage.getItem('fairmatch:recentAccounts') ?? '[]'),
+      JSON.parse(localStorage.getItem('fairrace:recentAccounts') ?? '[]'),
     ).toEqual([{ fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 }])
   })
 })

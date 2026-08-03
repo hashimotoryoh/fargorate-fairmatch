@@ -5,7 +5,7 @@ import AppFooter from '../../../app/components/AppFooter.vue'
 import { footerNavItems } from '../../../app/utils/navigation'
 import { jaMessage } from '../../helpers/i18n'
 
-const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairmatch'
+const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairrace'
 const COMMIT_SHA = '0123456789abcdef0123456789abcdef01234567'
 
 function setPublicConfig(overrides: { commitSha?: string }) {

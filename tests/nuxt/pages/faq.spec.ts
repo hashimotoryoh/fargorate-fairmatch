@@ -17,7 +17,7 @@ const { queryCollectionMock, allMock } = vi.hoisted(() => {
 
 mockNuxtImport('queryCollection', () => queryCollectionMock)
 
-const SITE_URL = 'https://fairmatch.example'
+const SITE_URL = 'https://fairrace.example'
 
 function setSiteUrl(siteUrl: string | undefined) {
   Object.assign(useRuntimeConfig().public, { siteUrl })

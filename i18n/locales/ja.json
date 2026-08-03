@@ -60,11 +60,11 @@
     },
     "blog": {
       "title": "ブログ",
-      "description": "FargoRate FairMatchのアップデートやプレスリリースなど、ブログをまとめて確認できます。"
+      "description": "FargoRate FairRaceのアップデートやプレスリリースなど、ブログをまとめて確認できます。"
     },
     "faq": {
       "title": "よくある質問",
-      "description": "FargoRate FairMatchの使い方やFargoRateとの関係について、よくいただく質問をまとめています。"
+      "description": "FargoRate FairRaceの使い方やFargoRateとの関係について、よくいただく質問をまとめています。"
     }
   },
   "index": {

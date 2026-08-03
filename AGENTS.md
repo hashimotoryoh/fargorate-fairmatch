@@ -78,6 +78,10 @@ MITライセンスで公開している。`LICENSE` はライセンスの定型�
 
 ## アプリケーション概要
 
+アプリの名称は `FargoRate FairRace` である。必ずこの綴りで統一し、UI・翻訳・ドキュメントで別の表記を作らないこと。
+
+メタタグに出るサイト名は `nuxt.config.ts` の `app.head.templateParams` に一本化してある（後述の「SEOのメタタグ」を参照）。名称を変える場合はまずここを直し、そのうえでヘッダーやトップの見出し、法務文書、JSON-LD、OGP画像など、文中や画像に直接入っている箇所を揃えること。
+
 FargoRateを用いたビリヤード対戦を補助するウェブアプリ。対戦中のスコアの入力や、対戦成績の振り返りなどを補助する。
 
 このアプリは、ユーザーのFargoRateを公式システムからAPI経由で取得して扱うが、対戦結果をそのシステムには送信せずレーティングの更新は行わない。
@@ -106,6 +110,8 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 
 - `docs/fargorate-membership-lookup-api.md`: FargoRateのプレイヤー検索
 - `docs/csi-membership-lookup-api.md`: CSIのメンバーシップ検索
+
+`docs/` に出てくる `fairmatch.fargorate.com` と `Find a Fair Match` はFargoRate公式のドメインと機能の名前であり、このアプリの名称とは無関係である。アプリ名の変更に巻き込んで書き換えないこと。
 
 いずれも公開ドキュメントのある公式APIではなく、ブラウザの通信を調査して判明したエンドポイントである。次を前提に扱うこと。
 
@@ -322,7 +328,7 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 
 リンクとリダイレクトの遷移先は `localePath()` に通し、ロケールを落とさないこと。対象は `NuxtLink` の `to`、ミドルウェアの `navigateTo`、認証後の復帰先である。`resolveRedirectPath()` はロケールを知らない純粋な関数のまま保ち、オープンリダイレクトの判定とロケールの付与を混ぜないこと。既にロケールを含むパスを `localePath()` に通しても二重には付かない。
 
-`<title>` と `og:title` は「タイトル - FargoRate FairMatch」で揃える。サイト名と区切りは `nuxt.config.ts` の `app.head.templateParams` に一本化してあり、`titleTemplate` と `app/app.vue` の `ogTitle` が同じ値を参照する。unhead の `templateParams` は `titleTemplate` だけでなく各メタの `content` でも展開されるため、この形が取れる。
+`<title>` と `og:title` は「タイトル - FargoRate FairRace」で揃える。サイト名と区切りは `nuxt.config.ts` の `app.head.templateParams` に一本化してあり、`titleTemplate` と `app/app.vue` の `ogTitle` が同じ値を参照する。unhead の `templateParams` は `titleTemplate` だけでなく各メタの `content` でも展開されるため、この形が取れる。
 
 ページ側で `ogTitle` を書かないこと。書くと接尾辞の管理が二重になり、ページを足すたびに書き忘れが起きる。`title` だけを与えれば `og:title` は自動で揃う。プレースホルダは `%pageTitle`（そのページの `title`）・`%separator`・`%siteName` で、`%pageTitle` が空のときは区切りごと落ちてサイト名だけが残る。`%s` は `titleTemplate` でしか展開されないため、メタには使えない。
 

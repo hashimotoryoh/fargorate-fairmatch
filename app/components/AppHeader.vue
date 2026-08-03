@@ -17,7 +17,7 @@ const localePath = useLocalePath()
         class="btn btn-ghost gap-2 px-2 text-sm font-bold sm:text-base"
       >
         <Icon name="custom:app-logo" class="text-primary size-7 shrink-0" />
-        <span>FargoRate FairMatch</span>
+        <span>FargoRate FairRace</span>
       </NuxtLink>
     </div>
 

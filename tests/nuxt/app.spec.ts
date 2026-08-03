@@ -3,7 +3,7 @@ import { useRuntimeConfig } from '#imports'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../../app/app.vue'
 
-const SITE_URL = 'https://fairmatch.example'
+const SITE_URL = 'https://fairrace.example'
 
 /**
  * 公開URLを差し替える。
@@ -40,7 +40,7 @@ describe('アプリのルートコンポーネント（公開URLが設定済み�
 
     await vi.waitFor(() => {
       expect(head('meta[property="og:title"]')?.getAttribute('content')).toBe(
-        'FargoRate FairMatch',
+        'FargoRate FairRace',
       )
     })
   })
@@ -51,7 +51,7 @@ describe('アプリのルートコンポーネント（公開URLが設定済み�
     await vi.waitFor(() => {
       expect(
         head('meta[property="og:site_name"]')?.getAttribute('content'),
-      ).toBe('FargoRate FairMatch')
+      ).toBe('FargoRate FairRace')
     })
   })
 

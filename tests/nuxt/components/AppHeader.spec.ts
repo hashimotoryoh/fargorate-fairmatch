@@ -11,7 +11,7 @@ describe('AppHeader', () => {
     const home = component.find('a[href="/"]')
 
     expect(home.exists()).toBe(true)
-    expect(home.text()).toContain('FargoRate FairMatch')
+    expect(home.text()).toContain('FargoRate FairRace')
     expect(home.findComponent(Icon).props('name')).toBe('custom:app-logo')
   })
 

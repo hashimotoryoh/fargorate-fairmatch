@@ -1,10 +1,10 @@
 ---
 title: 利用規約
-description: FargoRate FairMatchを使ううえでの条件、禁止事項、免責事項を定めた利用規約です。
-updatedAt: '2026-08-03'
+description: FargoRate FairRaceを使ううえでの条件、禁止事項、免責事項を定めた利用規約です。
+updatedAt: '2026-08-04'
 ---
 
-この利用規約（以下「本規約」）は、FargoRate FairMatch（以下「本アプリ」）の利用条件を定めるものです。本アプリを利用した時点で、本規約に同意したものとみなします。
+この利用規約（以下「本規約」）は、FargoRate FairRace（以下「本アプリ」）の利用条件を定めるものです。本アプリを利用した時点で、本規約に同意したものとみなします。
 
 ## 本アプリについて
 
@@ -52,4 +52,4 @@ updatedAt: '2026-08-03'
 
 ## お問い合わせ
 
-本規約に関するお問い合わせは、[リポジトリのIssue](https://github.com/hashimotoryoh/fargorate-fairmatch/issues)からお願いします。
+本規約に関するお問い合わせは、[リポジトリのIssue](https://github.com/hashimotoryoh/fargorate-fairrace/issues)からお願いします。

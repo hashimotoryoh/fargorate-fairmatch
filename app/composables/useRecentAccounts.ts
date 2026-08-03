@@ -1,6 +1,6 @@
 import type { FargoRatePlayer } from '#shared/types/player'
 
-const STORAGE_KEY = 'fairmatch:recentAccounts'
+const STORAGE_KEY = 'fairrace:recentAccounts'
 // サジェストとして表示する件数の上限。
 const MAX_ENTRIES = 5
 

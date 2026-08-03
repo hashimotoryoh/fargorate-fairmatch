@@ -60,11 +60,11 @@
     },
     "blog": {
       "title": "Blog",
-      "description": "Keep up with FargoRate FairMatch updates and press releases in one place."
+      "description": "Keep up with FargoRate FairRace updates and press releases in one place."
     },
     "faq": {
       "title": "FAQ",
-      "description": "Answers to common questions about how to use FargoRate FairMatch and how it relates to FargoRate."
+      "description": "Answers to common questions about how to use FargoRate FairRace and how it relates to FargoRate."
     }
   },
   "index": {

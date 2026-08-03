@@ -70,10 +70,10 @@ useHead(() => ({
             datePublished: article.value!.date,
             dateModified: article.value!.updatedAt ?? article.value!.date,
             image: ogImage.value,
-            author: { '@type': 'Organization', name: 'FargoRate FairMatch' },
+            author: { '@type': 'Organization', name: 'FargoRate FairRace' },
             publisher: {
               '@type': 'Organization',
-              name: 'FargoRate FairMatch',
+              name: 'FargoRate FairRace',
             },
             mainEntityOfPage: `${siteUrl}${localePath(path)}`,
           }),
