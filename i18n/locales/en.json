@@ -35,27 +35,19 @@
   "seo": {
     "index": {
       "title": "Record your matches with FargoRate",
-      "description": "A web app that helps you enter and review pool match scores on top of FargoRate ratings. Your FargoRate ID is all you need to get started.",
-      "ogTitle": "FargoRate FairMatch",
-      "ogDescription": "A web app that helps you enter and review pool match scores on top of FargoRate ratings."
+      "description": "A web app that helps you enter and review pool match scores on top of FargoRate ratings. Your FargoRate ID is all you need to get started."
     },
     "link": {
       "title": "Link your FargoRate",
-      "description": "Enter the 13-digit FargoRate ID shown on your player card in the FargoRate app to link your FargoRate player profile. The screen also shows you where to find it.",
-      "ogTitle": "Link your FargoRate - FargoRate FairMatch",
-      "ogDescription": "Enter the 13-digit FargoRate ID shown on your player card in the FargoRate app to link your FargoRate player profile."
+      "description": "Enter the 13-digit FargoRate ID shown on your player card in the FargoRate app to link your FargoRate player profile. The screen also shows you where to find it."
     },
     "guest": {
       "title": "Start as a guest",
-      "description": "No FargoRate ID? Enter a name and a rating to get started. The name is optional.",
-      "ogTitle": "Start as a guest - FargoRate FairMatch",
-      "ogDescription": "No FargoRate ID? Enter a name and a rating to get started."
+      "description": "No FargoRate ID? Enter a name and a rating to get started. The name is optional."
     },
     "lookup": {
       "title": "Lookup a Player",
-      "description": "Look up FargoRate players by name to check their rating and robustness. Useful when you want a sense of how strong an opponent is.",
-      "ogTitle": "Lookup a Player - FargoRate FairMatch",
-      "ogDescription": "Look up FargoRate players by name to check their rating and robustness."
+      "description": "Look up FargoRate players by name to check their rating and robustness. Useful when you want a sense of how strong an opponent is."
     },
     "dashboard": {
       "title": "Dashboard"
@@ -68,9 +60,7 @@
     },
     "blog": {
       "title": "Blog",
-      "description": "Keep up with FargoRate FairMatch updates and press releases in one place.",
-      "ogTitle": "Blog - FargoRate FairMatch",
-      "ogDescription": "Keep up with FargoRate FairMatch updates and press releases in one place."
+      "description": "Keep up with FargoRate FairMatch updates and press releases in one place."
     },
     "faq": {
       "title": "FAQ",

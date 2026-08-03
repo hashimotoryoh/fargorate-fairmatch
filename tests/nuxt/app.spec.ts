@@ -30,6 +30,21 @@ describe('アプリのルートコンポーネント（公開URLが設定済み�
     setSiteUrl(SITE_URL)
   })
 
+  /**
+   * サイト名と区切りは `templateParams` に一本化してある。ページ側で接尾辞を
+   * 書き写さないため、ページのタイトルが無いときは区切りごと落ちてサイト名
+   * だけが残る。
+   */
+  it('og:title をテンプレートから組み立てる', async () => {
+    await mountSuspended(App)
+
+    await vi.waitFor(() => {
+      expect(head('meta[property="og:title"]')?.getAttribute('content')).toBe(
+        'FargoRate FairMatch',
+      )
+    })
+  })
+
   it('サイト共通のOGPを出す', async () => {
     await mountSuspended(App)
 

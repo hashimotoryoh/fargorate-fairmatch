@@ -6,6 +6,7 @@ const { siteUrl } = useRuntimeConfig().public
 useSeoMeta({
   title: () => t('seo.faq.title'),
   description: () => t('seo.faq.description'),
+  ogDescription: () => t('seo.faq.description'),
 })
 
 const { data: faqItems } = await useAsyncData(
