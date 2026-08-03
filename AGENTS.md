@@ -202,13 +202,14 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 いっぽう、外部APIへの問い合わせそのものは「検索」であり、`server/utils/lookup.ts` の `lookupPlayerProfile`・`server/api/*/lookup.post.ts`・`docs/*-lookup-api.md` は名前と実態が合っているため `lookup` のまま残してある。機能の名前（`link`）と操作の名前（`lookup`）を混ぜないこと。
 
-この検索は CSI で姓名を引き、その姓名で FargoRate を引く二段で固定である。三段目が増えることはないため、段数を可変にする作りにはしないこと。
+リンクの導線での検索は、CSI で姓名を引き、その姓名で FargoRate を引く二段で固定である。三段目が増えることはないため、段数を可変にする作りにはしないこと。いっぽうプレイヤー検索（`/lookup`）は FargoRate だけを引く一段で、CSI は経由しない。
 
 このルックアップ層は認証の一部ではなく、認証から使われている共有部品である。他プレイヤーのレーティングを閲覧するような、セッションと無関係の用途からも同じ層を呼べる状態に保つこと。具体的には次を守る。
 
 - `server/utils/lookup.ts` と `POST /api/link/lookup` に、セッションの読み書きや「本人かどうか」の判断を持ち込まない。それらは `POST /api/auth/session` の責務である
-- reCAPTCHAのアクション名は機能ごとに分ける。管理コンソールでスコアの分布を機能ごとに見分け、しきい値を機能ごとに調整できるようにするため。`POST /api/link/lookup` は `link` を使っている
-- アクション名はサーバールート側に直書きし、クライアントから受け取らないこと。受け取ると `verifyRecaptchaToken` の「他の画面向けに取得したトークンではないか」の判定が骨抜きになる。別の機能から同じ検索を使う場合は `lookupPlayerProfile` を共有し、ルートを機能ごとに分けること
+- ルートは機能ごとに分ける。根拠はゲートと応答の形の違いであって、reCAPTCHAではない。リンクの導線はIDで1件に絞る確認のための経路、プレイヤー検索は名前で複数件を返す一覧の経路であり、返すものが違う
+- reCAPTCHAのアクション名も機能ごとに分け、サーバールート側に直書きする（`link` と `playerLookup`）。管理コンソールでスコアの分布を機能ごとに見分け、しきい値を個別に調整できるようにするためである
+- ただし**アクション名はアクセス制御ではない**。サイトキーは公開値であり、アクションを決めるのはクライアントなので、攻撃者は目的のアクションのトークンを自分で発行できる。アクション名で総当たりを止められると考えないこと。直書きにしているのは、クライアント制御の入力をルートの契約から減らすためと、分析の値を素直に保つためである
 - 逆に、リンクの導線でしか使わないものへ `lookup` と名付けないこと。自分のFargoRate IDの調べ方を案内するモーダルは、他人を検索する機能と紛れないよう `FargoRateIdGuideModal`（座標は `app/utils/fargorateIdGuide.ts`、文言は `fargorateIdGuide.*`）としてある
 
 #### FargoRateとのリンクによる認証
@@ -246,11 +247,11 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 どちらであるかの判別には必ず `isFargoRatePlayer()`（`shared/utils/player.ts`）を使い、`robustness` や `fargorateId` の有無を見る形にしないこと。ゲストの自己申告値を、FargoRateで確認が取れた値と取り違えないためである。`GuestPlayer` がFargoRate固有の項目を型として持たないのも同じ理由による。
 
-CSI・FargoRateの両APIは非公式で利用制約が不明なため、`POST /api/link/lookup`（IDを送って外部APIへ問い合わせる最初の関門）ではreCAPTCHA v3のスコア判定を通してから `lookupPlayerProfile` を呼ぶ（`server/utils/recaptcha.ts` の `verifyRecaptchaToken`）。クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。`POST /api/auth/session` は `POST /api/link/lookup` を通過した画面遷移でしか呼ばれないため、reCAPTCHAは付けていない。
+CSI・FargoRateの両APIは非公式で利用制約が不明なため、外部APIを叩くルート（`POST /api/link/lookup` と `POST /api/players/lookup`）ではreCAPTCHA v3のスコア判定を通してから検索を呼ぶ（`server/utils/recaptcha.ts` の `verifyRecaptchaToken`）。クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。`POST /api/auth/session` は `POST /api/link/lookup` を通過した画面遷移でしか呼ばれないため、reCAPTCHAは付けていない。
 
 Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり、このアプリでは使えない。v2の `siteverify` の応答には `score` も `action` も含まれず、スコア判定で必ず落ちるためである。v3用のテストキーは公開されていないので、ローカル開発でも `localhost` をドメインに加えた自分のv3キーを使うこと。検証が通らないことを理由に `score` や `action` のチェックを緩めてはならない。
 
-認証なしでアクセスできるのは `/`、`/link`、`/guest`、`/privacy-policy`、`/terms-conditions` の5つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
+認証なしでアクセスできるのは `/`、`/link`、`/guest`、`/lookup`、`/blog`、`/blog/[スラッグ]`、`/faq`、`/privacy-policy`、`/terms-conditions` で、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
 
 - `app/middleware/auth.ts`: 未認証なら `/link` へ送る。保護対象のページに `definePageMeta({ middleware: 'auth' })` で付ける
 - `app/middleware/guest.ts`: 認証済みなら `/dashboard` へ送る。認証の入口である `/link` と `/guest` に付ける。名前が同じだが、これは「未認証のユーザー」の意味であり、ゲスト認証とは別の概念である
@@ -267,11 +268,25 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 
 セッションの秘密鍵は環境変数 `NUXT_SESSION_PASSWORD` で与える。`.env.example` を参照すること。
 
+### プレイヤーのルックアップ
+
+`/lookup` はFargoRateのプレイヤーを名前で検索し、レーティングと信頼度を見るページである。対戦相手の実力の目安を知るためのもので、認証を要さない公開ページとして置いてある。セッションには一切触れない。
+
+- 検索は `POST /api/players/lookup`。reCAPTCHAのアクションは `playerLookup`
+- 検索の実体は `server/utils/lookup.ts` の `searchPlayers` で、**FargoRateのAPIだけ**を引く。CSIはIDでしか引けず、この経路の主な入力は名前であるため経由しない。したがってリーグ・リージョン・チームは得られず、結果は `FargoRateSearchResult`（名前・ID・所在地・レーティング・信頼度）になる
+- 検索語はそのまま `q` に渡す。このAPIは姓名のほかレスポンスの `readableId` でも引けるため、入力を名前に限定する検証を入れないこと。`readableId` は桁数が一定せず、リンクに使う13桁のFargoRate ID（`membershipId`）とは別物である。両者を取り違えないこと
+- 結果の一覧は `card` で見せ、レーティングと信頼度は `stat` に置く。所在地は名前の下に小さく添える
+- 該当が無いことは異常ではないため、404ではなく空配列を返す
+- 読み取れない行が混じっても一覧全体は落とさず、行単位で除く。1件の異常で他の正常な結果まで見せられなくなるのを避けるため
+- 入力の長さの条件は `shared/utils/playerQuery.ts` の `PLAYER_QUERY_MIN_LENGTH`・`PLAYER_QUERY_MAX_LENGTH` に一本化してある。フォームとサーバールートの双方で `isValidPlayerQuery()` を使い、条件を二重に書かないこと
+
+導線はフッターの `footerNavItems` だけに置いてある。ブログと同じく、ヘッダーとドックの `mainNavItems` には足さない方針である。`footerNavItems` から外すと辿り着けなくなるので注意すること。
+
 ### レイアウト
 
 レイアウトは2つある。ヘッダーとフッターは共通で、`AppHeader` と `AppFooter` を両者から使う。
 
-- `default`: 公開ページ（`/`、`/link`、`/privacy-policy`、`/terms-conditions`）用
+- `default`: 公開ページ（`/`、`/link`、`/guest`、`/lookup`、`/blog`、`/faq`、`/privacy-policy`、`/terms-conditions`）用
 - `authenticated`: 認証ページ（`/dashboard`、`/game`、`/settings`）用。スマホ幅でのみ `AppDock` を出し、デスクトップ幅ではヘッダーにナビゲーションを出す
 
 `authenticated` には `noindex` をまとめて指定してある。保護ページとこのレイアウトが1対1に対応するため、ページごとに書くより追加漏れが起きない。保護ページを追加する際は `definePageMeta({ middleware: 'auth', layout: 'authenticated' })` を付けること。

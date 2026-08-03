@@ -24,9 +24,11 @@ export function createFargoRateLookupPlayer(
   overrides: Partial<FargoRateLookupPlayer> = {},
 ): FargoRateLookupPlayer {
   return {
+    readableId: '1234567',
     membershipId: FARGORATE_ID,
     firstName: 'Taro',
     lastName: 'Yamada',
+    location: 'Tokyo',
     effectiveRating: '523',
     robustness: '412',
     ...overrides,

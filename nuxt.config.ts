@@ -189,6 +189,12 @@ export default defineNuxtConfig({
               'Start without a FargoRate ID by entering a name and a self-reported rating.',
             href: '/en/guest',
           },
+          {
+            title: 'Lookup a Player',
+            description:
+              'Look up FargoRate players by name to check their rating and robustness. No account needed.',
+            href: '/en/lookup',
+          },
         ],
       },
       {

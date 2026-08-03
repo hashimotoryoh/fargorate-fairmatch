@@ -2,7 +2,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { useRuntimeConfig } from '#imports'
 import { afterEach, describe, expect, it } from 'vitest'
 import AppFooter from '../../../app/components/AppFooter.vue'
-import { documentNavItems } from '../../../app/utils/navigation'
+import { footerNavItems } from '../../../app/utils/navigation'
 import { jaMessage } from '../../helpers/i18n'
 
 const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairmatch'
@@ -29,13 +29,15 @@ describe('AppFooter', () => {
   })
 
   /**
-   * プライバシーポリシーと利用規約はどのページからも辿れる必要がある。
+   * ドキュメントと、認証の要らない機能はどのページからも辿れる必要がある。
    * フッターは両方のレイアウトから使うため、ここに導線があれば全ページを賄える。
+   * とくにプレイヤー検索は、ヘッダーとドックが `authenticated` レイアウトに
+   * しか出ないため、未認証のユーザーにはここが唯一の経路になる。
    */
-  it('プライバシーポリシーと利用規約へのリンクを出す', async () => {
+  it('フッターの導線をすべて出す', async () => {
     const component = await mountSuspended(AppFooter)
 
-    for (const item of documentNavItems) {
+    for (const item of footerNavItems) {
       expect(component.find(`a[href="${item.to}"]`).text()).toBe(
         jaMessage(item.labelKey),
       )

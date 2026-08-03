@@ -8,6 +8,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "game": "Game",
+    "lookup": "Lookup a Player",
     "settings": "Settings"
   },
   "document": {
@@ -49,6 +50,12 @@
       "description": "No FargoRate ID? Enter a name and a rating to get started. The name is optional.",
       "ogTitle": "Start as a guest - FargoRate FairMatch",
       "ogDescription": "No FargoRate ID? Enter a name and a rating to get started."
+    },
+    "lookup": {
+      "title": "Lookup a Player",
+      "description": "Look up FargoRate players by name to check their rating and robustness. Useful when you want a sense of how strong an opponent is.",
+      "ogTitle": "Lookup a Player - FargoRate FairMatch",
+      "ogDescription": "Look up FargoRate players by name to check their rating and robustness."
     },
     "dashboard": {
       "title": "Dashboard"
@@ -154,6 +161,19 @@
       "invalidRating": "Enter a whole number between {min} and {max}.",
       "invalidName": "Enter a name of at most {max} characters.",
       "invalidInput": "Please check what you entered.",
+      "unexpected": "The request failed. Please wait a moment and try again."
+    }
+  },
+  "lookup": {
+    "heading": "Lookup a Player",
+    "lead": "Look up FargoRate players by name to check their rating and robustness.",
+    "queryLabel": "Player name",
+    "submit": "Search",
+    "resultsHeading": "Results",
+    "empty": "No players matched your search.",
+    "errors": {
+      "invalidQuery": "Enter between {min} and {max} characters.",
+      "recaptchaFailed": "We couldn't verify that you're not a robot. Please wait a moment and try again.",
       "unexpected": "The request failed. Please wait a moment and try again."
     }
   },

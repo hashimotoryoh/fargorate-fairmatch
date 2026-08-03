@@ -26,9 +26,16 @@ export type CsiLookupResponse = {
  * @see docs/fargorate-membership-lookup-api.md
  */
 export type FargoRateLookupPlayer = {
+  /**
+   * FargoRateの表示用ID。桁数は一定しない。名前の代わりにこの値でも検索できる。
+   * 13桁の `membershipId`（このアプリでいうFargoRate ID）とは別物である。
+   */
+  readableId: string | null
   membershipId: string | null
   firstName: string
   lastName: string
+  /** 所在地。空文字で返ることがある。 */
+  location: string | null
   effectiveRating: string
   robustness: string
 }
@@ -96,4 +103,23 @@ export type FargoRatePlayer = Player & {
  */
 export type GuestPlayer = Player & {
   kind: 'guest'
+}
+
+/**
+ * プレイヤー検索の結果1件。
+ *
+ * `FargoRatePlayer` と違い、リーグ・リージョン・チームを持たない。それらはCSIから
+ * 得る情報であり、名前での検索はFargoRate側しか引かないためである。IDが欠けている
+ * プレイヤーが混じるため、`fargorateId` は `null` を取りうる。
+ */
+export type FargoRateSearchResult = Player & {
+  name: string
+  /**
+   * FargoRateの表示用ID。桁数は一定しない。リンクに使う13桁のFargoRate ID
+   * （`fargorateId`）とは別物なので、取り違えないこと。
+   */
+  readableId: string | null
+  fargorateId: string | null
+  location: string | null
+  robustness: number
 }
