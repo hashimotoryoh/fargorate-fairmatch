@@ -12,7 +12,9 @@ useSeoMeta({
   // title で、空のときは `%separator` ごと落ちてサイト名だけになる。ページ側で
   // og:title を書かないこと。書くと接尾辞の管理が二重になる。
   ogTitle: '%pageTitle %separator %siteName',
-  ogSiteName: 'FargoRate FairMatch',
+  // サイト名は `nuxt.config.ts` の `templateParams` に一本化してある。
+  // ここで書き写すと、名前を変えたときに片方だけ古くなる。
+  ogSiteName: '%siteName',
   ogType: 'website',
   ogImage: () => (siteUrl ? `${siteUrl}/img/ogp.png` : undefined),
   twitterCard: 'summary_large_image',
