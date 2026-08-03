@@ -186,14 +186,24 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 認証には2つの経路がある。セッション管理には [Nuxt Auth Utils](https://github.com/atinux/nuxt-auth-utils) を使う。
 
-- FargoRate ID（13桁の数値）のルックアップ
+- FargoRateとのリンク（13桁のFargoRate IDでプレイヤー情報を紐づける）
 - ゲスト（IDを持たないユーザーの自己申告）
 
-#### FargoRate IDでの認証
+前者の入口は `/link` である。独自のIDもパスワードも持たず、FargoRate IDを知っていれば誰にでもなれるため、本人性を検証する「サインイン」でも、単に検索するだけの「ルックアップ」でもない。実態は「このブラウザのセッションを、FargoRateの公開プロフィールへ紐づける」ことなので、その操作を指す `link` を名前に採っている。UIの見出しも「FargoRateとリンクする」「Link your FargoRate」で揃える。ここに本人確認や認証の強さを匂わせる語を持ち込まないこと。
+
+いっぽう、外部APIへの問い合わせそのものは「検索」であり、`POST /api/lookup`・`server/utils/lookup.ts` の `lookupPlayerProfile`・`docs/*-lookup-api.md` は名前と実態が合っているため `lookup` のまま残してある。機能の名前（`link`）と操作の名前（`lookup`）を混ぜないこと。
+
+このルックアップ層は認証の一部ではなく、認証から使われている共有部品である。他プレイヤーのレーティングを閲覧するような、セッションと無関係の用途からも同じ層を呼べる状態に保つこと。具体的には次を守る。
+
+- `server/utils/lookup.ts` と `POST /api/lookup` に、セッションの読み書きや「本人かどうか」の判断を持ち込まない。それらは `POST /api/auth/session` の責務である
+- `useRecaptcha()` とアクション名 `lookup` は `POST /api/lookup` に紐づく。呼び出し元のページが増えても、ページごとにアクション名を分けないこと
+- 逆に、リンクの導線でしか使わないものへ `lookup` と名付けないこと。自分のFargoRate IDの調べ方を案内するモーダルは、他人を検索する機能と紛れないよう `FargoRateIdGuideModal`（座標は `app/utils/fargorateIdGuide.ts`、文言は `fargorateIdGuide.*`）としてある
+
+#### FargoRateとのリンクによる認証
 
 フローは次のとおり。
 
-1. ユーザーが `/lookup` でFargoRate IDを入力する
+1. ユーザーが `/link` でFargoRate IDを入力する
 2. CSIメンバーシップルックアップAPIをIDで検索し、姓名・リーグ・リージョン・チームを得る
 3. その姓名でFargoRateメンバーシップルックアップAPIを検索し、メンバーシップIDの一致で1件に絞ってレーティングと信頼度を得る
 4. 得られたプレイヤー情報をユーザーに見せ、本人かどうかを確認する
@@ -209,7 +219,7 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 ゲストは `POST /api/auth/guest` という別のルートに分けてある。`auth/session` に相乗りさせると、IDを送るだけのつもりの経路に自称の値が紛れ込む余地が生まれるためである。ハンドラーはボディを展開せず、`readGuestPlayer()` が読み取った項目だけでオブジェクトを組み立てる。`fargorateId` や `kind: 'fargorate'` を送られても効かないのはこのためで、`tests/unit/server/api/auth/guest.post.spec.ts` がそれを固定している。
 
-このルートにreCAPTCHAは付けていない。`lookup` に付けているのは非公式の外部APIへの総当たりを防ぐためであり、ゲストは外部APIを一切呼ばないため理由が当てはまらない。
+このルートにreCAPTCHAは付けていない。`POST /api/lookup` に付けているのは非公式の外部APIへの総当たりを防ぐためであり、ゲストは外部APIを一切呼ばないため理由が当てはまらない。
 
 #### プレイヤーの型
 
@@ -224,20 +234,20 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 どちらであるかの判別には必ず `isFargoRatePlayer()`（`shared/utils/player.ts`）を使い、`robustness` や `fargorateId` の有無を見る形にしないこと。ゲストの自己申告値を、FargoRateで確認が取れた値と取り違えないためである。`GuestPlayer` がFargoRate固有の項目を型として持たないのも同じ理由による。
 
-CSI・FargoRateの両APIは非公式で利用制約が不明なため、`POST /api/lookup`（IDを送って外部APIへ問い合わせる最初の関門）ではreCAPTCHA v3のスコア判定を通してから `lookupPlayerProfile` を呼ぶ（`server/utils/recaptcha.ts` の `verifyRecaptchaToken`）。クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。`POST /api/auth/session` は `lookup` を通過した画面遷移でしか呼ばれないため、reCAPTCHAは付けていない。
+CSI・FargoRateの両APIは非公式で利用制約が不明なため、`POST /api/lookup`（IDを送って外部APIへ問い合わせる最初の関門）ではreCAPTCHA v3のスコア判定を通してから `lookupPlayerProfile` を呼ぶ（`server/utils/recaptcha.ts` の `verifyRecaptchaToken`）。クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。`POST /api/auth/session` は `POST /api/lookup` を通過した画面遷移でしか呼ばれないため、reCAPTCHAは付けていない。
 
 Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり、このアプリでは使えない。v2の `siteverify` の応答には `score` も `action` も含まれず、スコア判定で必ず落ちるためである。v3用のテストキーは公開されていないので、ローカル開発でも `localhost` をドメインに加えた自分のv3キーを使うこと。検証が通らないことを理由に `score` や `action` のチェックを緩めてはならない。
 
-認証なしでアクセスできるのは `/`、`/lookup`、`/guest`、`/privacy-policy`、`/terms-conditions` の5つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
+認証なしでアクセスできるのは `/`、`/link`、`/guest`、`/privacy-policy`、`/terms-conditions` の5つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
 
-- `app/middleware/auth.ts`: 未認証なら `/lookup` へ送る。保護対象のページに `definePageMeta({ middleware: 'auth' })` で付ける
-- `app/middleware/guest.ts`: 認証済みなら `/dashboard` へ送る。サインインの入口である `/lookup` と `/guest` に付ける。名前が同じだが、これは「未認証のユーザー」の意味であり、ゲスト認証とは別の概念である
+- `app/middleware/auth.ts`: 未認証なら `/link` へ送る。保護対象のページに `definePageMeta({ middleware: 'auth' })` で付ける
+- `app/middleware/guest.ts`: 認証済みなら `/dashboard` へ送る。サインインの入口である `/link` と `/guest` に付ける。名前が同じだが、これは「未認証のユーザー」の意味であり、ゲスト認証とは別の概念である
 
 保護対象のパスをどこかに配列で列挙する形にはしないこと。グローバルミドルウェアであれ `routeRules` であれ、ページを追加するたびに更新が必要になり、更新漏れがそのまま情報の露出になる。保護に関わる指定はすべてページ側の `definePageMeta` から辿れる状態に保つこと。
 
 `auth.ts` はSSR時に `x-robots-tag: noindex, nofollow` も立てる。レイアウトの `noindex` メタタグは本文を返す応答にしか乗らず、未認証時のリダイレクトをカバーできないため。
 
-`auth.ts` は元の行き先を `redirect` クエリに残し、サインイン後にそこへ戻す。この値はURLから誰でも与えられるため、必ず `resolveRedirectPath()`（`app/utils/navigation.ts`）を通してから `navigateTo` に渡すこと。外部サイトへ誘導するオープンリダイレクトを防ぐため。`/lookup` と `/guest` は互いへのリンクでもこのクエリを引き継ぐ。片方で行き先を落とすと、経路によって戻り先が変わってしまう。
+`auth.ts` は元の行き先を `redirect` クエリに残し、サインイン後にそこへ戻す。この値はURLから誰でも与えられるため、必ず `resolveRedirectPath()`（`app/utils/navigation.ts`）を通してから `navigateTo` に渡すこと。外部サイトへ誘導するオープンリダイレクトを防ぐため。`/link` と `/guest` は互いへのリンクでもこのクエリを引き継ぐ。片方で行き先を落とすと、経路によって戻り先が変わってしまう。
 
 保護ページには `prerender` や ISR・SWR のルートルールを付けないこと。Nuxt Auth Utils はプリレンダやキャッシュの際にサーバー側のセッション取得を飛ばすため、ミドルウェアが認証済みのユーザーを未認証と判定してしまう。
 
@@ -249,7 +259,7 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 
 レイアウトは2つある。ヘッダーとフッターは共通で、`AppHeader` と `AppFooter` を両者から使う。
 
-- `default`: 公開ページ（`/`、`/lookup`、`/privacy-policy`、`/terms-conditions`）用
+- `default`: 公開ページ（`/`、`/link`、`/privacy-policy`、`/terms-conditions`）用
 - `authenticated`: 認証ページ（`/dashboard`、`/game`、`/settings`）用。スマホ幅でのみ `AppDock` を出し、デスクトップ幅ではヘッダーにナビゲーションを出す
 
 `authenticated` には `noindex` をまとめて指定してある。保護ページとこのレイアウトが1対1に対応するため、ページごとに書くより追加漏れが起きない。保護ページを追加する際は `definePageMeta({ middleware: 'auth', layout: 'authenticated' })` を付けること。
@@ -342,7 +352,7 @@ AIクローラー・エージェント向けに、サイト構造を案内する
 
 ぼかしで隠す方法は採らない。`backdrop-filter` は祖先の `opacity` の影響を受け、モーダルはまさに `opacity` を遷移させるため、環境によっては素通しになりうる。
 
-FargoRateアプリの表示言語は端末の設定に従うため、案内の画像も本来は言語ごとに撮り分ける必要がある。画像とクロップの座標は文言ではないので翻訳ファイルではなく `app/utils/lookupGuide.ts` に置き、ロケールで引く形にしてある。**英語版の画像はまだ用意できておらず、当面は日本語版を流用している。** 英語のスクリーンショットが揃ったら `en` の配列だけを差し替えること。
+FargoRateアプリの表示言語は端末の設定に従うため、案内の画像も本来は言語ごとに撮り分ける必要がある。画像とクロップの座標は文言ではないので翻訳ファイルではなく `app/utils/fargorateIdGuide.ts` に置き、ロケールで引く形にしてある。**英語版の画像はまだ用意できておらず、当面は日本語版を流用している。** 英語のスクリーンショットが揃ったら `en` の配列だけを差し替えること。
 
 ### コーディング規約
 
@@ -400,7 +410,7 @@ Vitestでテストを書く。実行方法は `README.md` に記載している�
 
 方針は次のとおり。
 
-- テスト名は日本語で、何が保証されているかを書く。「正しく動く」ではなく「未認証ならルックアップページへ送る」のように、期待する挙動そのものを書くこと
+- テスト名は日本語で、何が保証されているかを書く。「正しく動く」ではなく「未認証ならリンクページへ送る」のように、期待する挙動そのものを書くこと
 - 外部APIへは決して実通信しないこと。`tests/setup/nitro-auto-imports.ts` が `$fetch` を既定で失敗させてあるので、テストごとに `vi.stubGlobal` で差し替える
 - サーバールートは `tests/helpers/h3.ts` の `callHandler` でWeb標準のリクエストとして叩く。`readBody` の解釈や `createError` の応答への変換まで含めて確かめるため、ハンドラーを関数として直接呼ばないこと
 - 認証やリダイレクトの制限は、緩めた場合にテストが落ちる形で書くこと。オープンリダイレクトの防止やセッションへの保存内容は、壊れても画面上は正常に見えてしまう
