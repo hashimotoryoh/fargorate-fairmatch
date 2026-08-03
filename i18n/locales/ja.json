@@ -201,8 +201,8 @@
   "settings": {
     "heading": "設定",
     "account": "アカウント",
-    "signedInAs": "{name}（{fargorateId}）としてサインインしています。",
-    "signedInAsGuest": "{name}（ゲスト）としてサインインしています。レーティングは自己申告のため、FargoRateの記録とは結び付いていません。",
+    "playingAs": "{name}（{fargorateId}）として利用しています。",
+    "playingAsGuest": "{name}（ゲスト）として利用しています。レーティングは自己申告のため、FargoRateの記録とは結び付いていません。",
     "signOut": "サインアウト",
     "theme": "テーマ",
     "themeDescription": "画面の配色を選びます。",

@@ -186,7 +186,7 @@ export default defineNuxtConfig({
           {
             title: 'Start as a guest',
             description:
-              'Sign in without a FargoRate ID by entering a name and a self-reported rating.',
+              'Start without a FargoRate ID by entering a name and a self-reported rating.',
             href: '/en/guest',
           },
         ],

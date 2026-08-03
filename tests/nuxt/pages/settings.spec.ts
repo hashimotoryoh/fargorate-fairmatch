@@ -45,7 +45,7 @@ describe('設定ページ', () => {
     clearMock.mockResolvedValue(undefined)
   })
 
-  it('サインイン中のプレイヤーを名前とFargoRate IDで示す', async () => {
+  it('利用中のプレイヤーを名前とFargoRate IDで示す', async () => {
     const component = await mountSuspended(SettingsPage)
 
     expect(component.find('h1').text()).toBe(jaMessage('settings.heading'))
@@ -60,7 +60,7 @@ describe('設定ページ', () => {
     const component = await mountSuspended(SettingsPage)
 
     expect(component.text()).toContain(
-      jaMessage('settings.signedInAsGuest', { name: 'Jiro Suzuki' }),
+      jaMessage('settings.playingAsGuest', { name: 'Jiro Suzuki' }),
     )
   })
 
@@ -70,7 +70,7 @@ describe('設定ページ', () => {
     const component = await mountSuspended(SettingsPage)
 
     expect(component.text()).toContain(
-      jaMessage('settings.signedInAsGuest', {
+      jaMessage('settings.playingAsGuest', {
         name: jaMessage('player.guestName'),
       }),
     )

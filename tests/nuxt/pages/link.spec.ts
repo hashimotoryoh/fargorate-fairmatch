@@ -196,9 +196,9 @@ describe('リンクページ', () => {
     expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
   })
 
-  // 入力欄の値ではなく、ルックアップで得たプレイヤーのIDでサインインを確定する。
-  // 状態が食い違った場合に、ユーザーが確認していない別IDでサインインしないため。
-  it('確認画面ではルックアップで得たプレイヤーのIDでサインインを確定する', async () => {
+  // 入力欄の値ではなく、ルックアップで得たプレイヤーのIDでリンクを確定する。
+  // 状態が食い違った場合に、ユーザーが確認していない別IDでリンクしないため。
+  it('確認画面ではルックアップで得たプレイヤーのIDでリンクを確定する', async () => {
     const candidateId = '9900009999999'
     lookupHandler.mockReturnValue(
       createFargoRatePlayer({ fargorateId: candidateId }),
@@ -340,7 +340,7 @@ describe('リンクページ', () => {
   }
 
   // FargoRate IDを持たない人が行き止まりにならないようにする。
-  it('ゲストのサインインへのリンクを出し、行き先を引き継ぐ', async () => {
+  it('ゲストページへの導線を出し、行き先を引き継ぐ', async () => {
     routeQuery.redirect = '/settings'
 
     const component = await mountSuspended(LinkPage)
@@ -401,7 +401,7 @@ describe('リンクページ', () => {
   })
 
   // 選んだ時点で本人だとわかっているため、IDの入力や確認画面を経由しない。
-  it('サジェストを選ぶと確認画面を経ずに直接サインインする', async () => {
+  it('サジェストを選ぶと確認画面を経ずに直接リンクを確定する', async () => {
     localStorage.setItem(
       'fairmatch:recentAccounts',
       JSON.stringify([
@@ -428,7 +428,7 @@ describe('リンクページ', () => {
 
   // サジェストは古いスナップショットの可能性があるため、サーバーが
   // 再ルックアップした最新の情報で記憶を上書きする。
-  it('サジェストからのサインインでは、サーバーが返した最新の情報を記憶する', async () => {
+  it('サジェストからのリンクでは、サーバーが返した最新の情報を記憶する', async () => {
     localStorage.setItem(
       'fairmatch:recentAccounts',
       JSON.stringify([SECOND_ACCOUNT]),
@@ -453,7 +453,7 @@ describe('リンクページ', () => {
     ).toEqual([{ ...SECOND_ACCOUNT, rating: 450 }])
   })
 
-  it('サジェストでの直接サインインに失敗したら知らせる', async () => {
+  it('サジェストでの直接リンクに失敗したら知らせる', async () => {
     sessionHandler.mockImplementation(notFound)
     localStorage.setItem(
       'fairmatch:recentAccounts',

@@ -21,7 +21,7 @@ const PUBLIC_PAGES = [
   'faq',
 ]
 
-/** 認証済みのユーザーを追い返すページ。サインインの入口が対象。 */
+/** 認証済みのユーザーを追い返すページ。認証の入口が対象。 */
 const GUEST_ONLY_PAGES = ['link', 'guest']
 
 /**

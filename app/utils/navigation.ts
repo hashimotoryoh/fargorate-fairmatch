@@ -37,7 +37,7 @@ export const documentNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
   { to: '/terms-conditions', labelKey: 'document.termsConditions' },
 ]
 
-/** サインイン後の既定の遷移先。 */
+/** 認証後の既定の遷移先。 */
 const DEFAULT_AFTER_SIGN_IN = '/dashboard'
 
 /**

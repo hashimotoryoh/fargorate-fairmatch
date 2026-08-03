@@ -1,7 +1,7 @@
 ---
 title: 利用規約
 description: FargoRate FairMatchを使ううえでの条件、禁止事項、免責事項を定めた利用規約です。
-updatedAt: '2026-08-01'
+updatedAt: '2026-08-03'
 ---
 
 この利用規約（以下「本規約」）は、FargoRate FairMatch（以下「本アプリ」）の利用条件を定めるものです。本アプリを利用した時点で、本規約に同意したものとみなします。
@@ -14,7 +14,7 @@ updatedAt: '2026-08-01'
 
 ## 利用資格
 
-本アプリは、FargoRate IDを持つ方が利用できます。サインインの際は、必ずあなた自身のFargoRate IDを入力してください。他人のFargoRate IDでのサインインは、なりすましにあたるため禁止します。
+本アプリは、FargoRate IDを持つ方が利用できます。FargoRateとリンクする際は、必ずあなた自身のFargoRate IDを入力してください。他人のFargoRate IDでのリンクは、なりすましにあたるため禁止します。
 
 ## 禁止事項
 

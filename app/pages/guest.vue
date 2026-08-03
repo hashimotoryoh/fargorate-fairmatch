@@ -34,7 +34,7 @@ function toErrorMessage(error: unknown) {
   return t('guest.errors.unexpected')
 }
 
-async function signIn() {
+async function startAsGuest() {
   const parsedRating = Number(rating.value)
 
   // `Number('')` は 0 になるため、空欄は別に見る。
@@ -103,7 +103,7 @@ const linkPath = computed(() =>
           {{ errorMessage }}
         </div>
 
-        <form class="flex flex-col gap-4" @submit.prevent="signIn">
+        <form class="flex flex-col gap-4" @submit.prevent="startAsGuest">
           <label class="floating-label">
             <span>{{ $t('guest.nameLabel') }}</span>
             <input

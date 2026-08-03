@@ -15,9 +15,9 @@ export default defineNuxtRouteMiddleware((to) => {
     return
   }
 
-  // サインインを終えたあとに元のページへ戻せるよう、行き先を残しておく。
+  // リンクを終えたあとに元のページへ戻せるよう、行き先を残しておく。
   // 送り先はロケールを保つ。英語で読んでいた人を日本語のページへ送ると、
-  // サインインの手前で読めない画面に突き当たる。
+  // リンクの手前で読めない画面に突き当たる。
   return navigateTo({
     path: useLocalePath()('/link'),
     query: { redirect: to.fullPath },

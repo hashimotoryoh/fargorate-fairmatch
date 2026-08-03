@@ -1,7 +1,7 @@
 ---
 title: Terms and Conditions
 description: The conditions, prohibited conduct, and disclaimers that apply when you use FargoRate FairMatch.
-updatedAt: '2026-08-01'
+updatedAt: '2026-08-03'
 ---
 
 These terms and conditions (the "Terms") set out the conditions for using FargoRate FairMatch (the "App"). By using the App, you are deemed to have agreed to the Terms.
@@ -14,7 +14,7 @@ The App is not operated by FargoRate or CSI (CueSports International), and it is
 
 ## Eligibility
 
-The App is available to anyone who has a FargoRate ID. When you sign in, always enter your own FargoRate ID. Signing in with someone else's FargoRate ID is impersonation and is prohibited.
+The App is available to anyone who has a FargoRate ID. When you link your FargoRate, always enter your own FargoRate ID. Linking with someone else's FargoRate ID is impersonation and is prohibited.
 
 ## Prohibited conduct
 

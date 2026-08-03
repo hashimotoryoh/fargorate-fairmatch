@@ -119,7 +119,7 @@
       }
     },
     "gettingStartedHeading": "Getting started",
-    "gettingStartedBody": "Just enter the 13-digit FargoRate ID shown on your player card in the FargoRate app. There is no password to register, and the sign-in screen shows you how to find your ID.",
+    "gettingStartedBody": "Just enter the 13-digit FargoRate ID shown on your player card in the FargoRate app. There is no password to register, and the linking screen shows you how to find your ID.",
     "gettingStartedNote": "This app reads your rating from FargoRate, but it never sends match results to the official system. Nothing you record here changes your rating."
   },
   "link": {
@@ -201,8 +201,8 @@
   "settings": {
     "heading": "Settings",
     "account": "Account",
-    "signedInAs": "Signed in as {name} ({fargorateId}).",
-    "signedInAsGuest": "Signed in as {name} (guest). Your rating is self-reported and is not tied to any FargoRate record.",
+    "playingAs": "You're using the app as {name} ({fargorateId}).",
+    "playingAsGuest": "You're using the app as {name} (guest). Your rating is self-reported and is not tied to any FargoRate record.",
     "signOut": "Sign out",
     "theme": "Theme",
     "themeDescription": "Choose the color scheme used across the app.",
