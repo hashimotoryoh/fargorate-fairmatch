@@ -19,13 +19,14 @@ const shortCommitSha = computed(() => commitSha.slice(0, 7))
     >
       <!--
         3カラムの1つ目は中央のセルをビューポート中央に置くための余白でもある。
-        ドキュメントへの導線はどのページからも辿れる必要があるため、ここに置く。
+        ドキュメントと、認証の要らない機能への導線はどのページからも辿れる
+        必要があるため、ここに置く。
       -->
       <nav
         class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-start"
       >
         <NuxtLink
-          v-for="item in documentNavItems"
+          v-for="item in footerNavItems"
           :key="item.to"
           class="link link-hover"
           :to="localePath(item.to)"

@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import {
+  documentNavItems,
+  footerNavItems,
   mainNavItems,
   resolveRedirectPath,
 } from '../../../app/utils/navigation'
 
 describe('mainNavItems', () => {
-  it('ダッシュボード・ゲーム・設定の3項目を持つ', () => {
+  it('ダッシュボード・ゲーム・プレイヤー検索・設定の4項目を持つ', () => {
     expect(mainNavItems.map((item) => item.to)).toEqual([
       '/dashboard',
       '/game',
+      '/lookup',
       '/settings',
     ])
   })
@@ -32,6 +35,26 @@ describe('mainNavItems', () => {
     const game = mainNavItems.find((item) => item.to === '/game')
 
     expect(game?.icon).toBe('mdi:billiards-rack')
+  })
+})
+
+describe('footerNavItems', () => {
+  /**
+   * ヘッダーとドックのナビは `authenticated` レイアウトにしか出ない。
+   * 未認証のユーザーがプレイヤー検索へ辿り着ける経路はフッターだけなので、
+   * ここから外れると導線が消える。
+   */
+  it('プレイヤー検索とドキュメントへの導線を並べる', () => {
+    expect(footerNavItems.map((item) => item.to)).toEqual([
+      '/lookup',
+      ...documentNavItems.map((item) => item.to),
+    ])
+  })
+
+  it('遷移先が重複しない', () => {
+    const paths = footerNavItems.map((item) => item.to)
+
+    expect(new Set(paths).size).toBe(paths.length)
   })
 })
 

@@ -14,6 +14,7 @@ const PUBLIC_PAGES = [
   'index',
   'link',
   'guest',
+  'lookup',
   'privacy-policy',
   'terms-conditions',
   'blog/index',

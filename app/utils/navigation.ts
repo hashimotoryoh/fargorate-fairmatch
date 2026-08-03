@@ -23,6 +23,7 @@ export type NavItem = {
 export const mainNavItems: NavItem[] = [
   { to: '/dashboard', labelKey: 'nav.dashboard', icon: 'mdi:view-dashboard' },
   { to: '/game', labelKey: 'nav.game', icon: 'mdi:billiards-rack' },
+  { to: '/lookup', labelKey: 'nav.lookup', icon: 'mdi:account-search' },
   { to: '/settings', labelKey: 'nav.settings', icon: 'mdi:cog' },
 ]
 
@@ -35,6 +36,16 @@ export const documentNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
   { to: '/faq', labelKey: 'document.faq' },
   { to: '/privacy-policy', labelKey: 'document.privacyPolicy' },
   { to: '/terms-conditions', labelKey: 'document.termsConditions' },
+]
+
+/**
+ * フッターに出す導線。ドキュメントに加えて、認証の有無によらず使える機能も
+ * 並べる。ヘッダーとドックのナビは `authenticated` レイアウトにしか出ないため、
+ * 未認証のユーザーがプレイヤー検索へ辿り着ける経路はここだけになる。
+ */
+export const footerNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
+  { to: '/lookup', labelKey: 'nav.lookup' },
+  ...documentNavItems,
 ]
 
 /** 認証後の既定の遷移先。 */
