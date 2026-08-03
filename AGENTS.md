@@ -189,14 +189,17 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 - FargoRateとのリンク（13桁のFargoRate IDでプレイヤー情報を紐づける）
 - ゲスト（IDを持たないユーザーの自己申告）
 
-前者の入口は `/link` である。独自のIDもパスワードも持たず、FargoRate IDを知っていれば誰にでもなれるため、本人性を検証する「サインイン」でも、単に検索するだけの「ルックアップ」でもない。実態は「このブラウザのセッションを、FargoRateの公開プロフィールへ紐づける」ことなので、その操作を指す `link` を名前に採っている。UIの見出しも「FargoRateとリンクする」「Link your FargoRate」で揃える。ここに本人確認や認証の強さを匂わせる語を持ち込まないこと。
+前者の入口は `/link` である。独自のIDもパスワードも持たず、FargoRate IDを知っていれば誰にでもなれるため、本人性を検証する仕組みではない。実態は「このブラウザのセッションを、FargoRateの公開プロフィールへ紐づける」ことなので、その操作を指す `link` を名前に採っている。UIの見出しも「FargoRateとリンクする」「Link your FargoRate」で揃える。ここに本人確認や認証の強さを匂わせる語を持ち込まないこと。
+
+このため、UI・翻訳・ドキュメント・テスト名で「サインイン」「Sign in」という語は使わない。セッションを始める操作は「リンク」または「利用を開始する」と書く。ただしセッションを終える操作は「サインアウト」「Sign out」のままにしてある（Nuxt Auth Utils 内蔵の `DELETE /api/_auth/session` に対応する操作であり、破棄することに曖昧さが無いため）。
 
 いっぽう、外部APIへの問い合わせそのものは「検索」であり、`POST /api/lookup`・`server/utils/lookup.ts` の `lookupPlayerProfile`・`docs/*-lookup-api.md` は名前と実態が合っているため `lookup` のまま残してある。機能の名前（`link`）と操作の名前（`lookup`）を混ぜないこと。
 
 このルックアップ層は認証の一部ではなく、認証から使われている共有部品である。他プレイヤーのレーティングを閲覧するような、セッションと無関係の用途からも同じ層を呼べる状態に保つこと。具体的には次を守る。
 
 - `server/utils/lookup.ts` と `POST /api/lookup` に、セッションの読み書きや「本人かどうか」の判断を持ち込まない。それらは `POST /api/auth/session` の責務である
-- `useRecaptcha()` とアクション名 `lookup` は `POST /api/lookup` に紐づく。呼び出し元のページが増えても、ページごとにアクション名を分けないこと
+- reCAPTCHAのアクション名は機能ごとに分ける。管理コンソールでスコアの分布を機能ごとに見分け、しきい値を機能ごとに調整できるようにするため。`POST /api/lookup` はリンクの導線からしか呼ばれないので `link` を使っている
+- アクション名はサーバールート側に直書きし、クライアントから受け取らないこと。受け取ると `verifyRecaptchaToken` の「他の画面向けに取得したトークンではないか」の判定が骨抜きになる。別の機能から同じ検索を使う場合は `lookupPlayerProfile` を共有し、ルートを機能ごとに分けること
 - 逆に、リンクの導線でしか使わないものへ `lookup` と名付けないこと。自分のFargoRate IDの調べ方を案内するモーダルは、他人を検索する機能と紛れないよう `FargoRateIdGuideModal`（座標は `app/utils/fargorateIdGuide.ts`、文言は `fargorateIdGuide.*`）としてある
 
 #### FargoRateとのリンクによる認証
@@ -213,7 +216,7 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 #### ゲスト認証
 
-FargoRate IDを持たないユーザーは `/guest` で名前とレーティングを入力してサインインする。名前は任意で、未入力なら `null` を保存し、表示時に `player.guestName` で補う。既定名は言語によって変わるため、翻訳した文字列をセッションへ焼き込まないこと。
+FargoRate IDを持たないユーザーは `/guest` で名前とレーティングを入力して利用を開始する。名前は任意で、未入力なら `null` を保存し、表示時に `player.guestName` で補う。既定名は言語によって変わるため、翻訳した文字列をセッションへ焼き込まないこと。
 
 レーティングの範囲は `shared/utils/guestPlayer.ts` の `GUEST_RATING_MIN` と `GUEST_RATING_MAX`（-90 〜 930）に一本化してある。USAPLが公開しているハンディキャップ計算ツール（https://usaplraceto.azurewebsites.net/）が受け付ける入力レンジに合わせたものである。フォームとサーバールートの双方でこの関数を使い、条件を二重に書かないこと。
 
@@ -241,13 +244,13 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 認証なしでアクセスできるのは `/`、`/link`、`/guest`、`/privacy-policy`、`/terms-conditions` の5つだけで、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
 
 - `app/middleware/auth.ts`: 未認証なら `/link` へ送る。保護対象のページに `definePageMeta({ middleware: 'auth' })` で付ける
-- `app/middleware/guest.ts`: 認証済みなら `/dashboard` へ送る。サインインの入口である `/link` と `/guest` に付ける。名前が同じだが、これは「未認証のユーザー」の意味であり、ゲスト認証とは別の概念である
+- `app/middleware/guest.ts`: 認証済みなら `/dashboard` へ送る。認証の入口である `/link` と `/guest` に付ける。名前が同じだが、これは「未認証のユーザー」の意味であり、ゲスト認証とは別の概念である
 
 保護対象のパスをどこかに配列で列挙する形にはしないこと。グローバルミドルウェアであれ `routeRules` であれ、ページを追加するたびに更新が必要になり、更新漏れがそのまま情報の露出になる。保護に関わる指定はすべてページ側の `definePageMeta` から辿れる状態に保つこと。
 
 `auth.ts` はSSR時に `x-robots-tag: noindex, nofollow` も立てる。レイアウトの `noindex` メタタグは本文を返す応答にしか乗らず、未認証時のリダイレクトをカバーできないため。
 
-`auth.ts` は元の行き先を `redirect` クエリに残し、サインイン後にそこへ戻す。この値はURLから誰でも与えられるため、必ず `resolveRedirectPath()`（`app/utils/navigation.ts`）を通してから `navigateTo` に渡すこと。外部サイトへ誘導するオープンリダイレクトを防ぐため。`/link` と `/guest` は互いへのリンクでもこのクエリを引き継ぐ。片方で行き先を落とすと、経路によって戻り先が変わってしまう。
+`auth.ts` は元の行き先を `redirect` クエリに残し、認証後にそこへ戻す。この値はURLから誰でも与えられるため、必ず `resolveRedirectPath()`（`app/utils/navigation.ts`）を通してから `navigateTo` に渡すこと。外部サイトへ誘導するオープンリダイレクトを防ぐため。`/link` と `/guest` は互いへのリンクでもこのクエリを引き継ぐ。片方で行き先を落とすと、経路によって戻り先が変わってしまう。
 
 保護ページには `prerender` や ISR・SWR のルートルールを付けないこと。Nuxt Auth Utils はプリレンダやキャッシュの際にサーバー側のセッション取得を飛ばすため、ミドルウェアが認証済みのユーザーを未認証と判定してしまう。
 
@@ -282,7 +285,7 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 
 `useSeoMeta` に渡すページ固有のメタは、ロケールの切り替えに追随させるため値ではなくゲッター（`title: () => t('seo.index.title')`）で渡すこと。
 
-リンクとリダイレクトの遷移先は `localePath()` に通し、ロケールを落とさないこと。対象は `NuxtLink` の `to`、ミドルウェアの `navigateTo`、サインイン後の復帰先である。`resolveRedirectPath()` はロケールを知らない純粋な関数のまま保ち、オープンリダイレクトの判定とロケールの付与を混ぜないこと。既にロケールを含むパスを `localePath()` に通しても二重には付かない。
+リンクとリダイレクトの遷移先は `localePath()` に通し、ロケールを落とさないこと。対象は `NuxtLink` の `to`、ミドルウェアの `navigateTo`、認証後の復帰先である。`resolveRedirectPath()` はロケールを知らない純粋な関数のまま保ち、オープンリダイレクトの判定とロケールの付与を混ぜないこと。既にロケールを含むパスを `localePath()` に通しても二重には付かない。
 
 SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る。`html` の `lang`、hreflang の alternate と `x-default`、canonical、`og:url`、`og:locale` が対象で、これらを手書きで足さないこと。言語を増やすたびに漏れる。
 
