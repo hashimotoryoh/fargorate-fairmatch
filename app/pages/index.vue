@@ -34,7 +34,7 @@ const ratingGuideKeys = [
         </div>
 
         <div class="flex flex-col items-center gap-2">
-          <NuxtLink :to="localePath('/lookup')" class="btn btn-primary btn-lg">
+          <NuxtLink :to="localePath('/link')" class="btn btn-primary btn-lg">
             {{ $t('index.start') }}
           </NuxtLink>
           <NuxtLink :to="localePath('/guest')" class="btn btn-link btn-sm">
@@ -105,7 +105,7 @@ const ratingGuideKeys = [
       <p class="text-base-content/60 max-w-xl text-xs">
         {{ $t('index.gettingStartedNote') }}
       </p>
-      <NuxtLink :to="localePath('/lookup')" class="btn btn-primary">
+      <NuxtLink :to="localePath('/link')" class="btn btn-primary">
         {{ $t('index.start') }}
       </NuxtLink>
       <NuxtLink :to="localePath('/guest')" class="btn btn-link btn-sm">

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const { locale } = useI18n()
 
-const steps = computed(() => lookupGuideScreenshots(locale.value))
+const steps = computed(() => fargorateIdGuideScreenshots(locale.value))
 
 const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 </script>
@@ -12,14 +12,14 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
     type="button"
     @click="dialog?.showModal()"
   >
-    {{ $t('lookupGuide.trigger') }}
+    {{ $t('fargorateIdGuide.trigger') }}
   </button>
 
   <dialog ref="dialog" class="modal">
     <div class="modal-box max-w-2xl">
-      <h2 class="text-lg font-bold">{{ $t('lookupGuide.heading') }}</h2>
+      <h2 class="text-lg font-bold">{{ $t('fargorateIdGuide.heading') }}</h2>
       <p class="text-base-content/70 mt-2 text-sm">
-        {{ $t('lookupGuide.lead') }}
+        {{ $t('fargorateIdGuide.lead') }}
       </p>
 
       <!--
@@ -31,11 +31,11 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
         <li v-for="(step, index) in steps" :key="step.src">
           <p class="mb-2 flex items-center gap-2 font-medium">
             <span class="badge badge-primary badge-sm">{{ index + 1 }}</span>
-            {{ $t(`lookupGuide.steps.${step.key}.title`) }}
+            {{ $t(`fargorateIdGuide.steps.${step.key}.title`) }}
           </p>
           <ScreenshotFigure
             :src="step.src"
-            :alt="$t(`lookupGuide.steps.${step.key}.alt`)"
+            :alt="$t(`fargorateIdGuide.steps.${step.key}.alt`)"
             :natural-width="step.naturalWidth"
             :crop="step.crop"
             :highlight="step.highlight"
@@ -45,13 +45,13 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 
       <div class="modal-action">
         <form method="dialog">
-          <button class="btn">{{ $t('lookupGuide.close') }}</button>
+          <button class="btn">{{ $t('fargorateIdGuide.close') }}</button>
         </form>
       </div>
     </div>
 
     <form method="dialog" class="modal-backdrop">
-      <button>{{ $t('lookupGuide.close') }}</button>
+      <button>{{ $t('fargorateIdGuide.close') }}</button>
     </form>
   </dialog>
 </template>

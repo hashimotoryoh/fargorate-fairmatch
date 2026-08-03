@@ -178,10 +178,10 @@ export default defineNuxtConfig({
             href: '/en',
           },
           {
-            title: 'Sign in with your FargoRate ID',
+            title: 'Link your FargoRate',
             description:
-              'Sign in with the 13-digit FargoRate ID shown on your player card in the FargoRate app.',
-            href: '/en/lookup',
+              'Link your FargoRate player profile with the 13-digit FargoRate ID shown on your player card in the FargoRate app.',
+            href: '/en/link',
           },
           {
             title: 'Start as a guest',

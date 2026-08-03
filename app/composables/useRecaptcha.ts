@@ -12,8 +12,10 @@ const RECAPTCHA_SCRIPT_URL = 'https://www.google.com/recaptcha/api.js'
 /**
  * reCAPTCHA v3 のスクリプトを遅延読み込みし、トークンの取得を提供する。
  *
- * `/lookup` からの総当たりを防ぐため、ID送信の直前に呼び出す想定。
- * スコアはサーバー側（`verifyRecaptchaToken`）で判定する。
+ * `POST /api/lookup` への総当たりを防ぐため、その呼び出しの直前に使う想定。
+ * 特定のページに紐づく前提は持たせない。非公式の外部APIを叩く経路が増えれば、
+ * そのどれからも同じように使う。スコアはサーバー側（`verifyRecaptchaToken`）で
+ * 判定する。
  */
 export function useRecaptcha() {
   const {

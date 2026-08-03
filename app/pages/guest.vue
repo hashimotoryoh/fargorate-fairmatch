@@ -75,10 +75,10 @@ async function signIn() {
   }
 }
 
-// FargoRate IDでのサインインへ戻る。元々の行き先は引き継ぐ。
-const lookupPath = computed(() =>
+// FargoRateとのリンクへ戻る。元々の行き先は引き継ぐ。
+const linkPath = computed(() =>
   localePath({
-    path: '/lookup',
+    path: '/link',
     query:
       typeof route.query.redirect === 'string'
         ? { redirect: route.query.redirect }
@@ -145,8 +145,8 @@ const lookupPath = computed(() =>
         </form>
 
         <div class="text-center">
-          <NuxtLink :to="lookupPath" class="btn btn-link btn-sm">
-            {{ $t('guest.lookupLink') }}
+          <NuxtLink :to="linkPath" class="btn btn-link btn-sm">
+            {{ $t('guest.fargorateLink') }}
           </NuxtLink>
         </div>
       </div>

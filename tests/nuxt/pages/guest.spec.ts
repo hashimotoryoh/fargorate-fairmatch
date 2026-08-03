@@ -204,14 +204,14 @@ describe('ゲストのサインインページ', () => {
     expect(navigateToMock).toHaveBeenCalledWith('/en/dashboard')
   })
 
-  it('FargoRate IDでのサインインへ戻るリンクを出し、行き先を引き継ぐ', async () => {
+  it('FargoRateとのリンクへ戻るリンクを出し、行き先を引き継ぐ', async () => {
     routeQuery.redirect = '/settings'
 
     const component = await mountSuspended(GuestPage)
     const link = component
       .findAll('a')
-      .find((anchor) => anchor.text() === jaMessage('guest.lookupLink'))
+      .find((anchor) => anchor.text() === jaMessage('guest.fargorateLink'))
 
-    expect(link?.attributes('href')).toBe('/lookup?redirect=/settings')
+    expect(link?.attributes('href')).toBe('/link?redirect=/settings')
   })
 })

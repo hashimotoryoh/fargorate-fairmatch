@@ -50,11 +50,11 @@ describe('auth ミドルウェア', () => {
     expect(navigateToMock).not.toHaveBeenCalled()
   })
 
-  it('未認証ならルックアップページへ送る', () => {
+  it('未認証ならリンクページへ送る', () => {
     auth(route('/dashboard'), FROM)
 
     expect(navigateToMock).toHaveBeenCalledWith({
-      path: '/lookup',
+      path: '/link',
       query: { redirect: '/dashboard' },
     })
   })
@@ -63,13 +63,13 @@ describe('auth ミドルウェア', () => {
    * 英語で読んでいた人を日本語のサインインページへ送ると、サインインの手前で
    * 読めない画面に突き当たる。送り先はロケールを保たなければならない。
    */
-  it('英語で見ているときは英語のルックアップページへ送る', async () => {
+  it('英語で見ているときは英語のリンクページへ送る', async () => {
     await useLocale('en')
 
     auth(route('/en/dashboard'), FROM)
 
     expect(navigateToMock).toHaveBeenCalledWith({
-      path: '/en/lookup',
+      path: '/en/link',
       query: { redirect: '/en/dashboard' },
     })
   })
@@ -79,7 +79,7 @@ describe('auth ミドルウェア', () => {
     auth(route('/settings?tab=account'), FROM)
 
     expect(navigateToMock).toHaveBeenCalledWith({
-      path: '/lookup',
+      path: '/link',
       query: { redirect: '/settings?tab=account' },
     })
   })

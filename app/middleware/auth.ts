@@ -1,4 +1,4 @@
-// 認証が必要なページに付ける。未認証ならルックアップページへ送る。
+// 認証が必要なページに付ける。未認証ならリンクページへ送る。
 export default defineNuxtRouteMiddleware((to) => {
   // このミドルウェアが付くページは非公開である。
   //
@@ -19,7 +19,7 @@ export default defineNuxtRouteMiddleware((to) => {
   // 送り先はロケールを保つ。英語で読んでいた人を日本語のページへ送ると、
   // サインインの手前で読めない画面に突き当たる。
   return navigateTo({
-    path: useLocalePath()('/lookup'),
+    path: useLocalePath()('/link'),
     query: { redirect: to.fullPath },
   })
 })

@@ -13,7 +13,7 @@ const { loggedIn, navigateToMock } = vi.hoisted(() => ({
 mockNuxtImport('useUserSession', () => () => ({ loggedIn }))
 mockNuxtImport('navigateTo', () => navigateToMock)
 
-const TO = { fullPath: '/lookup' } as RouteLocationNormalized
+const TO = { fullPath: '/link' } as RouteLocationNormalized
 const FROM = { fullPath: '/' } as RouteLocationNormalized
 
 /**
