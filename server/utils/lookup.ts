@@ -151,7 +151,7 @@ function toSearchResult(
   return {
     name: `${player.firstName} ${player.lastName}`,
     readableId: player.readableId || null,
-    fargorateId: player.membershipId,
+    fargorateId: player.membershipId || null,
     location: player.location || null,
     rating,
     robustness,

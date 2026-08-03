@@ -198,6 +198,18 @@ describe('プレイヤー検索ページ', () => {
     )
   })
 
+  // 入力を弾くときも、結果とエラーの整合が取れるよう前回の結果を消す。
+  it('短すぎる入力を弾くときも前回の検索結果を消す', async () => {
+    const component = await mountSuspended(LookupPage)
+
+    await fillAndSubmit(component, 'Taro Yamada')
+    expect(component.text()).toContain('Taro Yamada')
+
+    await fillAndSubmit(component, 'a')
+
+    expect(component.text()).not.toContain(jaMessage('lookup.resultsHeading'))
+  })
+
   // 前回の結果を残したままエラーを出すと、どちらの検索の結果か読めなくなる。
   it('失敗したら前回の検索結果を消す', async () => {
     const component = await mountSuspended(LookupPage)

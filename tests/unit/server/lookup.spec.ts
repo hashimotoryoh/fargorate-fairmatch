@@ -418,16 +418,25 @@ describe('searchPlayers', () => {
   })
 
   // 空文字で返ることがあるため、表示側で扱いやすいよう null に寄せる。
-  it('所在地が空文字なら null にする', async () => {
+  // 一部だけ空文字を許すと、値の有無の判定が項目ごとにぶれる。
+  it('空文字で返る項目を null に寄せる', async () => {
     stubFetch({
       fargorate: fargorateResponse([
-        createFargoRateLookupPlayer({ location: '' }),
+        createFargoRateLookupPlayer({
+          location: '',
+          readableId: '',
+          membershipId: '',
+        }),
       ]),
     })
 
     const players = await searchPlayers('Yamada')
 
-    expect(players[0]?.location).toBeNull()
+    expect(players[0]).toMatchObject({
+      location: null,
+      readableId: null,
+      fargorateId: null,
+    })
   })
 })
 

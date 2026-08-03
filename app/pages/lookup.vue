@@ -41,6 +41,10 @@ function toErrorMessage(error: unknown) {
 }
 
 async function search() {
+  // 前回の結果を残したままエラーを出すと、どちらの検索の結果か読めなくなる。
+  // 入力を弾くときも、通信に失敗したときも同じように消す。
+  players.value = null
+
   if (!isValidPlayerQuery(query.value)) {
     errorMessage.value = invalidQueryMessage.value
     return
@@ -59,8 +63,6 @@ async function search() {
       },
     )
   } catch (error) {
-    // 前回の結果を残したままエラーを出すと、どちらの検索の結果か読めなくなる。
-    players.value = null
     errorMessage.value = toErrorMessage(error)
   } finally {
     pending.value = false
