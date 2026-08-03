@@ -30,7 +30,9 @@ registerEndpoint('/api/players/lookup', {
 function createSearchResult(overrides: Record<string, unknown> = {}) {
   return {
     name: 'Taro Yamada',
+    readableId: '1234567',
     fargorateId: FARGORATE_ID,
+    location: 'Tokyo',
     rating: 523,
     robustness: 412,
     ...overrides,
@@ -75,41 +77,69 @@ describe('プレイヤー検索ページ', () => {
     expect(component.text()).not.toContain(jaMessage('lookup.empty'))
   })
 
-  it('ヒットしたプレイヤーを名前・レーティング・信頼度で一覧に出す', async () => {
+  it('ヒットしたプレイヤーをカードで見せ、レーティングと信頼度をstatに出す', async () => {
     const component = await mountSuspended(LookupPage)
 
     await fillAndSubmit(component, 'Taro Yamada')
 
     expect(lookupHandler).toHaveBeenCalledTimes(1)
     expect(component.text()).toContain(jaMessage('lookup.resultsHeading'))
-    expect(component.text()).toContain('Taro Yamada')
-    expect(component.text()).toContain('523')
-    expect(component.text()).toContain('412')
+
+    const card = component.get('.card')
+    expect(card.text()).toContain('Taro Yamada')
+
+    const stats = card.findAll('.stat')
+    expect(stats).toHaveLength(2)
+    expect(stats[0]?.text()).toContain(jaMessage('player.rating'))
+    expect(stats[0]?.text()).toContain('523')
+    expect(stats[1]?.text()).toContain(jaMessage('player.robustness'))
+    expect(stats[1]?.text()).toContain('412')
   })
 
-  it('複数ヒットしたら行を並べる', async () => {
+  it('名前の下に所在地を出す', async () => {
+    const component = await mountSuspended(LookupPage)
+
+    await fillAndSubmit(component, 'Taro Yamada')
+
+    expect(component.get('.card').text()).toContain('Tokyo')
+  })
+
+  // 所在地は空で返ることがある。枠だけが残ると読み手に伝わるものが無い。
+  it('所在地が無ければその行を出さない', async () => {
+    lookupHandler.mockReturnValue([createSearchResult({ location: null })])
+
+    const component = await mountSuspended(LookupPage)
+
+    await fillAndSubmit(component, 'Taro Yamada')
+
+    expect(component.get('.card').text()).not.toContain('Tokyo')
+  })
+
+  it('複数ヒットしたらカードを並べる', async () => {
     lookupHandler.mockReturnValue([
       createSearchResult({ name: 'Taro Yamada' }),
-      createSearchResult({ name: 'Jiro Yamada', fargorateId: '9900007654321' }),
+      createSearchResult({ name: 'Jiro Yamada', readableId: '7654321' }),
     ])
 
     const component = await mountSuspended(LookupPage)
 
     await fillAndSubmit(component, 'Yamada')
 
-    expect(component.findAll('tbody tr')).toHaveLength(2)
+    expect(component.findAll('.card')).toHaveLength(2)
     expect(component.text()).toContain('Jiro Yamada')
   })
 
-  // IDを持たないプレイヤーが混じっても、行の描画で落ちてはならない。
-  it('メンバーシップIDが無いプレイヤーも一覧に出す', async () => {
-    lookupHandler.mockReturnValue([createSearchResult({ fargorateId: null })])
+  // IDを持たないプレイヤーが混じっても、描画で落ちてはならない。
+  it('IDが無いプレイヤーも一覧に出す', async () => {
+    lookupHandler.mockReturnValue([
+      createSearchResult({ readableId: null, fargorateId: null }),
+    ])
 
     const component = await mountSuspended(LookupPage)
 
     await fillAndSubmit(component, 'Yamada')
 
-    expect(component.findAll('tbody tr')).toHaveLength(1)
+    expect(component.findAll('.card')).toHaveLength(1)
   })
 
   it('0件なら見つからなかったことを伝える', async () => {

@@ -98,37 +98,48 @@ async function search() {
       {{ errorMessage }}
     </div>
 
-    <section v-else-if="players" class="flex flex-col gap-2">
+    <section v-else-if="players" class="flex flex-col gap-3">
       <h2 class="text-lg font-bold">{{ $t('lookup.resultsHeading') }}</h2>
 
       <p v-if="!players.length" class="text-base-content/70 text-sm">
         {{ $t('lookup.empty') }}
       </p>
 
-      <!-- 狭い画面でも表が崩れないよう、はみ出す分は表の中で横スクロールさせる。 -->
-      <div v-else class="overflow-x-auto">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>{{ $t('player.name') }}</th>
-              <th class="text-right">{{ $t('player.rating') }}</th>
-              <th class="text-right">{{ $t('player.robustness') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(player, index) in players"
-              :key="player.fargorateId ?? index"
-            >
-              <td>{{ player.name }}</td>
-              <td class="text-primary text-right font-bold">
-                {{ player.rating }}
-              </td>
-              <td class="text-right">{{ player.robustness }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <ul v-else class="flex flex-col gap-3">
+        <!--
+          `readableId` はこのAPIの表示用IDで、リンクに使う13桁のFargoRate ID
+          （`fargorateId`）とは別物。欠けることもあるため、無ければ添字で補う。
+        -->
+        <li
+          v-for="(player, index) in players"
+          :key="player.readableId ?? index"
+          class="card bg-base-200"
+        >
+          <div class="card-body gap-3 p-4">
+            <div>
+              <p class="font-bold">{{ player.name }}</p>
+              <p
+                v-if="player.location"
+                class="text-base-content/60 mt-0.5 text-xs"
+              >
+                {{ player.location }}
+              </p>
+            </div>
+
+            <!-- レーティングと信頼度はこのアプリの中心的な数値なので独立して見せる。 -->
+            <div class="stats stats-horizontal bg-base-100 w-full">
+              <div class="stat place-items-center">
+                <div class="stat-title">{{ $t('player.rating') }}</div>
+                <div class="stat-value text-primary">{{ player.rating }}</div>
+              </div>
+              <div class="stat place-items-center">
+                <div class="stat-title">{{ $t('player.robustness') }}</div>
+                <div class="stat-value">{{ player.robustness }}</div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
     </section>
   </div>
 </template>
