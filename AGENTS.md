@@ -180,6 +180,13 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 外部APIへのアクセスや秘匿すべき処理はサーバールートに置き、コンポーネントからはコンポーザブル経由で呼び出す。コンポーネントに通信処理を直接書かないこと。
 
+サーバールートは機能単位で立て、複数の機能で1つのルートを共用しないこと。共有するのは `server/utils/` の関数であって、ルートではない。ルートの責務は次の2つに絞る。
+
+- どのゲートを通すか（`requireUserSession()` か、reCAPTCHAか。reCAPTCHAならどのアクション名か）
+- その画面に必要な形へ応答を整えること
+
+機能ごとにゲートの強さも応答の形も違うため、共用すると片方の都合で緩めた設定がもう片方へ漏れる。ルート自体は十数行の薄いものになるので、分けても重複はほとんど生じない。`POST /api/auth/guest` を `POST /api/auth/session` から分けてあるのも同じ判断による。
+
 `app/` と `server/` の双方から使う型やユーティリティは `shared/` に置き、`#shared/` エイリアスで参照する。
 
 ### 認証
@@ -193,12 +200,14 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 このため、UI・翻訳・ドキュメント・テスト名で「サインイン」「Sign in」という語は使わない。セッションを始める操作は「リンク」または「利用を開始する」と書く。ただしセッションを終える操作は「サインアウト」「Sign out」のままにしてある（Nuxt Auth Utils 内蔵の `DELETE /api/_auth/session` に対応する操作であり、破棄することに曖昧さが無いため）。
 
-いっぽう、外部APIへの問い合わせそのものは「検索」であり、`POST /api/lookup`・`server/utils/lookup.ts` の `lookupPlayerProfile`・`docs/*-lookup-api.md` は名前と実態が合っているため `lookup` のまま残してある。機能の名前（`link`）と操作の名前（`lookup`）を混ぜないこと。
+いっぽう、外部APIへの問い合わせそのものは「検索」であり、`server/utils/lookup.ts` の `lookupPlayerProfile`・`server/api/*/lookup.post.ts`・`docs/*-lookup-api.md` は名前と実態が合っているため `lookup` のまま残してある。機能の名前（`link`）と操作の名前（`lookup`）を混ぜないこと。
+
+この検索は CSI で姓名を引き、その姓名で FargoRate を引く二段で固定である。三段目が増えることはないため、段数を可変にする作りにはしないこと。
 
 このルックアップ層は認証の一部ではなく、認証から使われている共有部品である。他プレイヤーのレーティングを閲覧するような、セッションと無関係の用途からも同じ層を呼べる状態に保つこと。具体的には次を守る。
 
-- `server/utils/lookup.ts` と `POST /api/lookup` に、セッションの読み書きや「本人かどうか」の判断を持ち込まない。それらは `POST /api/auth/session` の責務である
-- reCAPTCHAのアクション名は機能ごとに分ける。管理コンソールでスコアの分布を機能ごとに見分け、しきい値を機能ごとに調整できるようにするため。`POST /api/lookup` はリンクの導線からしか呼ばれないので `link` を使っている
+- `server/utils/lookup.ts` と `POST /api/link/lookup` に、セッションの読み書きや「本人かどうか」の判断を持ち込まない。それらは `POST /api/auth/session` の責務である
+- reCAPTCHAのアクション名は機能ごとに分ける。管理コンソールでスコアの分布を機能ごとに見分け、しきい値を機能ごとに調整できるようにするため。`POST /api/link/lookup` は `link` を使っている
 - アクション名はサーバールート側に直書きし、クライアントから受け取らないこと。受け取ると `verifyRecaptchaToken` の「他の画面向けに取得したトークンではないか」の判定が骨抜きになる。別の機能から同じ検索を使う場合は `lookupPlayerProfile` を共有し、ルートを機能ごとに分けること
 - 逆に、リンクの導線でしか使わないものへ `lookup` と名付けないこと。自分のFargoRate IDの調べ方を案内するモーダルは、他人を検索する機能と紛れないよう `FargoRateIdGuideModal`（座標は `app/utils/fargorateIdGuide.ts`、文言は `fargorateIdGuide.*`）としてある
 
@@ -222,7 +231,7 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 ゲストは `POST /api/auth/guest` という別のルートに分けてある。`auth/session` に相乗りさせると、IDを送るだけのつもりの経路に自称の値が紛れ込む余地が生まれるためである。ハンドラーはボディを展開せず、`readGuestPlayer()` が読み取った項目だけでオブジェクトを組み立てる。`fargorateId` や `kind: 'fargorate'` を送られても効かないのはこのためで、`tests/unit/server/api/auth/guest.post.spec.ts` がそれを固定している。
 
-このルートにreCAPTCHAは付けていない。`POST /api/lookup` に付けているのは非公式の外部APIへの総当たりを防ぐためであり、ゲストは外部APIを一切呼ばないため理由が当てはまらない。
+このルートにreCAPTCHAは付けていない。`POST /api/link/lookup` に付けているのは非公式の外部APIへの総当たりを防ぐためであり、ゲストは外部APIを一切呼ばないため理由が当てはまらない。
 
 #### プレイヤーの型
 
@@ -237,7 +246,7 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 どちらであるかの判別には必ず `isFargoRatePlayer()`（`shared/utils/player.ts`）を使い、`robustness` や `fargorateId` の有無を見る形にしないこと。ゲストの自己申告値を、FargoRateで確認が取れた値と取り違えないためである。`GuestPlayer` がFargoRate固有の項目を型として持たないのも同じ理由による。
 
-CSI・FargoRateの両APIは非公式で利用制約が不明なため、`POST /api/lookup`（IDを送って外部APIへ問い合わせる最初の関門）ではreCAPTCHA v3のスコア判定を通してから `lookupPlayerProfile` を呼ぶ（`server/utils/recaptcha.ts` の `verifyRecaptchaToken`）。クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。`POST /api/auth/session` は `POST /api/lookup` を通過した画面遷移でしか呼ばれないため、reCAPTCHAは付けていない。
+CSI・FargoRateの両APIは非公式で利用制約が不明なため、`POST /api/link/lookup`（IDを送って外部APIへ問い合わせる最初の関門）ではreCAPTCHA v3のスコア判定を通してから `lookupPlayerProfile` を呼ぶ（`server/utils/recaptcha.ts` の `verifyRecaptchaToken`）。クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。`POST /api/auth/session` は `POST /api/link/lookup` を通過した画面遷移でしか呼ばれないため、reCAPTCHAは付けていない。
 
 Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり、このアプリでは使えない。v2の `siteverify` の応答には `score` も `action` も含まれず、スコア判定で必ず落ちるためである。v3用のテストキーは公開されていないので、ローカル開発でも `localhost` をドメインに加えた自分のv3キーを使うこと。検証が通らないことを理由に `score` や `action` のチェックを緩めてはならない。
 
