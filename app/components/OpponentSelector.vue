@@ -11,7 +11,8 @@ const emit = defineEmits<{ select: [opponent: GameOpponent] }>()
 const { t } = useI18n()
 const { user } = useUserSession()
 const { recentOpponents } = useRecentOpponents()
-const { query, players, pending, errorMessage, search } = usePlayerSearch()
+const { query, players, pending, errorMessage, search, clear } =
+  usePlayerSearch()
 
 const method = ref<'search' | 'guest'>('search')
 const guestError = ref('')
@@ -77,23 +78,28 @@ function selectRecent(opponent: FargoRatePlayer) {
     </div>
 
     <template v-if="method === 'search'">
-      <form class="flex flex-col gap-4" @submit.prevent="search">
-        <label class="floating-label">
-          <span>{{ $t('lookup.queryLabel') }}</span>
-          <input
-            v-model.trim="query"
-            class="input input-bordered w-full"
-            type="text"
-            :maxlength="PLAYER_QUERY_MAX_LENGTH"
-            placeholder="John Doe"
-            required
-          />
-        </label>
-
-        <button class="btn btn-primary" type="submit" :disabled="pending">
-          <span v-if="pending" class="loading loading-spinner" />
-          {{ $t('games.briefing.opponent.search') }}
-        </button>
+      <form @submit.prevent="search">
+        <div class="join w-full">
+          <label class="floating-label join-item flex-1">
+            <span>{{ $t('lookup.queryLabel') }}</span>
+            <input
+              v-model.trim="query"
+              class="input input-bordered w-full"
+              type="text"
+              :maxlength="PLAYER_QUERY_MAX_LENGTH"
+              placeholder="John Doe"
+              required
+            />
+          </label>
+          <button
+            class="btn btn-primary join-item"
+            type="submit"
+            :disabled="pending"
+          >
+            <span v-if="pending" class="loading loading-spinner" />
+            {{ $t('games.briefing.opponent.search') }}
+          </button>
+        </div>
       </form>
 
       <div v-if="errorMessage" role="alert" class="alert alert-error">
@@ -101,11 +107,20 @@ function selectRecent(opponent: FargoRatePlayer) {
       </div>
 
       <section v-else-if="players" class="flex flex-col gap-3">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="text-base-content/70 text-xs font-bold">
+            {{ $t('lookup.resultsHeading') }}
+          </h3>
+          <button class="btn btn-ghost btn-xs" type="button" @click="clear">
+            {{ $t('games.briefing.opponent.clear') }}
+          </button>
+        </div>
+
         <p v-if="!players.length" class="text-base-content/70 text-sm">
           {{ $t('lookup.empty') }}
         </p>
 
-        <ul v-else class="flex flex-col gap-3">
+        <ul v-else class="flex flex-col gap-2">
           <li
             v-for="(player, index) in players"
             :key="player.readableId ?? index"
@@ -117,10 +132,10 @@ function selectRecent(opponent: FargoRatePlayer) {
               :disabled="!player.membershipId"
               @click="selectResult(player)"
             >
-              <PlayerCard :player="player" />
+              <PlayerRow :player="player" />
               <p
                 v-if="!player.membershipId"
-                class="text-base-content/60 px-4 pb-3 text-xs"
+                class="text-base-content/60 px-3 pb-2 text-xs"
               >
                 {{ $t('games.briefing.opponent.noId') }}
               </p>
@@ -129,7 +144,11 @@ function selectRecent(opponent: FargoRatePlayer) {
         </ul>
       </section>
 
-      <div v-if="recentOpponents.length" class="flex flex-col gap-2">
+      <!-- 検索結果を見ている間は引っ込め、どちらの一覧か迷わせない。 -->
+      <div
+        v-if="players === null && recentOpponents.length"
+        class="flex flex-col gap-2"
+      >
         <h3 class="text-base-content/70 text-xs font-bold">
           {{ $t('games.recentOpponents.label') }}
         </h3>

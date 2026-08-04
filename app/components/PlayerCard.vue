@@ -19,10 +19,8 @@ const name = computed(() => player.name ?? t('player.guestName'))
 
 // ゲストの自己申告値には信頼度が無い。項目の有無ではなく kind で判別する。
 // kind を持たない検索結果は、FargoRateの応答そのものなので値を信じてよい。
-const robustness = computed(() =>
-  player.kind !== 'guest' && player.robustness !== undefined
-    ? String(player.robustness)
-    : t('player.robustnessNone'),
+const hasRobustness = computed(
+  () => player.kind !== 'guest' && player.robustness !== undefined,
 )
 </script>
 
@@ -54,7 +52,12 @@ const robustness = computed(() =>
       </div>
       <div class="stat place-items-center px-3 py-2">
         <div class="stat-title text-xs">{{ $t('player.robustness') }}</div>
-        <div class="stat-value text-2xl">{{ robustness }}</div>
+        <div
+          class="stat-value text-2xl"
+          :class="{ 'text-base-content/40': !hasRobustness }"
+        >
+          {{ hasRobustness ? player.robustness : '-' }}
+        </div>
       </div>
     </div>
   </div>

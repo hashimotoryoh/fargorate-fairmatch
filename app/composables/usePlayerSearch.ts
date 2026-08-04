@@ -77,5 +77,12 @@ export function usePlayerSearch() {
     }
   }
 
-  return { query, players, pending, errorMessage, search, fetchPlayers }
+  /** 検索をやり直すために、入力と結果をまとめて消す。 */
+  function clear() {
+    query.value = ''
+    players.value = null
+    errorMessage.value = ''
+  }
+
+  return { query, players, pending, errorMessage, search, clear, fetchPlayers }
 }

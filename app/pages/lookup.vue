@@ -58,7 +58,7 @@ const { query, players, pending, errorMessage, search } = usePlayerSearch()
           :key="player.readableId ?? index"
           class="card bg-base-200"
         >
-          <PlayerCard :player="player" />
+          <PlayerRow :player="player" />
         </li>
       </ul>
     </section>

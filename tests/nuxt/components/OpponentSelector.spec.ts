@@ -145,6 +145,47 @@ describe('OpponentSelector', () => {
     expect(component.emitted('select')?.[0]?.[0]).toEqual(stored)
   })
 
+  // どちらの一覧から選んでいるのか迷わせない。
+  it('検索結果を見ている間は最近の対戦プレイヤーを隠す', async () => {
+    localStorage.setItem(
+      'fairrace:recentOpponents',
+      JSON.stringify([createFargoRatePlayer({ name: 'Alex Morgan' })]),
+    )
+
+    const component = await mountSelector()
+    expect(component.text()).toContain(jaMessage('games.recentOpponents.label'))
+
+    await searchFor(component, 'Kengo Sato')
+
+    expect(component.text()).not.toContain(
+      jaMessage('games.recentOpponents.label'),
+    )
+  })
+
+  it('クリアで検索結果を消し、最近の対戦プレイヤーへ戻す', async () => {
+    localStorage.setItem(
+      'fairrace:recentOpponents',
+      JSON.stringify([createFargoRatePlayer({ name: 'Alex Morgan' })]),
+    )
+
+    const component = await mountSelector()
+    await searchFor(component, 'Kengo Sato')
+
+    await component
+      .findAll('button')
+      .find(
+        (button) =>
+          button.text() === jaMessage('games.briefing.opponent.clear'),
+      )
+      ?.trigger('click')
+
+    expect(component.text()).not.toContain('Japan - Tokyo')
+    expect(component.text()).toContain(jaMessage('games.recentOpponents.label'))
+    expect(
+      (component.find('input[type="text"]').element as HTMLInputElement).value,
+    ).toBe('')
+  })
+
   // 個別削除は /games 側にのみ置き、ここは選択に専念させる。
   it('最近の対戦相手に削除ボタンを置かない', async () => {
     localStorage.setItem(

@@ -27,8 +27,7 @@
     "guestName": "Guest Player",
     "location": "Location",
     "rating": "Rating",
-    "robustness": "Robustness",
-    "robustnessNone": "None"
+    "robustness": "Robustness"
   },
   "seo": {
     "index": {
@@ -257,7 +256,8 @@
         "methodGuest": "Guest",
         "search": "Search",
         "noId": "Cannot be selected because they have no FargoRate ID.",
-        "guestSubmit": "Use this opponent"
+        "guestSubmit": "Use this opponent",
+        "clear": "Clear"
       }
     },
     "rotate": {
