@@ -57,6 +57,13 @@ export function useRecaptcha() {
   }
 
   async function execute(action: string): Promise<string> {
+    // 開発環境ではサーバー側（`verifyRecaptchaToken`）が検証ごと省くため、
+    // スクリプトを読み込まずダミーのトークンを返す。キー未設定でも
+    // 各フォームを動かせるようにするため。
+    if (process.env.NODE_ENV === 'development') {
+      return 'recaptcha-skipped-in-development'
+    }
+
     await load()
     return window.grecaptcha!.execute(recaptchaSiteKey, { action })
   }

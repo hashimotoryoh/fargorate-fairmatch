@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { verifyRecaptchaToken } from '../../../server/utils/recaptcha'
 
 const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
@@ -29,6 +29,22 @@ function verifyResponse(overrides: Record<string, unknown> = {}) {
 describe('verifyRecaptchaToken', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  // クライアント側（useRecaptcha）も開発環境ではトークンの取得を省くため、
+  // トークンが無くても通ることまで保証する。
+  it('開発環境ならトークンが無くても外部APIを呼ばずに通す', async () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    const fetchMock = stubFetch(verifyResponse())
+
+    await expect(
+      verifyRecaptchaToken(undefined, 'link'),
+    ).resolves.toBeUndefined()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('成功かつスコアが閾値以上、actionが一致すれば通す', async () => {

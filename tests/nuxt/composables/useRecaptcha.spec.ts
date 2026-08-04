@@ -42,6 +42,19 @@ describe('useRecaptcha', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+    vi.unstubAllEnvs()
+  })
+
+  // サーバー側（verifyRecaptchaToken）も開発環境では検証ごと省くため、
+  // 返すトークンの値に意味は無い。スクリプトを読み込まないことが要点。
+  it('開発環境ならスクリプトを読み込まずにトークンを返す', async () => {
+    const component = await mountSuspended(TestComponent)
+    const { execute } = component.vm as unknown as Exposed
+    vi.stubEnv('NODE_ENV', 'development')
+    const createElementSpy = vi.spyOn(document, 'createElement')
+
+    await expect(execute('link')).resolves.toEqual(expect.any(String))
+    expect(createElementSpy).not.toHaveBeenCalledWith('script')
   })
 
   it('スクリプトの読み込みに失敗しても、次回呼び出しで再試行できる', async () => {

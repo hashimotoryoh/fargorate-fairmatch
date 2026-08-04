@@ -17,13 +17,21 @@ type RecaptchaVerifyResponse = {
  * `score` と `action` はv3の応答にのみ含まれる。Googleが公開している
  * テストキーはv2用であり、これを設定すると応答に `score` が無いまま
  * `success: true` が返るため、ここのスコア判定で必ず落ちる。v3のテスト用
- * キーは公開されていないので、ローカル開発でも `localhost` をドメインに
- * 加えた自分のv3キーを使うこと（`.env.example` 参照）。
+ * キーは公開されていないため、開発環境（`NODE_ENV=development`）では
+ * 検証ごと省き、キーなしで動くようにしてある。reCAPTCHAそのものの動作を
+ * 確かめる場合は、`localhost` をドメインに加えた自分のv3キーを設定し、
+ * 本番ビルドで起動すること（`.env.example` 参照）。
  */
 export async function verifyRecaptchaToken(
   token: unknown,
   action: string,
 ): Promise<void> {
+  // クライアント側（`useRecaptcha`）も同じ条件でトークンの取得を省くため、
+  // トークンの有無の検査より前に抜ける必要がある。
+  if (process.env.NODE_ENV === 'development') {
+    return
+  }
+
   if (typeof token !== 'string' || !token) {
     throw createError({
       statusCode: 422,
