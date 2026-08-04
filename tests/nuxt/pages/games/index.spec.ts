@@ -1,6 +1,7 @@
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { clearNuxtState } from '#imports'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { VueWrapper } from '@vue/test-utils'
 import GamesPage from '../../../../app/pages/games/index.vue'
 import { jaMessage } from '../../../helpers/i18n'
 import { createFargoRatePlayer } from '../../../helpers/fixtures'
@@ -9,8 +10,20 @@ const { navigateToMock } = vi.hoisted(() => ({ navigateToMock: vi.fn() }))
 
 mockNuxtImport('navigateTo', () => navigateToMock)
 
+// マウントしたまま次のテストで clearNuxtState() すると、残ったインスタンスの
+// 再レンダーが undefined になった状態を読んで落ちる。テストごとに必ず
+// アンマウントする。
+let wrapper: VueWrapper | undefined
+
+async function mountPage() {
+  wrapper = await mountSuspended(GamesPage)
+  return wrapper
+}
+
 describe('ゲーム一覧ページ', () => {
   beforeEach(() => {
+    wrapper?.unmount()
+    wrapper = undefined
     vi.clearAllMocks()
     localStorage.clear()
     sessionStorage.clear()
@@ -18,7 +31,7 @@ describe('ゲーム一覧ページ', () => {
   })
 
   it('提供予定を含む全ゲームを説明つきで並べる', async () => {
-    const component = await mountSuspended(GamesPage)
+    const component = await mountPage()
 
     expect(component.text()).toContain(
       jaMessage('games.types.fairSingleRace.label'),
@@ -35,7 +48,7 @@ describe('ゲーム一覧ページ', () => {
   })
 
   it('準備中のゲームは選べない', async () => {
-    const component = await mountSuspended(GamesPage)
+    const component = await mountPage()
 
     const comingSoon = component
       .findAll('button[disabled]')
@@ -45,7 +58,7 @@ describe('ゲーム一覧ページ', () => {
 
   // ゲームは公開情報のスラッグなので、クエリの種としてブリーフィングへ渡す。
   it('ゲームを選ぶと ?game= を付けてブリーフィングへ移る', async () => {
-    const component = await mountSuspended(GamesPage)
+    const component = await mountPage()
 
     const card = component
       .findAll('button')
@@ -61,7 +74,7 @@ describe('ゲーム一覧ページ', () => {
   })
 
   it('最近の対戦相手が無ければ一覧を出さない', async () => {
-    const component = await mountSuspended(GamesPage)
+    const component = await mountPage()
 
     expect(component.text()).not.toContain(
       jaMessage('games.recentOpponents.label'),
@@ -73,7 +86,7 @@ describe('ゲーム一覧ページ', () => {
     const stored = createFargoRatePlayer({ name: 'Alex Morgan' })
     localStorage.setItem('fairrace:recentOpponents', JSON.stringify([stored]))
 
-    const component = await mountSuspended(GamesPage)
+    const component = await mountPage()
     const button = component
       .findAll('button')
       .find((candidate) => candidate.text().includes('Alex Morgan'))
@@ -90,7 +103,7 @@ describe('ゲーム一覧ページ', () => {
     const stored = createFargoRatePlayer({ name: 'Alex Morgan' })
     localStorage.setItem('fairrace:recentOpponents', JSON.stringify([stored]))
 
-    const component = await mountSuspended(GamesPage)
+    const component = await mountPage()
     const removeButton = component
       .findAll('button')
       .find(

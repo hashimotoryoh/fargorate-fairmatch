@@ -14,8 +14,13 @@ const Harness = defineComponent({
   template: '<div />',
 })
 
+// マウントしたまま次のテストで clearNuxtState() すると、残ったインスタンスが
+// undefined になった状態を読んで落ちる。テストごとに必ずアンマウントする。
+let wrapper: { unmount: () => void } | undefined
+
 async function mountHarness() {
   const component = await mountSuspended(Harness)
+  wrapper = component
   return component.vm
 }
 
@@ -29,6 +34,8 @@ function opponentAt(rating: number, index: number) {
 
 describe('useRecentOpponents', () => {
   beforeEach(() => {
+    wrapper?.unmount()
+    wrapper = undefined
     localStorage.clear()
     clearNuxtState()
   })

@@ -42,6 +42,16 @@ const RESULTS = [
   },
 ]
 
+// マウントしたまま次のテストで clearNuxtState() すると、残ったインスタンスの
+// 再レンダーが undefined になった状態を読んで落ちる。テストごとに必ず
+// アンマウントする。
+let wrapper: VueWrapper | undefined
+
+async function mountSelector() {
+  wrapper = await mountSuspended(OpponentSelector)
+  return wrapper
+}
+
 async function searchFor(component: VueWrapper, query: string) {
   await component.find('input[type="text"]').setValue(query)
   await component.find('form').trigger('submit')
@@ -50,6 +60,8 @@ async function searchFor(component: VueWrapper, query: string) {
 
 describe('OpponentSelector', () => {
   beforeEach(() => {
+    wrapper?.unmount()
+    wrapper = undefined
     vi.clearAllMocks()
     localStorage.clear()
     clearNuxtState()
@@ -57,7 +69,7 @@ describe('OpponentSelector', () => {
   })
 
   it('見出しとリードで、誰の対戦相手を選ぶのかを明示する', async () => {
-    const component = await mountSuspended(OpponentSelector)
+    const component = await mountSelector()
 
     expect(component.text()).toContain(
       jaMessage('games.briefing.opponent.heading'),
@@ -68,7 +80,7 @@ describe('OpponentSelector', () => {
   })
 
   it('タブは「FargoRateで探す」と「ゲスト」の2つだけを出す', async () => {
-    const component = await mountSuspended(OpponentSelector)
+    const component = await mountSelector()
     const tabs = component.findAll('[role="tab"]')
 
     expect(tabs.map((tab) => tab.text())).toEqual([
@@ -78,7 +90,7 @@ describe('OpponentSelector', () => {
   })
 
   it('名前で検索した候補から選ぶと、対戦相手として確定する', async () => {
-    const component = await mountSuspended(OpponentSelector)
+    const component = await mountSelector()
     await searchFor(component, 'Kengo Sato')
 
     const card = component
@@ -97,7 +109,7 @@ describe('OpponentSelector', () => {
 
   // 最近の対戦相手への保存と、レーティングの引き直しの鍵が無い。
   it('membershipIdが無い候補は選べない', async () => {
-    const component = await mountSuspended(OpponentSelector)
+    const component = await mountSelector()
     await searchFor(component, 'Kengo Sato')
 
     expect(component.text()).toContain(
@@ -113,7 +125,7 @@ describe('OpponentSelector', () => {
   it('該当が無ければその旨を出す', async () => {
     lookupHandler.mockReturnValue([])
 
-    const component = await mountSuspended(OpponentSelector)
+    const component = await mountSelector()
     await searchFor(component, 'Nobody Here')
 
     expect(component.text()).toContain(jaMessage('lookup.empty'))
@@ -123,7 +135,7 @@ describe('OpponentSelector', () => {
     const stored = createFargoRatePlayer({ name: 'Alex Morgan', rating: 612 })
     localStorage.setItem('fairrace:recentOpponents', JSON.stringify([stored]))
 
-    const component = await mountSuspended(OpponentSelector)
+    const component = await mountSelector()
     const button = component
       .findAll('button')
       .find((candidate) => candidate.text().includes('Alex Morgan'))
@@ -140,7 +152,7 @@ describe('OpponentSelector', () => {
       JSON.stringify([createFargoRatePlayer({ name: 'Alex Morgan' })]),
     )
 
-    const component = await mountSuspended(OpponentSelector)
+    const component = await mountSelector()
 
     const suffix = jaMessage('games.recentOpponents.remove', {
       name: 'Alex Morgan',
@@ -152,7 +164,7 @@ describe('OpponentSelector', () => {
   })
 
   it('ゲストタブから自己申告の相手を確定できる', async () => {
-    const component = await mountSuspended(OpponentSelector)
+    const component = await mountSelector()
     await component.findAll('[role="tab"]')[1]?.trigger('click')
 
     await component.find('input[type="text"]').setValue('Guest Taro')
@@ -167,7 +179,7 @@ describe('OpponentSelector', () => {
   })
 
   it('ゲストの入力の不備はその場で知らせ、確定しない', async () => {
-    const component = await mountSuspended(OpponentSelector)
+    const component = await mountSelector()
     await component.findAll('[role="tab"]')[1]?.trigger('click')
 
     await component.find('input[type="number"]').setValue('10000')
