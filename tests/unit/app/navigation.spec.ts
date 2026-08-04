@@ -63,7 +63,7 @@ describe('footerNavItems', () => {
 
 describe('resolveRedirectPath', () => {
   it('自サイト内の絶対パスはそのまま返す', () => {
-    expect(resolveRedirectPath('/game')).toBe('/game')
+    expect(resolveRedirectPath('/games')).toBe('/games')
     expect(resolveRedirectPath('/settings?tab=account')).toBe(
       '/settings?tab=account',
     )
@@ -73,7 +73,7 @@ describe('resolveRedirectPath', () => {
 
   it('絶対URLを既定の遷移先へ倒す', () => {
     expect(resolveRedirectPath('https://example.com')).toBe('/dashboard')
-    expect(resolveRedirectPath('http://example.com/game')).toBe('/dashboard')
+    expect(resolveRedirectPath('http://example.com/games')).toBe('/dashboard')
     expect(resolveRedirectPath('javascript:alert(1)')).toBe('/dashboard')
   })
 
@@ -81,13 +81,13 @@ describe('resolveRedirectPath', () => {
   // 解釈するため、`/` 始まりでも外部への誘導になりうる。
   it('プロトコル相対URLとして解釈されうる値を既定の遷移先へ倒す', () => {
     expect(resolveRedirectPath('//example.com')).toBe('/dashboard')
-    expect(resolveRedirectPath('//example.com/game')).toBe('/dashboard')
+    expect(resolveRedirectPath('//example.com/games')).toBe('/dashboard')
     expect(resolveRedirectPath('/\\example.com')).toBe('/dashboard')
   })
 
   it('相対パスを既定の遷移先へ倒す', () => {
-    expect(resolveRedirectPath('game')).toBe('/dashboard')
-    expect(resolveRedirectPath('../game')).toBe('/dashboard')
+    expect(resolveRedirectPath('games')).toBe('/dashboard')
+    expect(resolveRedirectPath('../games')).toBe('/dashboard')
     expect(resolveRedirectPath('')).toBe('/dashboard')
   })
 
@@ -104,8 +104,8 @@ describe('resolveRedirectPath', () => {
   it('文字列でない値を既定の遷移先へ倒す', () => {
     expect(resolveRedirectPath(undefined)).toBe('/dashboard')
     expect(resolveRedirectPath(null)).toBe('/dashboard')
-    expect(resolveRedirectPath(['/game', '/settings'])).toBe('/dashboard')
+    expect(resolveRedirectPath(['/games', '/settings'])).toBe('/dashboard')
     expect(resolveRedirectPath(123)).toBe('/dashboard')
-    expect(resolveRedirectPath({ path: '/game' })).toBe('/dashboard')
+    expect(resolveRedirectPath({ path: '/games' })).toBe('/dashboard')
   })
 })

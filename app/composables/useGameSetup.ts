@@ -18,6 +18,8 @@ const STORAGE_KEY = 'fairrace:gameSetup'
 
 const EMPTY_SETUP: GameSetup = { slug: null, opponent: null, returnTo: null }
 
+// レーティングは範囲まで確かめる。壊れた保存値が範囲外のまま通ると、
+// セット数の算出（/api/races）が 400 になりブリーフィングが進めなくなる。
 function isGameOpponent(value: unknown): value is GameOpponent {
   if (typeof value !== 'object' || value === null) return false
   const player = value as Record<string, unknown>
@@ -25,7 +27,8 @@ function isGameOpponent(value: unknown): value is GameOpponent {
   if (player.kind === 'guest') {
     return (
       (player.name === null || typeof player.name === 'string') &&
-      typeof player.rating === 'number'
+      typeof player.rating === 'number' &&
+      isValidGuestRating(player.rating)
     )
   }
 
@@ -37,6 +40,7 @@ function isGameOpponent(value: unknown): value is GameOpponent {
     (player.readableId === null || typeof player.readableId === 'string') &&
     (player.location === null || typeof player.location === 'string') &&
     typeof player.rating === 'number' &&
+    isValidRating(player.rating) &&
     typeof player.robustness === 'number'
   )
 }

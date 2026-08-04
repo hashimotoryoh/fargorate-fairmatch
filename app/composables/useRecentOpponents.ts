@@ -20,6 +20,8 @@ function isRecentOpponent(value: unknown): value is FargoRatePlayer {
     (player.readableId === null || typeof player.readableId === 'string') &&
     (player.location === null || typeof player.location === 'string') &&
     typeof player.rating === 'number' &&
+    // 範囲外のレーティングを復元すると、セット数の算出が 400 で止まる。
+    isValidRating(player.rating) &&
     typeof player.robustness === 'number'
   )
 }

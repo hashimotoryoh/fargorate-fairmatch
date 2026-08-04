@@ -170,6 +170,22 @@ describe('ブリーフィングページ', () => {
     expect(stepLabels(component)[1]?.classes()).toContain('step-primary')
   })
 
+  // 範囲外のレーティングを復元すると、セット数の算出が 400 で止まる。
+  it('レーティングが範囲外の対戦相手は復元せず、選び直させる', async () => {
+    setGameSetup({
+      slug: 'fair-single-race',
+      opponent: { kind: 'guest', name: null, rating: 10000 },
+    })
+
+    const component = await mountPage()
+    await flushPromises()
+
+    expect(navigateToMock).not.toHaveBeenCalled()
+    expect(component.text()).toContain(
+      jaMessage('games.briefing.opponent.heading'),
+    )
+  })
+
   it('ゲームと対戦相手が揃うと、ゲームのブリーフィングへ進む', async () => {
     setGameSetup({
       slug: 'fair-single-race',

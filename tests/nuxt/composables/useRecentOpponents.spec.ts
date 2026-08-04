@@ -125,4 +125,16 @@ describe('useRecentOpponents', () => {
 
     expect(vm.recentOpponents.map((o) => o.name)).toEqual(['Player 1'])
   })
+
+  // 範囲外のレーティングを復元すると、セット数の算出が 400 で止まる。
+  it('レーティングが範囲外の保存値は読み飛ばす', async () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify([opponentAt(10000, 1), opponentAt(450, 2)]),
+    )
+
+    const vm = await mountHarness()
+
+    expect(vm.recentOpponents.map((o) => o.name)).toEqual(['Player 2'])
+  })
 })
