@@ -109,6 +109,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 利用する外部APIの調査結果は `docs/` にまとめている。実装前に必ず参照すること。
 
 - `docs/fargorate-membership-lookup-api.md`: FargoRateのプレイヤー検索
+- `docs/fargorate-races-api.md`: FargoRateのレース（公平なセット数）の算出。使うのはフェアセットマッチ（`fair-single-race`）だけである
 - `docs/csi-membership-lookup-api.md`: CSIのメンバーシップ検索（**現在は未使用**。FargoRate IDが必ずしもCSIに登録されていないことが判明したため使用をやめた。調査の記録として残している）
 
 `docs/` に出てくる `fairmatch.fargorate.com` と `Find a Fair Match` はFargoRate公式のドメインと機能の名前であり、このアプリの名称とは無関係である。アプリ名の変更に巻き込んで書き換えないこと。
@@ -238,7 +239,7 @@ FargoRateのAPIはメンバーシップIDでの検索を受け付けない（ID�
 
 FargoRate IDを持たないユーザーは `/guest` で名前とレーティングを入力して利用を開始する。名前は任意で、未入力なら `null` を保存し、表示時に `player.guestName` で補う。既定名は言語によって変わるため、翻訳した文字列をセッションへ焼き込まないこと。
 
-レーティングの範囲は `shared/utils/guestPlayer.ts` の `GUEST_RATING_MIN` と `GUEST_RATING_MAX`（-90 〜 930）に一本化してある。USAPLが公開しているハンディキャップ計算ツール（https://usaplraceto.azurewebsites.net/）が受け付ける入力レンジに合わせたものである。フォームとサーバールートの双方でこの関数を使い、条件を二重に書かないこと。
+レーティングの範囲は `shared/utils/rating.ts` の `RATING_MIN` と `RATING_MAX`（-90 〜 930）に一本化してある。USAPLが公開しているハンディキャップ計算ツール（https://usaplraceto.azurewebsites.net/）が受け付ける入力レンジに合わせたものである。ゲスト固有の制限ではなく、レースAPIへ渡すレーティングの検証（`isValidRating`）も同じ定数を使う。ゲストの入力は `shared/utils/guestPlayer.ts` の `isValidGuestRating`（整数であることを足したもの）で検証し、条件を二重に書かないこと。
 
 ゲストは `POST /api/auth/guest` という別のルートに分けてある。`auth/session` に相乗りさせると、検索の鍵を送るだけのつもりの経路に自称の値が紛れ込む余地が生まれるためである。ハンドラーはボディを展開せず、`readGuestPlayer()` が読み取った項目だけでオブジェクトを組み立てる。`membershipId` や `kind: 'fargorate'` を送られても効かないのはこのためで、`tests/unit/server/api/auth/guest.post.spec.ts` がそれを固定している。
 
@@ -261,12 +262,14 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 現状の対象は次のとおり。
 
-| ルート                     | アクション     | 付ける／付けない理由                                              |
-| -------------------------- | -------------- | ----------------------------------------------------------------- |
-| `POST /api/link/lookup`    | `link`         | 未認証で叩け、非公式の外部APIへ総当たりできる                     |
-| `POST /api/players/lookup` | `playerLookup` | 同上。ただしセッションがあるときは免除する（後述）                |
-| `POST /api/auth/guest`     | `guest`        | 外部APIは呼ばないが、未認証で叩けてセッションを無制限に発行できる |
-| `POST /api/auth/session`   | なし           | `POST /api/link/lookup` を通過した画面遷移でしか呼ばれない        |
+| ルート                     | アクション     | 付ける／付けない理由                                                   |
+| -------------------------- | -------------- | ---------------------------------------------------------------------- |
+| `POST /api/link/lookup`    | `link`         | 未認証で叩け、非公式の外部APIへ総当たりできる                          |
+| `POST /api/players/lookup` | `playerLookup` | 同上。ただしセッションがあるときは免除する（後述）                     |
+| `POST /api/auth/guest`     | `guest`        | 外部APIは呼ばないが、未認証で叩けてセッションを無制限に発行できる      |
+| `POST /api/auth/session`   | なし           | `POST /api/link/lookup` を通過した画面遷移でしか呼ばれない             |
+| `POST /api/auth/refresh`   | なし           | セッション必須。ボディを読まず、引き直す対象もセッションの本人だけ     |
+| `GET /api/races`           | なし           | セッション必須。認証ページからしか呼ばれず、キャッシュが重複を吸収する |
 
 `POST /api/players/lookup` はセッションがあるときreCAPTCHAを省く。セッションを持つ利用者は `/link` か `/guest` のどちらかで一度reCAPTCHAを通っており、二重に課すと画面を開くたびにスクリプトを読み込ませることになるためである。この免除が成立するのは**セッションを作る経路の両方にreCAPTCHAが付いている**ことが前提なので、`POST /api/auth/guest` から外さないこと。
 
@@ -303,14 +306,40 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 
 導線はフッターの `footerNavItems` だけに置いてある。ブログと同じく、ヘッダーとドックの `mainNavItems` には足さない方針である。`footerNavItems` から外すと辿り着けなくなるので注意すること。
 
+### ゲーム
+
+ゲームは `/games` 配下に置く。ルールも勝敗のつきかたもスコアボードの見た目もゲームごとに完全に異なるため、それぞれ独立したモジュールとして実装する。ルーティングの規則は次の一行に集約される。
+
+**ゲームが未確定の画面は `/games/briefing`、確定した後の画面は `/games/<スラッグ>/` に置く。**
+
+- `/games`: 入口。ゲーム一覧と最近の対戦相手
+- `/games/briefing`: ステップ1（ゲームを選択）とステップ2（対戦プレイヤーを選択）。並びは常に固定で、先に決まっていたステップに完了印を付ける。ゲームは `?game=<スラッグ>` のクエリで渡してよいが、読み取ったら状態へ移してURLから落とす。対戦相手はクエリで渡さない（FargoRateのAPIはメンバーシップIDでは検索できず、他人のIDをURLに残さないため）
+- `/games/<スラッグ>/briefing`: ステップ3（ゲーム固有の設定と確認）
+- `/games/<スラッグ>/scoreboard`: スコアボード。ゲーム間で共有しない
+
+ゲームを追加する作業は、`app/utils/games.ts` の `gameDefinitions` に1件足し、`app/pages/games/<スラッグ>/` にブリーフィングとスコアボードの2ページを置くことに収まる。スラッグからコンポーネントを引く対応表は作らないこと。
+
+状態は `useState` + `sessionStorage` で持つ（Piniaは導入しない）。`useGameSetup`（選んだゲームと対戦相手）が全ゲーム共通、`useFairSingleRace`（セット数と得点の履歴）がフェアセットマッチ固有である。対戦相手の型は `FargoRatePlayer | GuestPlayer` のユニオンでよい。セッションに入らないため `SessionPlayer` の制約を受けない。
+
+対戦プレイヤーの選択（`OpponentSelector`）は名前検索・最近の対戦相手・ゲスト入力の3経路である。ID入力は置かないこと。FargoRateのAPIがIDでの検索を受け付けない以上、成立しない。検索は `/lookup` と同じ `usePlayerSearch` + `POST /api/players/lookup` を使い、`membershipId` が無い候補は選べなくする。最近の対戦相手（`useRecentOpponents`、直近20件）はプレイヤーを丸ごとlocalStorageに保存し、個別削除は `/games` にのみ置く。
+
+ゲーム設定（ステップ3）に入るたびに、両者のレーティングをFargoRateへ問い合わせて引き直す。自分は `POST /api/auth/refresh`（ボディを読まず、セッションの本人だけを引き直す）、相手は `POST /api/players/lookup` を使う。検索キーは `readableId ?? name` とし、**同一性の確認は必ず `membershipId` で行う**。`readableId` は欠けたり変わったりしない保証が無いため、検索キー以上の役割を持たせないこと。引き直しに失敗しても既存の値で続行し、ゲームの開始を止めないこと。対局中（スコアボード）では引き直さない。途中で必要セット数が変わってはならないため。
+
+外部APIへの問い合わせはサーバー側でキャッシュしている。`fetchFargoRateLookup` が6時間、`fetchRaces` が24時間で、どちらも `defineCachedFunction` で関数側に掛けてある。**`defineCachedEventHandler` でハンドラーごとキャッシュしないこと。** キャッシュヒット時に `requireUserSession` やreCAPTCHAの検査が実行されず、関門が素通りになる。
+
+スコアボードは横向き前提で、`useLandscapeLock` が全画面と向きのロックを試み（Android向け。ユーザー操作を起点にしか呼べない）、縦向きの間は `RotateDevicePrompt` で回転を促す（iOS Safariはロック非対応）。得点は履歴の配列で持ち、スコアはその集計として導く。取り消しは「そのプレイヤーの最後の1点を取り除く」操作であり、スコアの遷移の表示と食い違わない。対局中は `useWakeLock` で画面消灯を防ぐ。
+
+`/settings` の「端末に保存したデータ」の削除が消すのは、最近の対戦相手・最近使用したアカウント・進行中のゲームなど端末ローカルのデータだけである。サーバー側のAPIキャッシュは全ユーザー共有のため、個人の設定からは触らない。
+
 ### レイアウト
 
-レイアウトは2つある。ヘッダーとフッターは共通で、`AppHeader` と `AppFooter` を両者から使う。
+レイアウトは3つある。`default` と `authenticated` はヘッダーとフッターが共通で、`AppHeader` と `AppFooter` を両者から使う。
 
 - `default`: 公開ページ（`/`、`/link`、`/guest`、`/lookup`、`/blog`、`/faq`、`/privacy-policy`、`/terms-conditions`）用
-- `authenticated`: 認証ページ（`/dashboard`、`/game`、`/settings`）用。スマホ幅でのみ `AppDock` を出し、デスクトップ幅ではヘッダーにナビゲーションを出す
+- `authenticated`: 認証ページ（`/dashboard`、`/games`、`/settings`）用。スマホ幅でのみ `AppDock` を出し、デスクトップ幅ではヘッダーにナビゲーションを出す
+- `game`: ゲーム進行ページ（`/games/briefing` と `/games/<スラッグ>/` 配下）用。対局に集中させるため共通のヘッダー・フッター・ドックを出さず、各ページが `GameHeader`（左に終了ボタン、中央にリンクしないロゴとタイトル、右はページごとのスロット）を置く
 
-`authenticated` には `noindex` をまとめて指定してある。保護ページとこのレイアウトが1対1に対応するため、ページごとに書くより追加漏れが起きない。保護ページを追加する際は `definePageMeta({ middleware: 'auth', layout: 'authenticated' })` を付けること。
+`authenticated` と `game` には `noindex` をまとめて指定してある。保護ページとこれらのレイアウトが対応するため、ページごとに書くより追加漏れが起きない。保護ページを追加する際は `definePageMeta({ middleware: 'auth', layout: 'authenticated' })`（ゲーム進行ページは `layout: 'game'`）を付けること。`tests/unit/repository/page-protection.spec.ts` が保護レイアウトの `noindex` 宣言ごと検査する。
 
 ヘッダーのナビゲーションの有無は `showNav` の props で制御する。`useUserSession()` の `loggedIn` を見てはならない。`/` は認証済みでも紹介ページのままにする方針であり、ナビゲーションの有無は認証状態ではなくレイアウトの都合で決まるため。
 
@@ -346,7 +375,7 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 
 `robots.txt` は静的ファイルを置かず、`@nuxtjs/sitemap` と同じNuxt SEOファミリーの `@nuxtjs/robots` が動的に生成する。手書きの静的ファイルでは `NUXT_PUBLIC_SITE_URL` に依存する `Sitemap:` 行を環境ごとに正しく埋め込めないためである。
 
-保護ページ（`/dashboard`、`/game`、`/settings`）のパスは `nuxt.config.ts` の `PROTECTED_PAGE_PATHS` に一本化してあり、`sitemap.exclude` と `robots.disallow` の両方がこの1つだけを参照する。ロケール接頭辞付きのパス（`/en/...`）は `@nuxtjs/i18n` の設定から両モジュールが自動で展開するため、接頭辞なしのパスだけを挙げれば足りる。保護ページを増やす際はこの配列を更新すること。`tests/unit/repository/page-protection.spec.ts` が `app/pages/` から導いた保護ページの一覧との整合性を検査する。
+保護ページ（`/dashboard`、`/games` 配下、`/settings`）のパスは `nuxt.config.ts` の `PROTECTED_PAGE_PATHS` に一本化してあり、`sitemap.exclude` と `robots.disallow` の両方がこの1つだけを参照する。ロケール接頭辞付きのパス（`/en/...`）は `@nuxtjs/i18n` の設定から両モジュールが自動で展開するため、接頭辞なしのパスだけを挙げれば足りる。robots.txt の Disallow は前方一致だが sitemap の exclude はパスの一致で判定するため、exclude 側は `/games/**` のようなパターンを `flatMap` で足してある。配下のページは親のパスが列挙されていれば覆われるので、ゲームを増やすたびに更新は要らない。親を持たない保護ページを増やす際はこの配列を更新すること。`tests/unit/repository/page-protection.spec.ts` が `app/pages/` から導いた保護ページの一覧との整合性を検査する。
 
 ### Markdownで管理するドキュメント
 
