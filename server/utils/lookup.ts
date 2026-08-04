@@ -8,10 +8,16 @@ import type {
 const FARGORATE_LOOKUP_URL = 'https://dashboard.fargorate.com/api/indexsearch'
 
 /**
+ * 外部APIの応答を保持する時間。FargoRateのレーティング更新は概ね日次のため、
+ * 日をまたいで持ち越さない長さにしてある。
+ */
+const LOOKUP_CACHE_MAX_AGE_SECONDS = 60 * 60 * 6
+
+/**
  * FargoRateメンバーシップルックアップAPIを検索語で引く。
  * 外部APIに到達できなかった場合は「見つからない」と区別するため 502 を投げる。
  */
-async function fetchFargoRateLookup(
+async function fetchFargoRateLookupFresh(
   query: string,
 ): Promise<FargoRateLookupResponse> {
   try {
@@ -25,6 +31,17 @@ async function fetchFargoRateLookup(
     })
   }
 }
+
+/**
+ * 同じ検索語の問い合わせを外部へ届かせないためのキャッシュ。ハンドラーごと
+ * `defineCachedEventHandler` にするとキャッシュヒット時に認証やreCAPTCHAの
+ * 検査が実行されないため、キャッシュは必ずこの関数側に掛ける。
+ */
+const fetchFargoRateLookup = defineCachedFunction(fetchFargoRateLookupFresh, {
+  name: 'fargorate-lookup',
+  maxAge: LOOKUP_CACHE_MAX_AGE_SECONDS,
+  getKey: (query: string) => query.trim().toLowerCase(),
+})
 
 /**
  * レーティングは数値ではなく文字列で返るため、数値へ変換する。
@@ -82,6 +99,7 @@ export async function lookupPlayerProfile(
     // 検索語ではなく応答の表記を使う。検索は大文字小文字などの揺れを許すため。
     name: `${player.firstName} ${player.lastName}`,
     membershipId,
+    readableId: player.readableId || null,
     location: player.location || null,
     rating,
     robustness,

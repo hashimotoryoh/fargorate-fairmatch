@@ -70,6 +70,11 @@ export type FargoRatePlayer = Player & {
    * `membershipId` にあたる、桁数が一定しない数字列。
    */
   membershipId: string
+  /**
+   * FargoRateの表示用ID。レーティングを引き直すときの検索キーとして優先的に
+   * 使い、無ければ名前で検索する。同一性の確認には使わない。
+   */
+  readableId: string | null
   /** 所在地。空文字で返ることがあるため `null` に寄せて持つ。 */
   location: string | null
   /** レーティングの信頼度。 */

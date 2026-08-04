@@ -85,6 +85,7 @@ export function createFargoRatePlayer(
     kind: 'fargorate',
     name: 'Taro Yamada',
     membershipId: MEMBERSHIP_ID,
+    readableId: '1234567',
     location: 'Tokyo',
     rating: 523,
     robustness: 412,
@@ -101,4 +102,16 @@ export function createGuestPlayer(
     rating: 450,
     ...overrides,
   }
+}
+
+/**
+ * FargoRateレースAPIのレスポンス。`docs/fargorate-races-api.md` に残っている
+ * 576対419の実レスポンスを短くしたもので、`closest` は1件だけ true になる。
+ */
+export function createFargoRateRaces() {
+  return [
+    { highPlayerRaceTo: 3, lowPlayerRaceTo: 2, delta: 0, closest: false },
+    { highPlayerRaceTo: 12, lowPlayerRaceTo: 5, delta: 0, closest: true },
+    { highPlayerRaceTo: 13, lowPlayerRaceTo: 6, delta: 0, closest: false },
+  ]
 }

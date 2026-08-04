@@ -36,3 +36,26 @@ export async function callHandler(
     body: parsed,
   }
 }
+
+/** GETのサーバールートを、クエリパラメータ付きのWeb標準のRequestで叩く。 */
+export async function callGetHandler(
+  handler: EventHandler,
+  query: Record<string, string> = {},
+): Promise<HandlerResponse> {
+  const app = createApp()
+  app.use(handler)
+
+  const url = new URL('http://test.local/api')
+  for (const [key, value] of Object.entries(query)) {
+    url.searchParams.set(key, value)
+  }
+
+  const response = await toWebHandler(app)(new Request(url))
+  const parsed: unknown = await response.json()
+
+  return {
+    status: response.status,
+    statusMessage: (parsed as { statusMessage?: string })?.statusMessage,
+    body: parsed,
+  }
+}
