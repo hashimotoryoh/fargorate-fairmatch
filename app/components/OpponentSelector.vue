@@ -117,7 +117,7 @@ function selectRecent(opponent: FargoRatePlayer) {
               :disabled="!player.membershipId"
               @click="selectResult(player)"
             >
-              <PlayerSearchResultCard :player="player" />
+              <PlayerCard :player="player" />
               <p
                 v-if="!player.membershipId"
                 class="text-base-content/60 px-4 pb-3 text-xs"
@@ -135,16 +135,10 @@ function selectRecent(opponent: FargoRatePlayer) {
         </h3>
         <ul class="flex flex-col gap-2">
           <li v-for="opponent in recentOpponents" :key="opponent.membershipId">
-            <button
-              type="button"
-              class="btn btn-outline btn-block justify-between"
-              @click="selectRecent(opponent)"
-            >
-              <span class="truncate">{{ opponent.name }}</span>
-              <span class="font-mono text-xs font-normal">
-                {{ opponent.rating }} / {{ opponent.robustness }}
-              </span>
-            </button>
+            <RecentOpponentCard
+              :opponent="opponent"
+              @select="selectRecent(opponent)"
+            />
           </li>
         </ul>
       </div>

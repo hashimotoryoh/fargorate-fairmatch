@@ -321,7 +321,16 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 
 状態は `useState` + `sessionStorage` で持つ（Piniaは導入しない）。`useGameSetup`（選んだゲームと対戦相手）が全ゲーム共通、`useFairSingleRace`（セット数と得点の履歴）がフェアセットマッチ固有である。対戦相手の型は `FargoRatePlayer | GuestPlayer` のユニオンでよい。セッションに入らないため `SessionPlayer` の制約を受けない。
 
-対戦プレイヤーの選択（`OpponentSelector`）は名前検索・最近の対戦相手・ゲスト入力の3経路である。ID入力は置かないこと。FargoRateのAPIがIDでの検索を受け付けない以上、成立しない。検索は `/lookup` と同じ `usePlayerSearch` + `POST /api/players/lookup` を使い、`membershipId` が無い候補は選べなくする。最近の対戦相手（`useRecentOpponents`、直近20件）はプレイヤーを丸ごとlocalStorageに保存し、個別削除は `/games` にのみ置く。
+対戦プレイヤーの選択（`OpponentSelector`）は名前検索・最近の対戦プレイヤー・ゲスト入力の3経路である。ID入力は置かないこと。FargoRateのAPIがIDでの検索を受け付けない以上、成立しない。検索は `/lookup` と同じ `usePlayerSearch` + `POST /api/players/lookup` を使い、`membershipId` が無い候補は選べなくする。最近の対戦プレイヤー（`useRecentOpponents`、直近20件）はプレイヤーを丸ごとlocalStorageに保存し、個別削除は `/games` にのみ置く。
+
+入口と離脱の規則は次のとおり。
+
+- **入口では選択を丸ごと作り直す**（`startWithGame` / `startWithOpponent`）。前回の残りが付いてくると、選んでいないステップが完了済みで始まってしまう。入る前のページを `returnTo` に覚える
+- **ブリーフィングの中断（ヘッダー左「終了」）は全てを破棄**し、`returnTo` のページへ戻す
+- **プレイの中断（スコアボードのヘッダー左「中断」）はスコアだけを捨て**、ゲーム設定へ戻す。ゲームと対戦プレイヤーと設定は残る
+- **プレイの完了（結果ダイアログの「終了」）は全てを破棄**し、`returnTo` のページへ戻す
+
+プレイヤーの `card` 表示は `PlayerCard`（名前を大きく中央、下に所在地、下にレーティングと信頼度の `stat`）に一本化してあり、ダッシュボード・リンクの本人確認・プレイヤー検索・ゲームの各画面で共用する。最近の対戦プレイヤーの一覧だけは、見比べる用途に合わせて横に詰めた `RecentOpponentCard` を使う。
 
 ゲーム設定（ステップ3）に入るたびに、両者のレーティングをFargoRateへ問い合わせて引き直す。自分は `POST /api/auth/refresh`（ボディを読まず、セッションの本人だけを引き直す）、相手は `POST /api/players/lookup` を使う。検索キーは `readableId ?? name` とし、**同一性の確認は必ず `membershipId` で行う**。`readableId` は欠けたり変わったりしない保証が無いため、検索キー以上の役割を持たせないこと。引き直しに失敗しても既存の値で続行し、ゲームの開始を止めないこと。対局中（スコアボード）では引き直さない。途中で必要セット数が変わってはならないため。
 
@@ -337,7 +346,7 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 
 - `default`: 公開ページ（`/`、`/link`、`/guest`、`/lookup`、`/blog`、`/faq`、`/privacy-policy`、`/terms-conditions`）用
 - `authenticated`: 認証ページ（`/dashboard`、`/games`、`/settings`）用。スマホ幅でのみ `AppDock` を出し、デスクトップ幅ではヘッダーにナビゲーションを出す
-- `game`: ゲーム進行ページ（`/games/briefing` と `/games/<スラッグ>/` 配下）用。対局に集中させるため共通のヘッダー・フッター・ドックを出さず、各ページが `GameHeader`（左に終了ボタン、中央にリンクしないロゴとタイトル、右はページごとのスロット）を置く
+- `game`: ゲーム進行ページ（`/games/briefing` と `/games/<スラッグ>/` 配下）用。対局に集中させるため共通のヘッダー・フッター・ドックを出さず、各ページが `GameHeader` を置く。中央の見出しはページから渡す（ブリーフィングは「ゲームを開始する」、スコアボードはゲーム名）でリンクにしない。左は `GameExitButton`、右はページごとのスロット
 
 `authenticated` と `game` には `noindex` をまとめて指定してある。保護ページとこれらのレイアウトが対応するため、ページごとに書くより追加漏れが起きない。保護ページを追加する際は `definePageMeta({ middleware: 'auth', layout: 'authenticated' })`（ゲーム進行ページは `layout: 'game'`）を付けること。`tests/unit/repository/page-protection.spec.ts` が保護レイアウトの `noindex` 宣言ごと検査する。
 

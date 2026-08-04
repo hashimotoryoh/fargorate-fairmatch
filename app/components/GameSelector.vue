@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import type { GameSlug } from '~/utils/games'
 
-// 選んだあとの行き先はページごとに違う（入口はクエリ付きの遷移、
+// 選んだあとの行き先はページごとに違う（入口は状態を作り直して遷移、
 // ブリーフィングは状態の更新）ため、ここでは選択を伝えるだけにする。
 const emit = defineEmits<{ select: [slug: GameSlug] }>()
+
+const { locale } = useI18n()
+
+function imageOf(image: { ja: string; en: string }) {
+  return locale.value === 'en' ? image.en : image.ja
+}
 </script>
 
 <template>
@@ -19,7 +25,17 @@ const emit = defineEmits<{ select: [slug: GameSlug] }>()
     >
       <div class="card-body gap-2 p-4">
         <div class="flex items-center gap-3">
-          <Icon :name="game.icon" class="text-primary size-6 shrink-0" />
+          <NuxtImg
+            v-if="game.image"
+            :src="imageOf(game.image)"
+            alt=""
+            class="size-8 shrink-0 object-contain"
+          />
+          <Icon
+            v-else-if="game.icon"
+            :name="game.icon"
+            class="text-primary size-8 shrink-0"
+          />
           <span class="card-title text-base">{{ $t(game.labelKey) }}</span>
           <span v-if="!game.available" class="badge badge-ghost badge-sm">
             {{ $t('games.comingSoon') }}

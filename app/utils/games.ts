@@ -14,8 +14,13 @@ export type GameDefinition = {
    */
   labelKey: string
   descriptionKey: string
-  /** `@nuxt/icon` の `<Icon name>` にそのまま渡すアイコン名。 */
-  icon: string
+  /**
+   * 一覧に出すシンボル画像（`public/` 起点のパス）。JCLのように地域で
+   * ブランドが変わるゲームがあるため、ロケールごとに持つ。
+   */
+  image?: { ja: string; en: string }
+  /** シンボルが決まっていないゲームの代用アイコン。 */
+  icon?: string
   /** 未実装のゲームは一覧に「準備中」として出し、選べないようにする。 */
   available: boolean
 }
@@ -30,7 +35,10 @@ export const gameDefinitions: GameDefinition[] = [
     briefingPath: '/games/fair-single-race/briefing',
     labelKey: 'games.types.fairSingleRace.label',
     descriptionKey: 'games.types.fairSingleRace.description',
-    icon: 'mdi:scale-balance',
+    image: {
+      ja: '/img/fargorate/FR-shield@2x.png',
+      en: '/img/fargorate/FR-shield@2x.png',
+    },
     available: true,
   },
   {
@@ -38,6 +46,7 @@ export const gameDefinitions: GameDefinition[] = [
     briefingPath: '/games/custom-single-race/briefing',
     labelKey: 'games.types.customSingleRace.label',
     descriptionKey: 'games.types.customSingleRace.description',
+    // シンボルは検討中のため、決まるまでアイコンで代用する。
     icon: 'mdi:tune-variant',
     available: false,
   },
@@ -46,7 +55,10 @@ export const gameDefinitions: GameDefinition[] = [
     briefingPath: '/games/usapl-9-ball/briefing',
     labelKey: 'games.types.usapl9Ball.label',
     descriptionKey: 'games.types.usapl9Ball.description',
-    icon: 'mdi:numeric-9-circle-outline',
+    image: {
+      ja: '/img/jcl/JCL_logo.png',
+      en: '/img/usapl/2b640d11a73856ac2eba34c1c2861814.png',
+    },
     available: false,
   },
   {
@@ -54,7 +66,10 @@ export const gameDefinitions: GameDefinition[] = [
     briefingPath: '/games/usapl-8-ball/briefing',
     labelKey: 'games.types.usapl8Ball.label',
     descriptionKey: 'games.types.usapl8Ball.description',
-    icon: 'mdi:numeric-8-circle-outline',
+    image: {
+      ja: '/img/jcl/JCL_logo.png',
+      en: '/img/usapl/2b640d11a73856ac2eba34c1c2861814.png',
+    },
     available: false,
   },
 ]

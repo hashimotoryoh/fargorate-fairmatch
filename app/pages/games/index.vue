@@ -9,21 +9,22 @@ const { t } = useI18n()
 // ロケールを切り替えたときに追随させるため、値ではなくゲッターで渡す。
 useSeoMeta({ title: () => t('seo.games.title') })
 
+const route = useRoute()
 const localePath = useLocalePath()
-const { setOpponent } = useGameSetup()
+const { startWithGame, startWithOpponent } = useGameSetup()
 const { recentOpponents, removeRecentOpponent } = useRecentOpponents()
 
-// ゲームは公開情報のスラッグなので、クエリでブリーフィングへ渡す。
-async function startWithGame(slug: GameSlug) {
-  await navigateTo(
-    localePath({ path: '/games/briefing', query: { game: slug } }),
-  )
+// 入口では選択を丸ごと作り直す。前回の残りが付いてくると、選んでいない
+// ステップが完了済みで始まってしまう。戻り先も併せて覚える。
+async function selectGame(slug: GameSlug) {
+  startWithGame(slug, route.fullPath)
+  await navigateTo(localePath('/games/briefing'))
 }
 
 // 対戦相手はURLに載せず、状態に書き込んでからブリーフィングへ移る。
 // 他人のFargoRate IDをURLや履歴に残さないため。
-async function startWithOpponent(opponent: FargoRatePlayer) {
-  setOpponent(opponent)
+async function selectOpponent(opponent: FargoRatePlayer) {
+  startWithOpponent(opponent, route.fullPath)
   await navigateTo(localePath('/games/briefing'))
 }
 </script>
@@ -35,7 +36,7 @@ async function startWithOpponent(opponent: FargoRatePlayer) {
       <p class="text-base-content/70 mt-1 text-sm">{{ $t('games.lead') }}</p>
     </div>
 
-    <GameSelector @select="startWithGame" />
+    <GameSelector @select="selectGame" />
 
     <section v-if="recentOpponents.length" class="flex flex-col gap-3">
       <h2 class="text-lg font-bold">{{ $t('games.recentOpponents.label') }}</h2>
@@ -44,21 +45,17 @@ async function startWithOpponent(opponent: FargoRatePlayer) {
         <li
           v-for="opponent in recentOpponents"
           :key="opponent.membershipId"
-          class="join w-full"
+          class="flex items-stretch gap-2"
         >
+          <div class="min-w-0 flex-1">
+            <RecentOpponentCard
+              :opponent="opponent"
+              @select="selectOpponent(opponent)"
+            />
+          </div>
           <button
             type="button"
-            class="btn btn-outline join-item flex-1 justify-between"
-            @click="startWithOpponent(opponent)"
-          >
-            <span class="truncate">{{ opponent.name }}</span>
-            <span class="font-mono text-xs font-normal">
-              {{ opponent.rating }} / {{ opponent.robustness }}
-            </span>
-          </button>
-          <button
-            type="button"
-            class="btn btn-outline join-item"
+            class="btn btn-outline h-auto"
             :aria-label="
               $t('games.recentOpponents.remove', { name: opponent.name })
             "

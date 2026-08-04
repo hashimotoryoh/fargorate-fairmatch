@@ -10,7 +10,7 @@ useSeoMeta({ title: () => t('seo.games.fairSingleRace.scoreboard.title') })
 
 const localePath = useLocalePath()
 const { user } = useUserSession()
-const { setup, hydrated: setupHydrated } = useGameSetup()
+const { setup, hydrated: setupHydrated, clearGameSetup } = useGameSetup()
 const {
   match,
   hydrated: matchHydrated,
@@ -28,9 +28,12 @@ const { promptVisible, request: requestLandscape, release } = useLandscapeLock()
 // 対局中の画面消灯を防ぐ。ページを離れれば解放される。
 useWakeLock()
 
+// 中断や完了で自分から離れるときは、状態を消した瞬間の誘導を効かせない。
+const leaving = ref(false)
+
 // 進行中のマッチが無いまま開かれた場合は、ブリーフィングからやり直す。
 watchEffect(() => {
-  if (!setupHydrated.value || !matchHydrated.value) return
+  if (leaving.value || !setupHydrated.value || !matchHydrated.value) return
   if (
     !match.value ||
     setup.value.slug !== 'fair-single-race' ||
@@ -51,16 +54,26 @@ function nameOf(side: ScoringSide) {
   return side === 0 ? playerName.value : opponentName.value
 }
 
+function scoreOf(side: ScoringSide) {
+  return side === 0 ? playerScore.value : opponentScore.value
+}
+
+function raceToOf(side: ScoringSide) {
+  if (!match.value) return 0
+  return side === 0 ? match.value.playerRaceTo : match.value.opponentRaceTo
+}
+
 const resultDialog = useTemplateRef<HTMLDialogElement>('resultDialog')
 
-// 決着した瞬間に結果を確認させ、以降のタップがスコアへ届かないようにする。
+// 決着した瞬間に結果を確認させる。「スコアボードに戻る」で閉じたあとは、
+// ヘッダー右の「終了」からいつでも開き直せる。
 watch(winner, (side) => {
   if (side !== null) {
     resultDialog.value?.showModal()
   }
 })
 
-// 遷移は最新が右端へ伸びていくので、常に末尾を見せる。
+// 推移は最新が右端へ伸びていくので、常に末尾を見せる。
 const trailEl = useTemplateRef<HTMLElement>('trailEl')
 watch(
   () => trail.value.length,
@@ -76,11 +89,23 @@ function startRematch() {
   resultDialog.value?.close()
 }
 
+// プレイの完了。すべて破棄して、ブリーフィングに入る前のページへ戻す。
 async function finishGame() {
+  leaving.value = true
   resultDialog.value?.close()
+  const returnTo = resolveRedirectPath(setup.value.returnTo, '/games')
+  clearGameSetup()
   resetMatch()
   await release()
-  await navigateTo(localePath('/games'))
+  await navigateTo(localePath(returnTo))
+}
+
+// プレイの中断。スコアだけを捨てて、開始前のゲーム設定へ戻す。
+async function interruptGame() {
+  leaving.value = true
+  resetMatch()
+  await release()
+  await navigateTo(localePath('/games/fair-single-race/briefing'))
 }
 
 onUnmounted(() => {
@@ -91,23 +116,39 @@ onUnmounted(() => {
 <template>
   <!-- 横向きの狭い画面で全体が収まるよう、ページ自体をスクロールさせない。 -->
   <div
-    class="flex h-dvh select-none flex-col overflow-hidden [-webkit-tap-highlight-color:transparent]"
+    class="flex h-dvh flex-col overflow-hidden select-none [-webkit-tap-highlight-color:transparent]"
   >
-    <GameHeader>
+    <GameHeader :title="$t('games.types.fairSingleRace.label')">
       <template #leading>
-        <GameExitButton />
+        <GameExitButton
+          label-key="games.header.interrupt"
+          heading-key="games.header.interruptConfirmHeading"
+          lead-key="games.header.interruptConfirmLead"
+          @confirm="interruptGame"
+        />
+      </template>
+      <template #actions>
+        <!-- 最終スコアの入力後だけ出す。結果の確認からやり直せるように。 -->
+        <button
+          v-if="winner !== null"
+          class="btn btn-primary btn-sm"
+          type="button"
+          @click="resultDialog?.showModal()"
+        >
+          {{ $t('games.fairSingleRace.scoreboard.finish') }}
+        </button>
       </template>
     </GameHeader>
 
     <template v-if="match && user && opponent">
       <div
-        class="border-base-300 grid flex-none grid-cols-2 divide-x divide-base-300 border-b pl-[env(safe-area-inset-left)]"
+        class="border-base-300 divide-base-300 grid flex-none grid-cols-2 divide-x border-b pl-[env(safe-area-inset-left)]"
       >
-        <div class="px-3 py-2">
-          <PlayerSummary :player="user" :race-to="match.playerRaceTo" />
+        <div class="card">
+          <PlayerCard :player="user" />
         </div>
-        <div class="px-3 py-2">
-          <PlayerSummary :player="opponent" :race-to="match.opponentRaceTo" />
+        <div class="card">
+          <PlayerCard :player="opponent" />
         </div>
       </div>
 
@@ -133,7 +174,7 @@ onUnmounted(() => {
       </div>
 
       <div
-        class="grid min-h-0 flex-1 grid-cols-2 divide-x divide-base-300 pl-[env(safe-area-inset-left)]"
+        class="divide-base-300 grid min-h-0 flex-1 grid-cols-2 divide-x pl-[env(safe-area-inset-left)]"
       >
         <div
           v-for="side in [0, 1] as const"
@@ -143,12 +184,20 @@ onUnmounted(() => {
           <div
             class="pointer-events-none absolute inset-0 grid place-items-center"
           >
+            <!-- 分母は必要セット数。あと何セットかを画面から読み取れるようにする。 -->
             <span
               aria-live="polite"
-              class="text-[clamp(4rem,20vmin,9rem)] leading-none font-bold tabular-nums"
+              class="flex items-baseline gap-1 leading-none font-bold tabular-nums"
               :class="{ 'text-success': winner === side }"
             >
-              {{ side === 0 ? playerScore : opponentScore }}
+              <span class="text-[clamp(4rem,18vmin,8rem)]">
+                {{ scoreOf(side) }}
+              </span>
+              <span
+                class="text-base-content/40 text-[clamp(1.5rem,7vmin,3rem)]"
+              >
+                /{{ raceToOf(side) }}
+              </span>
             </span>
           </div>
 
@@ -196,12 +245,22 @@ onUnmounted(() => {
           {{ playerScore }} - {{ opponentScore }}
         </p>
 
-        <div class="modal-action justify-center">
-          <button class="btn btn-primary" type="button" @click="startRematch">
-            {{ $t('games.fairSingleRace.scoreboard.rematch') }}
-          </button>
-          <button class="btn" type="button" @click="finishGame">
-            {{ $t('games.fairSingleRace.scoreboard.finish') }}
+        <div class="modal-action flex-col items-stretch gap-2">
+          <div class="flex justify-center gap-2">
+            <button class="btn btn-primary" type="button" @click="startRematch">
+              {{ $t('games.fairSingleRace.scoreboard.rematch') }}
+            </button>
+            <button class="btn" type="button" @click="finishGame">
+              {{ $t('games.fairSingleRace.scoreboard.finish') }}
+            </button>
+          </div>
+          <!-- 最終スコアを打ち間違えたときに、戻って取り消せるようにする。 -->
+          <button
+            class="btn btn-ghost btn-sm"
+            type="button"
+            @click="resultDialog?.close()"
+          >
+            {{ $t('games.fairSingleRace.scoreboard.backToBoard') }}
           </button>
         </div>
       </div>

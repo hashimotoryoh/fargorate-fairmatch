@@ -57,14 +57,17 @@ const DEFAULT_AFTER_AUTH = '/dashboard'
  * 外部サイトへ誘導するオープンリダイレクトになる。自サイト内の絶対パスだけを
  * 許可し、それ以外は既定の遷移先へ倒す。
  */
-export function resolveRedirectPath(value: unknown): string {
+export function resolveRedirectPath(
+  value: unknown,
+  fallback: string = DEFAULT_AFTER_AUTH,
+): string {
   if (typeof value !== 'string' || !value.startsWith('/')) {
-    return DEFAULT_AFTER_AUTH
+    return fallback
   }
 
   // `//example.com` や `/\example.com` はプロトコル相対URLとして解釈されうる。
   if (value.startsWith('//') || value.startsWith('/\\')) {
-    return DEFAULT_AFTER_AUTH
+    return fallback
   }
 
   return value

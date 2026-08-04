@@ -250,7 +250,7 @@ function reject() {
         <div v-else-if="candidate" class="flex flex-col gap-4">
           <p class="text-sm">{{ $t('link.confirmQuestion') }}</p>
 
-          <PlayerProfileTable :player="candidate" />
+          <PlayerCard :player="candidate" />
 
           <div class="flex gap-2">
             <button

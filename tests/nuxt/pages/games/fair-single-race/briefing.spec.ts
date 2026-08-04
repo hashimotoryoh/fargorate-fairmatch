@@ -105,6 +105,68 @@ describe('フェアセットマッチのブリーフィングページ', () => {
     )
   })
 
+  it('3つのステップを出し、ゲーム設定を現在地にする', async () => {
+    const component = await mountPrepared()
+
+    const steps = component.findAll('.step')
+    expect(steps).toHaveLength(3)
+    expect(steps[2]?.classes()).toContain('step-primary')
+  })
+
+  // 完了済みのステップからルートをまたいで選び直しに戻れる。
+  it('ゲームのステップをタップすると選び直しに戻る', async () => {
+    const component = await mountPrepared()
+
+    await component
+      .findAll('.step button')
+      .find((button) =>
+        button.text().includes(jaMessage('games.briefing.steps.game')),
+      )
+      ?.trigger('click')
+    await vi.waitFor(() =>
+      expect(navigateToMock).toHaveBeenCalledWith(
+        '/games/briefing?change=game',
+      ),
+    )
+  })
+
+  it('ヘッダーの中央に「ゲームを開始する」を出す', async () => {
+    const component = await mountPrepared()
+
+    expect(component.find('header').text()).toContain(
+      jaMessage('games.briefing.heading'),
+    )
+  })
+
+  it('両者を所在地つきのプレイヤーカードで見せる', async () => {
+    const component = await mountPrepared()
+
+    expect(component.text()).toContain('Ryoh Hashimoto')
+    expect(component.text()).toContain('Kengo Sato')
+    expect(component.text()).toContain('Tokyo')
+    expect(component.findAll('.stat').length).toBeGreaterThanOrEqual(4)
+  })
+
+  // ブリーフィングの中断は選択を丸ごと破棄し、入る前のページへ戻す。
+  it('終了を確定すると選択を破棄して、入る前のページへ戻る', async () => {
+    const component = await mountPrepared()
+
+    await component
+      .find('header')
+      .findAll('button')
+      .find((button) => button.text() === jaMessage('games.header.exit'))
+      ?.trigger('click')
+    await component
+      .findAll('button')
+      .find((button) => button.text() === jaMessage('games.header.confirm'))
+      ?.trigger('click')
+    await vi.waitFor(() =>
+      expect(navigateToMock).toHaveBeenCalledWith('/games'),
+    )
+
+    expect(sessionStorage.getItem('fairrace:gameSetup')).toBeNull()
+  })
+
   it('入るときに自分と相手のレーティングを引き直す', async () => {
     await mountPrepared()
 

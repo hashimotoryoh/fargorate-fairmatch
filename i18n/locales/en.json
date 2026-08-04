@@ -53,14 +53,14 @@
     "games": {
       "title": "Games",
       "briefing": {
-        "title": "Game briefing"
+        "title": "Start a game"
       },
       "fairSingleRace": {
         "briefing": {
-          "title": "Fair Single Race briefing"
+          "title": "Start a game"
         },
         "scoreboard": {
-          "title": "Fair Single Race scoreboard"
+          "title": "Fair Single Race"
         }
       }
     },
@@ -233,12 +233,16 @@
     },
     "header": {
       "exit": "Exit",
-      "exitConfirmHeading": "Exit the game?",
-      "exitConfirmLead": "The score in progress will not be saved. The game and opponent you chose will remain.",
-      "exitConfirm": "Exit",
-      "exitCancel": "Keep playing"
+      "interrupt": "Exit",
+      "quitConfirmHeading": "Quit this game?",
+      "quitConfirmLead": "Nothing will be saved.",
+      "interruptConfirmHeading": "Exit this match?",
+      "interruptConfirmLead": "The score in progress will not be saved. You will go back to the game setup screen.",
+      "confirm": "Quit",
+      "cancel": "Keep going"
     },
     "briefing": {
+      "heading": "Start a game",
       "steps": {
         "game": "Game",
         "opponent": "Opponent",
@@ -266,7 +270,7 @@
       "briefing": {
         "heading": "Choose the race",
         "changePlayer": "Change opponent",
-        "recommended": "Recommended",
+        "recommended": "Fairest",
         "otherRaces": "Choose from other races ({count})",
         "play": "Start playing",
         "racesUnavailable": "Could not fetch the race options. Please wait a moment and try again.",
@@ -274,12 +278,13 @@
       },
       "scoreboard": {
         "raceTo": "Race to",
-        "trail": "Score",
+        "trail": "Score history",
         "increase": "Add a point for {name}",
         "decrease": "Remove a point from {name}",
         "winner": "{name} wins",
         "rematch": "Play again",
-        "finish": "Finish"
+        "finish": "Finish",
+        "backToBoard": "Back to the scoreboard"
       }
     }
   },

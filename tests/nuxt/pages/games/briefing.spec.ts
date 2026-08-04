@@ -88,6 +88,58 @@ describe('ブリーフィングページ', () => {
     expect(stepLabels(component)[0]?.classes()).toContain('step-primary')
   })
 
+  // 前回の対戦相手が残っていると、ステップ2を飛ばして始まってしまう。
+  it('?game= で入ると前回の対戦相手を捨てる', async () => {
+    routeQuery.game = 'fair-single-race'
+    setGameSetup({
+      slug: 'fair-single-race',
+      opponent: createFargoRatePlayer(),
+    })
+
+    const component = await mountPage()
+    await flushPromises()
+
+    expect(navigateToMock).not.toHaveBeenCalled()
+    expect(component.text()).toContain(
+      jaMessage('games.briefing.opponent.heading'),
+    )
+  })
+
+  it('ヘッダーの中央に「ゲームを開始する」を出す', async () => {
+    const component = await mountPage()
+
+    expect(component.find('header').text()).toContain(
+      jaMessage('games.briefing.heading'),
+    )
+  })
+
+  // ブリーフィングの中断は選択を丸ごと破棄し、入る前のページへ戻す。
+  it('終了を確定すると選択を破棄して、入る前のページへ戻る', async () => {
+    setGameSetup({
+      slug: null,
+      opponent: createFargoRatePlayer(),
+      returnTo: '/dashboard',
+    })
+
+    const component = await mountPage()
+    await flushPromises()
+
+    await component
+      .find('header')
+      .findAll('button')
+      .find((button) => button.text() === jaMessage('games.header.exit'))
+      ?.trigger('click')
+    await component
+      .findAll('button')
+      .find((button) => button.text() === jaMessage('games.header.confirm'))
+      ?.trigger('click')
+    await vi.waitFor(() =>
+      expect(navigateToMock).toHaveBeenCalledWith('/dashboard'),
+    )
+
+    expect(sessionStorage.getItem('fairrace:gameSetup')).toBeNull()
+  })
+
   // リロードのたびにクエリが再適用され、選択が巻き戻るのを防ぐ。
   it('クエリは読み取ったあとURLから落とす', async () => {
     routeQuery.game = 'fair-single-race'

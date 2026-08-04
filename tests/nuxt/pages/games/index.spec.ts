@@ -56,8 +56,18 @@ describe('ゲーム一覧ページ', () => {
     expect(comingSoon).toHaveLength(3)
   })
 
-  // ゲームは公開情報のスラッグなので、クエリの種としてブリーフィングへ渡す。
-  it('ゲームを選ぶと ?game= を付けてブリーフィングへ移る', async () => {
+  // 入口では選択を丸ごと作り直す。前回の対戦相手が残っていると、選んでいない
+  // ステップが完了済みで始まってしまう。
+  it('ゲームを選ぶと前回の対戦相手を捨てて、ブリーフィングへ移る', async () => {
+    sessionStorage.setItem(
+      'fairrace:gameSetup',
+      JSON.stringify({
+        slug: null,
+        opponent: createFargoRatePlayer(),
+        returnTo: null,
+      }),
+    )
+
     const component = await mountPage()
 
     const card = component
@@ -68,12 +78,13 @@ describe('ゲーム一覧ページ', () => {
     await card?.trigger('click')
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
 
-    expect(navigateToMock).toHaveBeenCalledWith(
-      '/games/briefing?game=fair-single-race',
-    )
+    expect(navigateToMock).toHaveBeenCalledWith('/games/briefing')
+    expect(
+      JSON.parse(sessionStorage.getItem('fairrace:gameSetup') ?? '{}'),
+    ).toMatchObject({ slug: 'fair-single-race', opponent: null })
   })
 
-  it('最近の対戦相手が無ければ一覧を出さない', async () => {
+  it('最近の対戦プレイヤーが無ければ一覧を出さない', async () => {
     const component = await mountPage()
 
     expect(component.text()).not.toContain(
@@ -82,7 +93,16 @@ describe('ゲーム一覧ページ', () => {
   })
 
   // 対戦相手はURLに載せず、状態に書き込んでからブリーフィングへ移る。
-  it('最近の対戦相手を選ぶと、IDをURLに載せずにブリーフィングへ移る', async () => {
+  // 前回のゲームが残っていると、ゲームを選ばずステップ3から始まってしまう。
+  it('最近の対戦プレイヤーを選ぶと前回のゲームを捨てて、IDをURLに載せずにブリーフィングへ移る', async () => {
+    sessionStorage.setItem(
+      'fairrace:gameSetup',
+      JSON.stringify({
+        slug: 'fair-single-race',
+        opponent: null,
+        returnTo: null,
+      }),
+    )
     const stored = createFargoRatePlayer({ name: 'Alex Morgan' })
     localStorage.setItem('fairrace:recentOpponents', JSON.stringify([stored]))
 
@@ -95,11 +115,26 @@ describe('ゲーム一覧ページ', () => {
 
     expect(navigateToMock).toHaveBeenCalledWith('/games/briefing')
     expect(
-      JSON.parse(sessionStorage.getItem('fairrace:gameSetup') ?? '{}').opponent,
-    ).toEqual(stored)
+      JSON.parse(sessionStorage.getItem('fairrace:gameSetup') ?? '{}'),
+    ).toMatchObject({ slug: null, opponent: stored })
   })
 
-  it('最近の対戦相手を個別に削除できる', async () => {
+  it('最近の対戦プレイヤーに所在地とレーティングと信頼度を出す', async () => {
+    const stored = createFargoRatePlayer({ name: 'Alex Morgan' })
+    localStorage.setItem('fairrace:recentOpponents', JSON.stringify([stored]))
+
+    const component = await mountPage()
+    const card = component
+      .findAll('button')
+      .find((candidate) => candidate.text().includes('Alex Morgan'))
+
+    expect(card?.text()).toContain('Tokyo')
+    expect(card?.findAll('.stat')).toHaveLength(2)
+    expect(card?.text()).toContain('523')
+    expect(card?.text()).toContain('412')
+  })
+
+  it('最近の対戦プレイヤーを個別に削除できる', async () => {
     const stored = createFargoRatePlayer({ name: 'Alex Morgan' })
     localStorage.setItem('fairrace:recentOpponents', JSON.stringify([stored]))
 

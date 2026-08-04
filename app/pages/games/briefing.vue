@@ -12,8 +12,10 @@ useSeoMeta({ title: () => t('seo.games.briefing.title') })
 const route = useRoute()
 const router = useRouter()
 const localePath = useLocalePath()
-const { setup, hydrated, setGame, setOpponent } = useGameSetup()
+const { setup, hydrated, startWithGame, setGame, setOpponent, clearGameSetup } =
+  useGameSetup()
 const { addRecentOpponent } = useRecentOpponents()
+const { resetMatch } = useFairSingleRace()
 
 // 完了済みのステップを選び直している間だけ、有無からの自動判定を上書きする。
 const manualStep = ref<'game' | 'opponent' | null>(null)
@@ -21,12 +23,14 @@ const manualStep = ref<'game' | 'opponent' | null>(null)
 const seeded = ref(false)
 
 onMounted(() => {
+  // ゲームの深いリンク（?game=）は入口として扱い、選択を丸ごと作り直す。
+  // 前回の対戦相手が残っていると、ステップ2を飛ばして始まってしまう。
   const game = route.query.game
   if (typeof game === 'string') {
     const definition = gameDefinitions.find(
       (candidate) => candidate.slug === game && candidate.available,
     )
-    if (definition) setGame(definition.slug)
+    if (definition) startWithGame(definition.slug, null)
   }
 
   const change = route.query.change
@@ -76,59 +80,31 @@ function chooseOpponent(opponent: GameOpponent) {
   manualStep.value = null
 }
 
-const steps = computed(() => [
-  {
-    key: 'game' as const,
-    labelKey: 'games.briefing.steps.game',
-    done: Boolean(setup.value.slug),
-    current: currentStep.value === 'game',
-  },
-  {
-    key: 'opponent' as const,
-    labelKey: 'games.briefing.steps.opponent',
-    done: Boolean(setup.value.opponent),
-    current: currentStep.value === 'opponent',
-  },
-  {
-    key: 'setup' as const,
-    labelKey: 'games.briefing.steps.setup',
-    done: false,
-    current: false,
-  },
-])
+// ブリーフィングの中断は選択を丸ごと破棄し、入る前のページへ戻す。
+async function quitBriefing() {
+  const returnTo = resolveRedirectPath(setup.value.returnTo, '/games')
+  clearGameSetup()
+  resetMatch()
+  await navigateTo(localePath(returnTo))
+}
 </script>
 
 <template>
   <div class="flex min-h-dvh flex-col">
-    <GameHeader>
+    <GameHeader :title="$t('games.briefing.heading')">
       <template #leading>
-        <GameExitButton />
+        <GameExitButton
+          label-key="games.header.exit"
+          heading-key="games.header.quitConfirmHeading"
+          lead-key="games.header.quitConfirmLead"
+          @confirm="quitBriefing"
+        />
       </template>
     </GameHeader>
 
     <main class="container mx-auto w-full max-w-2xl flex-1 p-4">
       <div class="flex flex-col gap-6">
-        <ul class="steps w-full">
-          <li
-            v-for="step in steps"
-            :key="step.key"
-            class="step"
-            :class="{ 'step-primary': step.done || step.current }"
-          >
-            <!-- 完了済みのステップはタップで選び直せる。 -->
-            <button
-              v-if="step.done && !step.current"
-              type="button"
-              class="cursor-pointer text-xs"
-              @click="manualStep = step.key === 'setup' ? null : step.key"
-            >
-              {{ $t(step.labelKey) }}
-            </button>
-            <span v-else class="text-xs" :class="{ 'font-bold': step.current }">
-              {{ $t(step.labelKey) }}
-            </span>
-          </li>
-        </ul>
+        <BriefingSteps :current="currentStep" @change="manualStep = $event" />
 
         <template v-if="hydrated">
           <div v-if="currentStep === 'game'" class="flex flex-col gap-4">

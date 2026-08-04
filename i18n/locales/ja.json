@@ -53,14 +53,14 @@
     "games": {
       "title": "ゲーム",
       "briefing": {
-        "title": "ゲームのブリーフィング"
+        "title": "ゲームを開始する"
       },
       "fairSingleRace": {
         "briefing": {
-          "title": "フェアセットマッチのブリーフィング"
+          "title": "ゲームを開始する"
         },
         "scoreboard": {
-          "title": "フェアセットマッチのスコアボード"
+          "title": "フェアセットマッチ"
         }
       }
     },
@@ -228,17 +228,21 @@
       }
     },
     "recentOpponents": {
-      "label": "最近の対戦相手",
-      "remove": "{name} を最近の対戦相手から削除"
+      "label": "最近の対戦プレイヤー",
+      "remove": "{name} を最近の対戦プレイヤーから削除"
     },
     "header": {
       "exit": "終了",
-      "exitConfirmHeading": "ゲームを終了しますか？",
-      "exitConfirmLead": "記録中のスコアは保存されません。選んだゲームと対戦プレイヤーはそのまま残ります。",
-      "exitConfirm": "終了する",
-      "exitCancel": "続ける"
+      "interrupt": "中断",
+      "quitConfirmHeading": "ゲームを中断しますか？",
+      "quitConfirmLead": "内容は保存されません。",
+      "interruptConfirmHeading": "プレイを中断しますか？",
+      "interruptConfirmLead": "記録中のスコアは保存されません。プレイ開始前のページに戻ります。",
+      "confirm": "中断する",
+      "cancel": "続ける"
     },
     "briefing": {
+      "heading": "ゲームを開始する",
       "steps": {
         "game": "ゲーム",
         "opponent": "対戦プレイヤー",
@@ -265,8 +269,8 @@
     "fairSingleRace": {
       "briefing": {
         "heading": "セット数を選ぶ",
-        "changePlayer": "プレイヤー変更",
-        "recommended": "おすすめ",
+        "changePlayer": "相手プレイヤーを変更",
+        "recommended": "最もフェア",
         "otherRaces": "他の候補から選ぶ（{count}）",
         "play": "プレイ開始",
         "racesUnavailable": "セット数の候補を取得できませんでした。しばらくしてからもう一度お試しください。",
@@ -274,12 +278,13 @@
       },
       "scoreboard": {
         "raceTo": "必要セット数",
-        "trail": "遷移",
+        "trail": "スコア推移",
         "increase": "{name} の得点を1増やす",
         "decrease": "{name} の得点を1減らす",
         "winner": "{name} の勝ち",
         "rematch": "もう一度",
-        "finish": "終了"
+        "finish": "終了",
+        "backToBoard": "スコアボードに戻る"
       }
     }
   },

@@ -22,10 +22,10 @@ const OPPONENT = createFargoRatePlayer({
   robustness: 288,
 })
 
-function seedMatch(history: (0 | 1)[] = []) {
+function seedMatch(history: (0 | 1)[] = [], returnTo: string | null = null) {
   sessionStorage.setItem(
     'fairrace:gameSetup',
-    JSON.stringify({ slug: 'fair-single-race', opponent: OPPONENT }),
+    JSON.stringify({ slug: 'fair-single-race', opponent: OPPONENT, returnTo }),
   )
   sessionStorage.setItem(
     'fairrace:match:fair-single-race',
@@ -68,7 +68,9 @@ function decreaseButton(component: VueWrapper, name: string) {
 }
 
 function scores(component: VueWrapper) {
-  return component.findAll('[aria-live="polite"]').map((node) => node.text())
+  return component
+    .findAll('[aria-live="polite"]')
+    .map((node) => node.find('span').text())
 }
 
 describe('フェアセットマッチのスコアボードページ', () => {
@@ -91,13 +93,22 @@ describe('フェアセットマッチのスコアボードページ', () => {
     )
   })
 
-  it('両者の名前と必要セット数を出す', async () => {
+  it('両者をプレイヤーカードで見せ、スコアに必要セット数の分母を添える', async () => {
     const component = await mountPage()
     await vi.waitFor(() => expect(component.text()).toContain('Kengo Sato'))
 
     expect(component.text()).toContain('Ryoh Hashimoto')
-    expect(component.text()).toContain(
-      jaMessage('games.fairSingleRace.scoreboard.raceTo'),
+    expect(component.findAll('.stat').length).toBeGreaterThanOrEqual(4)
+    expect(component.text()).toContain('/3')
+    expect(component.text()).toContain('/2')
+  })
+
+  it('ヘッダーの中央にゲーム名を出す', async () => {
+    const component = await mountPage()
+    await vi.waitFor(() => expect(component.text()).toContain('Kengo Sato'))
+
+    expect(component.find('header').text()).toContain(
+      jaMessage('games.types.fairSingleRace.label'),
     )
   })
 
@@ -169,17 +180,63 @@ describe('フェアセットマッチのスコアボードページ', () => {
     )
   })
 
-  // 決着後の誤タップで結果を動かさない。
-  it('決着後はタップしても得点が変わらない', async () => {
+  // 決着後の誤タップで結果を積み増さない。
+  it('決着後は加点が効かない', async () => {
     seedMatch([0, 0, 0])
 
     const component = await mountPage()
     await vi.waitFor(() => expect(component.text()).toContain('Kengo Sato'))
 
     await increaseButton(component, 'Kengo Sato')?.trigger('click')
-    await decreaseButton(component, 'Ryoh Hashimoto')?.trigger('click')
 
     expect(scores(component)).toEqual(['3', '0'])
+  })
+
+  // 最終スコアの打ち間違いは「スコアボードに戻る」から取り消して直す。
+  it('決着後に戻って取り消すと、決着が解けて続きを付けられる', async () => {
+    seedMatch([0, 0, 0])
+
+    const component = await mountPage()
+    await vi.waitFor(() => expect(component.text()).toContain('Kengo Sato'))
+
+    await component
+      .findAll('button')
+      .find((button) =>
+        button
+          .text()
+          .includes(jaMessage('games.fairSingleRace.scoreboard.backToBoard')),
+      )
+      ?.trigger('click')
+    await decreaseButton(component, 'Ryoh Hashimoto')?.trigger('click')
+
+    expect(scores(component)).toEqual(['2', '0'])
+
+    await increaseButton(component, 'Kengo Sato')?.trigger('click')
+
+    expect(scores(component)).toEqual(['2', '1'])
+  })
+
+  it('決着するまではヘッダーに終了ボタンを出さず、決着後に出す', async () => {
+    seedMatch([0, 0])
+
+    const component = await mountPage()
+    await vi.waitFor(() => expect(component.text()).toContain('Kengo Sato'))
+
+    const finishInHeader = () =>
+      component
+        .find('header')
+        .findAll('button')
+        .find((button) =>
+          button
+            .text()
+            .includes(jaMessage('games.fairSingleRace.scoreboard.finish')),
+        )
+
+    expect(finishInHeader()).toBeUndefined()
+
+    await increaseButton(component, 'Ryoh Hashimoto')?.trigger('click')
+
+    expect(finishInHeader()).toBeDefined()
   })
 
   it('もう一度で同じセット数のまま0-0から始める', async () => {
@@ -205,13 +262,36 @@ describe('フェアセットマッチのスコアボードページ', () => {
     ).toMatchObject({ playerRaceTo: 3, history: [] })
   })
 
-  it('終了でマッチを破棄し、ゲームと対戦相手は残して入口へ戻る', async () => {
+  // プレイの完了。すべて破棄して、ブリーフィングに入る前のページへ戻す。
+  it('終了で全てを破棄し、ブリーフィングに入る前のページへ戻る', async () => {
+    seedMatch([0, 0, 0], '/dashboard')
+
+    const component = await mountPage()
+    await vi.waitFor(() => expect(component.text()).toContain('Kengo Sato'))
+
+    const resultDialog = component.findAll('dialog').at(-1)
+    await resultDialog
+      ?.findAll('button')
+      .find((button) =>
+        button
+          .text()
+          .includes(jaMessage('games.fairSingleRace.scoreboard.finish')),
+      )
+      ?.trigger('click')
+    await vi.waitFor(() =>
+      expect(navigateToMock).toHaveBeenCalledWith('/dashboard'),
+    )
+
+    expect(sessionStorage.getItem('fairrace:match:fair-single-race')).toBeNull()
+    expect(sessionStorage.getItem('fairrace:gameSetup')).toBeNull()
+  })
+
+  it('戻り先が無ければ終了でゲーム一覧へ戻る', async () => {
     seedMatch([0, 0, 0])
 
     const component = await mountPage()
     await vi.waitFor(() => expect(component.text()).toContain('Kengo Sato'))
 
-    // ヘッダーの「終了」と同じ文言のため、結果ダイアログの中に絞って探す。
     const resultDialog = component.findAll('dialog').at(-1)
     await resultDialog
       ?.findAll('button')
@@ -224,10 +304,33 @@ describe('フェアセットマッチのスコアボードページ', () => {
     await vi.waitFor(() =>
       expect(navigateToMock).toHaveBeenCalledWith('/games'),
     )
+  })
+
+  // プレイの中断。スコアだけを捨てて、開始前のゲーム設定へ戻す。
+  it('中断でスコアだけを捨てて、ゲーム設定へ戻る', async () => {
+    seedMatch([0, 1])
+
+    const component = await mountPage()
+    await vi.waitFor(() => expect(component.text()).toContain('Kengo Sato'))
+
+    await component
+      .find('header')
+      .findAll('button')
+      .find((button) => button.text() === jaMessage('games.header.interrupt'))
+      ?.trigger('click')
+    await component
+      .findAll('button')
+      .find((button) => button.text() === jaMessage('games.header.confirm'))
+      ?.trigger('click')
+    await vi.waitFor(() =>
+      expect(navigateToMock).toHaveBeenCalledWith(
+        '/games/fair-single-race/briefing',
+      ),
+    )
 
     expect(sessionStorage.getItem('fairrace:match:fair-single-race')).toBeNull()
     expect(
-      JSON.parse(sessionStorage.getItem('fairrace:gameSetup') ?? '{}').opponent,
-    ).toEqual(OPPONENT)
+      JSON.parse(sessionStorage.getItem('fairrace:gameSetup') ?? '{}'),
+    ).toMatchObject({ slug: 'fair-single-race' })
   })
 })

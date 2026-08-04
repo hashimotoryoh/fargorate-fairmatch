@@ -10,9 +10,13 @@ export type GameOpponent = FargoRatePlayer | GuestPlayer
 type GameSetup = {
   slug: GameSlug | null
   opponent: GameOpponent | null
+  /** ブリーフィングに入る前のページ。プレイ完了や中断でここへ戻す。 */
+  returnTo: string | null
 }
 
 const STORAGE_KEY = 'fairrace:gameSetup'
+
+const EMPTY_SETUP: GameSetup = { slug: null, opponent: null, returnTo: null }
 
 function isGameOpponent(value: unknown): value is GameOpponent {
   if (typeof value !== 'object' || value === null) return false
@@ -38,11 +42,9 @@ function isGameOpponent(value: unknown): value is GameOpponent {
 }
 
 function readStoredSetup(): GameSetup {
-  const empty: GameSetup = { slug: null, opponent: null }
-
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY)
-    if (!raw) return empty
+    if (!raw) return { ...EMPTY_SETUP }
     const parsed = JSON.parse(raw) as Record<string, unknown>
 
     return {
@@ -50,10 +52,11 @@ function readStoredSetup(): GameSetup {
         ? (parsed.slug as GameSlug)
         : null,
       opponent: isGameOpponent(parsed.opponent) ? parsed.opponent : null,
+      returnTo: typeof parsed.returnTo === 'string' ? parsed.returnTo : null,
     }
   } catch {
     // 壊れた値やプライベートブラウジングでの例外は無視し、選び直させる。
-    return empty
+    return { ...EMPTY_SETUP }
   }
 }
 
@@ -63,10 +66,7 @@ function readStoredSetup(): GameSetup {
  * SSR時には読めないため、マウント後に読み込むまで `hydrated` が false になる。
  */
 export function useGameSetup() {
-  const setup = useState<GameSetup>('game-setup', () => ({
-    slug: null,
-    opponent: null,
-  }))
+  const setup = useState<GameSetup>('game-setup', () => ({ ...EMPTY_SETUP }))
   const hydrated = useState('game-setup-hydrated', () => false)
 
   onMounted(() => {
@@ -83,6 +83,21 @@ export function useGameSetup() {
     }
   }
 
+  /**
+   * ゲームを入口にブリーフィングを始める。前回の対戦相手が残っていると
+   * ステップ2を飛ばして始まってしまうため、選択を丸ごと作り直す。
+   */
+  function startWithGame(slug: GameSlug, returnTo: string | null) {
+    setup.value = { slug, opponent: null, returnTo }
+    persist()
+  }
+
+  /** 対戦相手を入口にブリーフィングを始める。ゲームは選ばせ直す。 */
+  function startWithOpponent(opponent: GameOpponent, returnTo: string | null) {
+    setup.value = { slug: null, opponent, returnTo }
+    persist()
+  }
+
   function setGame(slug: GameSlug) {
     setup.value = { ...setup.value, slug }
     persist()
@@ -94,7 +109,7 @@ export function useGameSetup() {
   }
 
   function clearGameSetup() {
-    setup.value = { slug: null, opponent: null }
+    setup.value = { ...EMPTY_SETUP }
     try {
       sessionStorage.removeItem(STORAGE_KEY)
     } catch {
@@ -102,5 +117,13 @@ export function useGameSetup() {
     }
   }
 
-  return { setup, hydrated, setGame, setOpponent, clearGameSetup }
+  return {
+    setup,
+    hydrated,
+    startWithGame,
+    startWithOpponent,
+    setGame,
+    setOpponent,
+    clearGameSetup,
+  }
 }

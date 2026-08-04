@@ -118,8 +118,10 @@ export function useFairSingleRace() {
     persist()
   }
 
+  // 決着後も取り消しは許す。最終スコアを打ち間違えたとき、結果ダイアログの
+  // 「スコアボードに戻る」から修正できるようにするため。
   function undoPoint(side: ScoringSide) {
-    if (!match.value || winner.value !== null) return
+    if (!match.value) return
     const index = match.value.history.lastIndexOf(side)
     if (index === -1) return
     const history = [...match.value.history]

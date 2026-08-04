@@ -1,3 +1,10 @@
+<script setup lang="ts">
+const { title } = defineProps<{
+  /** 中央に出す見出し。ブリーフィングでは開始の案内、スコアボードではゲーム名。 */
+  title: string
+}>()
+</script>
+
 <template>
   <!--
     左右のスロットが空でも中央のタイトルがずれないよう、3カラムのグリッドにする。
@@ -13,7 +20,7 @@
     <!-- ゲーム中の誤タップで対局から離脱しないよう、タイトルはリンクにしない。 -->
     <div class="flex items-center gap-2 text-sm font-bold sm:text-base">
       <Icon name="custom:app-logo" class="text-primary size-7 shrink-0" />
-      <span>FargoRate FairRace</span>
+      <span>{{ title }}</span>
     </div>
 
     <div class="flex items-center gap-2 justify-self-end">

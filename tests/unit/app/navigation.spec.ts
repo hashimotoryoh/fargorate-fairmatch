@@ -91,6 +91,15 @@ describe('resolveRedirectPath', () => {
     expect(resolveRedirectPath('')).toBe('/dashboard')
   })
 
+  // ゲームの戻り先のように、既定の遷移先が文脈で変わる呼び出しがある。
+  it('フォールバックを指定できる', () => {
+    expect(resolveRedirectPath(undefined, '/games')).toBe('/games')
+    expect(resolveRedirectPath('https://example.com', '/games')).toBe('/games')
+    expect(resolveRedirectPath('/games/briefing', '/games')).toBe(
+      '/games/briefing',
+    )
+  })
+
   // `redirect` クエリは同じキーを複数与えると配列になるなど、文字列とは限らない。
   it('文字列でない値を既定の遷移先へ倒す', () => {
     expect(resolveRedirectPath(undefined)).toBe('/dashboard')
