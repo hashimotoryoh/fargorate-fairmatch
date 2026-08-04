@@ -276,7 +276,6 @@
         "retry": "Retry"
       },
       "scoreboard": {
-        "raceTo": "Race to",
         "trail": "Score history",
         "increase": "Add a point for {name}",
         "decrease": "Remove a point from {name}",

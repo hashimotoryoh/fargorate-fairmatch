@@ -276,7 +276,6 @@
         "retry": "再試行"
       },
       "scoreboard": {
-        "raceTo": "必要セット数",
         "trail": "スコア推移",
         "increase": "{name} の得点を1増やす",
         "decrease": "{name} の得点を1減らす",
