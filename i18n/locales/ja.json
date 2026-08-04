@@ -232,8 +232,7 @@
       "remove": "{name} を最近の対戦プレイヤーから削除"
     },
     "header": {
-      "exit": "終了",
-      "interrupt": "中断",
+      "quit": "中断",
       "quitConfirmHeading": "ゲームを中断しますか？",
       "quitConfirmLead": "内容は保存されません。",
       "interruptConfirmHeading": "プレイを中断しますか？",

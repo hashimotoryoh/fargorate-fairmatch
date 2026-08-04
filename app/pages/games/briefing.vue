@@ -94,7 +94,6 @@ async function quitBriefing() {
     <GameHeader :title="$t('games.briefing.heading')">
       <template #leading>
         <GameExitButton
-          label-key="games.header.exit"
           heading-key="games.header.quitConfirmHeading"
           lead-key="games.header.quitConfirmLead"
           @confirm="quitBriefing"

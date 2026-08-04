@@ -25,9 +25,12 @@ const racesFailed = ref(false)
 const selected = ref<RaceOption | null>(null)
 const showOthers = ref(false)
 
+// 中断で自分から離れるときは、状態を消した瞬間の誘導を効かせない。
+const leaving = ref(false)
+
 // このページはフェアセットマッチ専用。状態が揃っていなければ選択からやり直す。
 watchEffect(() => {
-  if (!hydrated.value) return
+  if (leaving.value || !hydrated.value) return
   if (setup.value.slug !== 'fair-single-race' || !setup.value.opponent) {
     navigateTo(localePath('/games/briefing'))
   }
@@ -148,6 +151,7 @@ async function changeStep(step: 'game' | 'opponent') {
 
 // ブリーフィングの中断は選択を丸ごと破棄し、入る前のページへ戻す。
 async function quitBriefing() {
+  leaving.value = true
   const returnTo = resolveRedirectPath(setup.value.returnTo, '/games')
   clearGameSetup()
   resetMatch()
@@ -160,7 +164,6 @@ async function quitBriefing() {
     <GameHeader :title="$t('games.briefing.heading')">
       <template #leading>
         <GameExitButton
-          label-key="games.header.exit"
           heading-key="games.header.quitConfirmHeading"
           lead-key="games.header.quitConfirmLead"
           @confirm="quitBriefing"
@@ -172,10 +175,15 @@ async function quitBriefing() {
       <div class="flex flex-col gap-6">
         <BriefingSteps current="setup" @change="changeStep" />
 
-        <div v-if="refreshing" class="flex flex-col gap-4">
+        <!-- 読み込みの前後で座標が動かないよう、プレイヤーカードの位置と大きさに合わせる。 -->
+        <div v-if="refreshing" class="flex flex-col gap-6">
+          <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+            <div class="skeleton h-36 w-full" />
+            <span class="text-base-content/50 text-xs font-bold">VS</span>
+            <div class="skeleton h-36 w-full" />
+          </div>
           <div class="skeleton h-8 w-1/2" />
-          <div class="skeleton h-28 w-full" />
-          <div class="skeleton h-40 w-full" />
+          <div class="skeleton h-32 w-full" />
         </div>
 
         <template v-else-if="user && opponent">

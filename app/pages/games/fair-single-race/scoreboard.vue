@@ -121,7 +121,6 @@ onUnmounted(() => {
     <GameHeader :title="$t('games.types.fairSingleRace.label')">
       <template #leading>
         <GameExitButton
-          label-key="games.header.interrupt"
           heading-key="games.header.interruptConfirmHeading"
           lead-key="games.header.interruptConfirmLead"
           @confirm="interruptGame"
@@ -144,12 +143,8 @@ onUnmounted(() => {
       <div
         class="border-base-300 divide-base-300 grid flex-none grid-cols-2 divide-x border-b pl-[env(safe-area-inset-left)]"
       >
-        <div class="card">
-          <PlayerCard :player="user" />
-        </div>
-        <div class="card">
-          <PlayerCard :player="opponent" />
-        </div>
+        <PlayerCard :player="user" />
+        <PlayerCard :player="opponent" />
       </div>
 
       <div
@@ -245,8 +240,16 @@ onUnmounted(() => {
           {{ playerScore }} - {{ opponentScore }}
         </p>
 
-        <div class="modal-action flex-col items-stretch gap-2">
-          <div class="flex justify-center gap-2">
+        <div class="modal-action items-center justify-between gap-2">
+          <!-- 最終スコアを打ち間違えたときに、戻って取り消せるようにする。 -->
+          <button
+            class="btn btn-ghost"
+            type="button"
+            @click="resultDialog?.close()"
+          >
+            {{ $t('games.fairSingleRace.scoreboard.backToBoard') }}
+          </button>
+          <div class="flex gap-2">
             <button class="btn btn-primary" type="button" @click="startRematch">
               {{ $t('games.fairSingleRace.scoreboard.rematch') }}
             </button>
@@ -254,14 +257,6 @@ onUnmounted(() => {
               {{ $t('games.fairSingleRace.scoreboard.finish') }}
             </button>
           </div>
-          <!-- 最終スコアを打ち間違えたときに、戻って取り消せるようにする。 -->
-          <button
-            class="btn btn-ghost btn-sm"
-            type="button"
-            @click="resultDialog?.close()"
-          >
-            {{ $t('games.fairSingleRace.scoreboard.backToBoard') }}
-          </button>
         </div>
       </div>
     </dialog>

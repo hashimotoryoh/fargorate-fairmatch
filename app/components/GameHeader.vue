@@ -18,10 +18,7 @@ const { title } = defineProps<{
     </div>
 
     <!-- ゲーム中の誤タップで対局から離脱しないよう、タイトルはリンクにしない。 -->
-    <div class="flex items-center gap-2 text-sm font-bold sm:text-base">
-      <Icon name="custom:app-logo" class="text-primary size-7 shrink-0" />
-      <span>{{ title }}</span>
-    </div>
+    <span class="text-sm font-bold sm:text-base">{{ title }}</span>
 
     <div class="flex items-center gap-2 justify-self-end">
       <slot name="actions" />

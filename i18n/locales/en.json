@@ -232,11 +232,10 @@
       "remove": "Remove {name} from recent opponents"
     },
     "header": {
-      "exit": "Exit",
-      "interrupt": "Exit",
+      "quit": "Quit",
       "quitConfirmHeading": "Quit this game?",
       "quitConfirmLead": "Nothing will be saved.",
-      "interruptConfirmHeading": "Exit this match?",
+      "interruptConfirmHeading": "Quit this match?",
       "interruptConfirmLead": "The score in progress will not be saved. You will go back to the game setup screen.",
       "confirm": "Quit",
       "cancel": "Keep going"

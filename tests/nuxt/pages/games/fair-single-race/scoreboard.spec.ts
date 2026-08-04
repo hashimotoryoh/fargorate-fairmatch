@@ -316,7 +316,7 @@ describe('フェアセットマッチのスコアボードページ', () => {
     await component
       .find('header')
       .findAll('button')
-      .find((button) => button.text() === jaMessage('games.header.interrupt'))
+      .find((button) => button.text() === jaMessage('games.header.quit'))
       ?.trigger('click')
     await component
       .findAll('button')

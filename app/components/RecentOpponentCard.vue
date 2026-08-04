@@ -24,7 +24,9 @@ const emit = defineEmits<{ select: [] }>()
         </p>
       </div>
 
-      <div class="stats stats-horizontal bg-base-100 shrink-0">
+      <div
+        class="stats stats-horizontal shrink-0 bg-transparent [grid-auto-columns:1fr]"
+      >
         <div class="stat place-items-center px-3 py-1">
           <div class="stat-title text-[10px]">{{ $t('player.rating') }}</div>
           <div class="stat-value text-primary text-lg">

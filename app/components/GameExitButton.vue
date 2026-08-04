@@ -1,7 +1,6 @@
 <script setup lang="ts">
-const { labelKey, headingKey, leadKey } = defineProps<{
-  /** ヘッダーに出すボタンの文言。ブリーフィングは「終了」、プレイ中は「中断」。 */
-  labelKey: string
+const { headingKey, leadKey } = defineProps<{
+  /** 確認ダイアログの文言。ブリーフィングとプレイ中で破棄する範囲が違う。 */
   headingKey: string
   leadKey: string
 }>()
@@ -23,7 +22,7 @@ function confirm() {
     type="button"
     @click="dialog?.showModal()"
   >
-    {{ $t(labelKey) }}
+    {{ $t('games.header.quit') }}
   </button>
 
   <dialog ref="dialog" class="modal">

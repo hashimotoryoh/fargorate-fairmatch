@@ -28,14 +28,26 @@ const robustness = computed(() =>
 
 <template>
   <div class="card-body items-center gap-2 p-4 text-center">
-    <div class="min-w-0">
-      <p class="truncate text-lg font-bold">{{ name }}</p>
-      <p v-if="player.location" class="text-base-content/60 mt-0.5 text-xs">
+    <!--
+      所在地が無くても詰めず、名前と所在地を合わせた高さの中で名前を中央に置く。
+      並べたカード同士で名前やstatの位置が揃わなくなるのを防ぐ。
+      2.875rem は名前（text-lg）と所在地（text-xs + mt-0.5）の行の高さの合計。
+    -->
+    <div
+      class="flex min-h-[2.875rem] w-full min-w-0 flex-col items-center justify-center"
+    >
+      <p class="max-w-full truncate text-lg font-bold">{{ name }}</p>
+      <p
+        v-if="player.location"
+        class="text-base-content/60 mt-0.5 max-w-full truncate text-xs"
+      >
         {{ player.location }}
       </p>
     </div>
 
-    <div class="stats stats-horizontal bg-base-100 w-full">
+    <div
+      class="stats stats-horizontal w-full bg-transparent [grid-auto-columns:1fr]"
+    >
       <div class="stat place-items-center px-3 py-2">
         <div class="stat-title text-xs">{{ $t('player.rating') }}</div>
         <div class="stat-value text-primary text-2xl">{{ player.rating }}</div>
