@@ -15,7 +15,9 @@ const { recentOpponents, removeRecentOpponent } = useRecentOpponents()
 
 // ゲームは公開情報のスラッグなので、クエリでブリーフィングへ渡す。
 async function startWithGame(slug: GameSlug) {
-  await navigateTo(localePath({ path: '/games/briefing', query: { game: slug } }))
+  await navigateTo(
+    localePath({ path: '/games/briefing', query: { game: slug } }),
+  )
 }
 
 // 対戦相手はURLに載せず、状態に書き込んでからブリーフィングへ移る。

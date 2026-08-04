@@ -25,12 +25,12 @@ $ curl 'https://lms.fargorate.com/api/ratingcalc/racesbytype?type=1&ratingOne=57
 
 トップレベルが配列で、ルックアップAPIのようなラッパーオブジェクトは無い。
 
-| フィールド | 型 | 意味 |
-| --- | --- | --- |
-| `highPlayerRaceTo` | number | レーティングが高い側の必要セット数 |
-| `lowPlayerRaceTo` | number | レーティングが低い側の必要セット数 |
-| `delta` | number | 上の例では全件 `0.0`。意味は未調査 |
-| `closest` | boolean | 最も公平な候補にだけ `true` が付く。上の例では `12-5` の1件 |
+| フィールド         | 型      | 意味                                                        |
+| ------------------ | ------- | ----------------------------------------------------------- |
+| `highPlayerRaceTo` | number  | レーティングが高い側の必要セット数                          |
+| `lowPlayerRaceTo`  | number  | レーティングが低い側の必要セット数                          |
+| `delta`            | number  | 上の例では全件 `0.0`。意味は未調査                          |
+| `closest`          | boolean | 最も公平な候補にだけ `true` が付く。上の例では `12-5` の1件 |
 
 ## パラメータ
 

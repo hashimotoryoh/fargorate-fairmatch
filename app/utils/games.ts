@@ -1,8 +1,5 @@
 export type GameSlug =
-  | 'fair-single-race'
-  | 'custom-single-race'
-  | 'usapl-9-ball'
-  | 'usapl-8-ball'
+  'fair-single-race' | 'custom-single-race' | 'usapl-9-ball' | 'usapl-8-ball'
 
 export type GameDefinition = {
   slug: GameSlug

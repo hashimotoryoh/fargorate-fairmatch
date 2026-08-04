@@ -68,10 +68,7 @@ describe('POST /api/auth/refresh', () => {
     await callHandler(handler, {})
 
     expect(lookupPlayerProfile).toHaveBeenCalledTimes(1)
-    expect(lookupPlayerProfile).toHaveBeenCalledWith(
-      stored.name,
-      MEMBERSHIP_ID,
-    )
+    expect(lookupPlayerProfile).toHaveBeenCalledWith(stored.name, MEMBERSHIP_ID)
   })
 
   // 外部APIの応答の揺れでゲームの開始を止めない。

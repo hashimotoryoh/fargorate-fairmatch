@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { FargoRatePlayer, FargoRateSearchResult } from '#shared/types/player'
+import type {
+  FargoRatePlayer,
+  FargoRateSearchResult,
+} from '#shared/types/player'
 import type { GameOpponent } from '~/composables/useGameSetup'
 
 // 選んだ対戦相手をどう保存しどこへ進むかは、ブリーフィング側が決める。

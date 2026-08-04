@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { FargoRatePlayer, FargoRateSearchResult } from '#shared/types/player'
+import type {
+  FargoRatePlayer,
+  FargoRateSearchResult,
+} from '#shared/types/player'
 import type { RaceOption } from '#shared/types/race'
 
 definePageMeta({ middleware: 'auth', layout: 'game' })
@@ -174,7 +177,11 @@ async function changePlayer() {
           <h1 class="text-xl font-bold">
             {{ $t('games.fairSingleRace.briefing.heading') }}
           </h1>
-          <button class="link link-primary text-sm" type="button" @click="changePlayer">
+          <button
+            class="link link-primary text-sm"
+            type="button"
+            @click="changePlayer"
+          >
             {{ $t('games.fairSingleRace.briefing.changePlayer') }}
           </button>
         </div>
@@ -200,12 +207,16 @@ async function changePlayer() {
                 {{ $t('games.fairSingleRace.briefing.recommended') }}
               </span>
 
-              <div class="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-3">
+              <div
+                class="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-3"
+              >
                 <div class="flex min-w-0 flex-col items-center">
                   <span class="text-4xl font-bold tabular-nums">
                     {{ selected.playerRaceTo }}
                   </span>
-                  <span class="text-base-content/60 max-w-full truncate text-xs">
+                  <span
+                    class="text-base-content/60 max-w-full truncate text-xs"
+                  >
                     {{ user.name ?? $t('player.guestName') }}
                   </span>
                 </div>
@@ -214,7 +225,9 @@ async function changePlayer() {
                   <span class="text-4xl font-bold tabular-nums">
                     {{ selected.opponentRaceTo }}
                   </span>
-                  <span class="text-base-content/60 max-w-full truncate text-xs">
+                  <span
+                    class="text-base-content/60 max-w-full truncate text-xs"
+                  >
                     {{ opponent.name ?? $t('player.guestName') }}
                   </span>
                 </div>

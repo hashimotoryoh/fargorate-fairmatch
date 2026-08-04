@@ -133,9 +133,9 @@ describe('ページの保護の宣言', () => {
   it('PROTECTED_PAGE_PATHS が保護ページを網羅している', () => {
     const config = readFileSync(join(ROOT, 'nuxt.config.ts'), 'utf8')
     const listed = [
-      ...(config.match(/PROTECTED_PAGE_PATHS = \[(.*?)\]/s)?.[1] ?? '').matchAll(
-        /'([^']+)'/g,
-      ),
+      ...(
+        config.match(/PROTECTED_PAGE_PATHS = \[(.*?)\]/s)?.[1] ?? ''
+      ).matchAll(/'([^']+)'/g),
     ].map(([, path]) => path)
 
     expect(listed.length).toBeGreaterThan(0)
