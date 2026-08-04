@@ -9,7 +9,7 @@ const emit = defineEmits<{ select: [] }>()
 <template>
   <button
     type="button"
-    class="card bg-base-200 border-base-300 hover:border-primary w-full border text-left transition-colors"
+    class="card bg-base-200 border-base-300 hover:border-primary w-full border text-left transition-colors cursor-pointer"
     @click="emit('select')"
   >
     <PlayerRow :player="opponent" />

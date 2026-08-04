@@ -45,7 +45,7 @@ async function selectOpponent(opponent: FargoRatePlayer) {
         <li
           v-for="opponent in recentOpponents"
           :key="opponent.membershipId"
-          class="flex items-stretch gap-2"
+          class="flex items-center gap-2"
         >
           <div class="min-w-0 flex-1">
             <RecentOpponentCard
@@ -55,7 +55,7 @@ async function selectOpponent(opponent: FargoRatePlayer) {
           </div>
           <button
             type="button"
-            class="btn btn-outline h-auto"
+            class="btn btn-ghost btn-circle"
             :aria-label="
               $t('games.recentOpponents.remove', { name: opponent.name })
             "

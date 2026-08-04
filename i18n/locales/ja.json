@@ -254,7 +254,7 @@
         "lead": "あなた（{name}）の対戦相手を選びます。",
         "methodSearch": "FargoRateで探す",
         "methodGuest": "ゲスト",
-        "search": "検索する",
+        "search": "検索",
         "noId": "FargoRate IDが無いため選べません。",
         "guestSubmit": "この相手で決定",
         "clear": "クリア"

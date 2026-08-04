@@ -80,11 +80,10 @@ function selectRecent(opponent: FargoRatePlayer) {
     <template v-if="method === 'search'">
       <form @submit.prevent="search">
         <div class="join w-full">
-          <label class="floating-label join-item flex-1">
-            <span>{{ $t('lookup.queryLabel') }}</span>
+          <label class="input join-item flex-1">
+            <Icon name="heroicons:magnifying-glass" />
             <input
               v-model.trim="query"
-              class="input input-bordered w-full"
               type="text"
               :maxlength="PLAYER_QUERY_MAX_LENGTH"
               placeholder="John Doe"
@@ -127,7 +126,7 @@ function selectRecent(opponent: FargoRatePlayer) {
           >
             <button
               type="button"
-              class="card bg-base-200 border-base-300 w-full border text-left transition-colors disabled:opacity-60"
+              class="card bg-base-200 border-base-300 w-full border text-left transition-colors cursor-pointer disabled:opacity-60"
               :class="player.membershipId ? 'hover:border-primary' : ''"
               :disabled="!player.membershipId"
               @click="selectResult(player)"
