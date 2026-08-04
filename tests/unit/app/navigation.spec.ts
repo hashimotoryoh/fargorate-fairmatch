@@ -10,7 +10,7 @@ describe('mainNavItems', () => {
   it('ダッシュボード・ゲーム・設定の3項目を持つ', () => {
     expect(mainNavItems.map((item) => item.to)).toEqual([
       '/dashboard',
-      '/game',
+      '/games',
       '/settings',
     ])
   })
@@ -36,9 +36,9 @@ describe('mainNavItems', () => {
   })
 
   it('ゲームタブは mdi:billiards-rack を使う', () => {
-    const game = mainNavItems.find((item) => item.to === '/game')
+    const games = mainNavItems.find((item) => item.to === '/games')
 
-    expect(game?.icon).toBe('mdi:billiards-rack')
+    expect(games?.icon).toBe('mdi:billiards-rack')
   })
 })
 

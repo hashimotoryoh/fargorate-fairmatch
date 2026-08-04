@@ -21,7 +21,7 @@ const { user } = useUserSession()
 
     <PlayerProfileTable v-if="user" :player="user" show-membership-id />
 
-    <NuxtLink :to="localePath('/game')" class="btn btn-primary">
+    <NuxtLink :to="localePath('/games')" class="btn btn-primary">
       {{ $t('dashboard.startGame') }}
     </NuxtLink>
   </div>

@@ -7,7 +7,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "game": "Game",
+    "games": "Games",
     "lookup": "Lookup a Player",
     "settings": "Settings"
   },
@@ -50,8 +50,19 @@
     "dashboard": {
       "title": "Dashboard"
     },
-    "game": {
-      "title": "Game"
+    "games": {
+      "title": "Games",
+      "briefing": {
+        "title": "Game briefing"
+      },
+      "fairSingleRace": {
+        "briefing": {
+          "title": "Fair Single Race briefing"
+        },
+        "scoreboard": {
+          "title": "Fair Single Race scoreboard"
+        }
+      }
     },
     "settings": {
       "title": "Settings"
@@ -194,21 +205,83 @@
     "lead": "Your information as retrieved from FargoRate.",
     "startGame": "Start a game"
   },
-  "game": {
-    "heading": "Game",
-    "lead": "Choose a discipline to start a new game.",
-    "typeLegend": "Discipline",
+  "games": {
+    "heading": "Games",
+    "lead": "Pick a game or an opponent to get started.",
+    "comingSoon": "Coming soon",
     "types": {
-      "9ball": {
-        "label": "9-Ball",
-        "description": "Pocket the balls from 1 to 9 in order. Whoever pockets the 9 first takes the rack."
+      "fairSingleRace": {
+        "label": "Fair Single Race",
+        "description": "Play a race calculated by FargoRate to be fair."
       },
-      "8ball": {
-        "label": "8-Ball",
-        "description": "Clear your own group of seven balls, then pocket the 8 to take the rack."
+      "customSingleRace": {
+        "label": "Custom Single Race",
+        "description": "Play a race of your own choosing."
+      },
+      "usapl9Ball": {
+        "label": "USAPL 9-Ball",
+        "description": "Keep score under USAPL 9-ball rules."
+      },
+      "usapl8Ball": {
+        "label": "USAPL 8-Ball",
+        "description": "Keep score under USAPL 8-ball rules."
       }
     },
-    "start": "Start the game (coming soon)"
+    "recentOpponents": {
+      "label": "Recent opponents",
+      "remove": "Remove {name} from recent opponents"
+    },
+    "header": {
+      "exit": "Exit",
+      "exitConfirmHeading": "Exit the game?",
+      "exitConfirmLead": "The score in progress will not be saved. The game and opponent you chose will remain.",
+      "exitConfirm": "Exit",
+      "exitCancel": "Keep playing"
+    },
+    "briefing": {
+      "steps": {
+        "game": "Game",
+        "opponent": "Opponent",
+        "setup": "Game setup"
+      },
+      "game": {
+        "heading": "Choose a game"
+      },
+      "opponent": {
+        "heading": "Choose your opponent",
+        "lead": "Choose an opponent for you ({name}).",
+        "methodSearch": "Search FargoRate",
+        "methodGuest": "Guest",
+        "search": "Search",
+        "noId": "Cannot be selected because they have no FargoRate ID.",
+        "guestSubmit": "Use this opponent"
+      }
+    },
+    "rotate": {
+      "heading": "Rotate your device",
+      "lead": "The scoreboard is designed for landscape. If the screen does not rotate, turn off the rotation lock on your device.",
+      "retry": "Go landscape"
+    },
+    "fairSingleRace": {
+      "briefing": {
+        "heading": "Choose the race",
+        "changePlayer": "Change opponent",
+        "recommended": "Recommended",
+        "otherRaces": "Choose from other races ({count})",
+        "play": "Start playing",
+        "racesUnavailable": "Could not fetch the race options. Please wait a moment and try again.",
+        "retry": "Retry"
+      },
+      "scoreboard": {
+        "raceTo": "Race to",
+        "trail": "Score",
+        "increase": "Add a point for {name}",
+        "decrease": "Remove a point from {name}",
+        "winner": "{name} wins",
+        "rematch": "Play again",
+        "finish": "Finish"
+      }
+    }
   },
   "settings": {
     "heading": "Settings",
@@ -221,7 +294,13 @@
     "language": "Language",
     "languageDescription": "Choose the language used across the app.",
     "blogDescription": "Check app updates and announcements.",
-    "faqDescription": "Find answers to common questions about how to use the app and how it relates to FargoRate."
+    "faqDescription": "Find answers to common questions about how to use the app and how it relates to FargoRate.",
+    "localData": {
+      "heading": "Data stored on this device",
+      "description": "Deletes data stored on this device, such as recent opponents, recently used accounts, and the game in progress. You will stay signed in.",
+      "clear": "Delete",
+      "cleared": "Deleted."
+    }
   },
   "blog": {
     "heading": "Blog",

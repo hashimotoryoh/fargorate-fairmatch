@@ -25,7 +25,7 @@ const SITE_URL = process.env.NUXT_PUBLIC_SITE_URL ?? ''
  * 網羅していることを `tests/unit/repository/page-protection.spec.ts` で
  * 機械的に確かめている。追加漏れをレビューに頼らないため。
  */
-const PROTECTED_PAGE_PATHS = ['/dashboard', '/game', '/settings']
+const PROTECTED_PAGE_PATHS = ['/dashboard', '/games', '/settings']
 
 /**
  * フッターのバージョン表示に使うコミットハッシュを解決する。
@@ -121,7 +121,9 @@ export default defineNuxtConfig({
   sitemap: {
     // 検索エンジンに載せるのは認証の要らないページだけで、これは公開ページと
     // 一致する。保護ページの列挙は PROTECTED_PAGE_PATHS に一本化してある。
-    exclude: PROTECTED_PAGE_PATHS,
+    // robots.txt の Disallow は前方一致だが sitemap の exclude はパスの一致で
+    // 判定するため、`/games/briefing` のような配下のページをパターンで足す。
+    exclude: PROTECTED_PAGE_PATHS.flatMap((path) => [path, `${path}/**`]),
     /**
      * `/blog/[slug]` は動的ルートで、ルート定義からはスラッグを列挙できない。
      * `server/api/__sitemap__/blog.ts` が Nuxt Content から記事のパスを

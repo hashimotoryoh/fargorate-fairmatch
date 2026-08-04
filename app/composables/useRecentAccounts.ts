@@ -87,5 +87,20 @@ export function useRecentAccounts() {
     writeStoredAccounts(next)
   }
 
-  return { recentAccounts, addRecentAccount, removeRecentAccount }
+  // 設定ページの「端末に保存したデータの削除」から呼ぶ。
+  function clearRecentAccounts() {
+    recentAccounts.value = []
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // 消せなくても実害はない。読み込み時に検証されるだけの値のため。
+    }
+  }
+
+  return {
+    recentAccounts,
+    addRecentAccount,
+    removeRecentAccount,
+    clearRecentAccounts,
+  }
 }

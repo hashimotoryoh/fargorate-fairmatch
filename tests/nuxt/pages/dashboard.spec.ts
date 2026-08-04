@@ -28,7 +28,7 @@ describe('ダッシュボードページ', () => {
 
   it('ゲームを始める導線を置く', async () => {
     const component = await mountSuspended(DashboardPage)
-    const link = component.find('a[href="/game"]')
+    const link = component.find('a[href="/games"]')
 
     expect(link.exists()).toBe(true)
     expect(link.text()).toBe(jaMessage('dashboard.startGame'))
@@ -41,6 +41,6 @@ describe('ダッシュボードページ', () => {
     const component = await mountSuspended(DashboardPage)
 
     expect(component.find('table').exists()).toBe(false)
-    expect(component.find('a[href="/game"]').exists()).toBe(true)
+    expect(component.find('a[href="/games"]').exists()).toBe(true)
   })
 })

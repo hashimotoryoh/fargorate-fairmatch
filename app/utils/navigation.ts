@@ -22,7 +22,7 @@ export type NavItem = {
  */
 export const mainNavItems: NavItem[] = [
   { to: '/dashboard', labelKey: 'nav.dashboard', icon: 'mdi:view-dashboard' },
-  { to: '/game', labelKey: 'nav.game', icon: 'mdi:billiards-rack' },
+  { to: '/games', labelKey: 'nav.games', icon: 'mdi:billiards-rack' },
   { to: '/settings', labelKey: 'nav.settings', icon: 'mdi:cog' },
 ]
 
