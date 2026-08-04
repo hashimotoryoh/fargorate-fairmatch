@@ -109,7 +109,7 @@ FargoRateを用いたビリヤード対戦を補助するウェブアプリ。�
 利用する外部APIの調査結果は `docs/` にまとめている。実装前に必ず参照すること。
 
 - `docs/fargorate-membership-lookup-api.md`: FargoRateのプレイヤー検索
-- `docs/csi-membership-lookup-api.md`: CSIのメンバーシップ検索
+- `docs/csi-membership-lookup-api.md`: CSIのメンバーシップ検索（**現在は未使用**。FargoRate IDが必ずしもCSIに登録されていないことが判明したため使用をやめた。調査の記録として残している）
 
 `docs/` に出てくる `fairmatch.fargorate.com` と `Find a Fair Match` はFargoRate公式のドメインと機能の名前であり、このアプリの名称とは無関係である。アプリ名の変更に巻き込んで書き換えないこと。
 
@@ -199,21 +199,23 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 認証には2つの経路がある。セッション管理には [Nuxt Auth Utils](https://github.com/atinux/nuxt-auth-utils) を使う。
 
-- FargoRateとのリンク（13桁のFargoRate IDでプレイヤー情報を紐づける）
+- FargoRateとのリンク（名前とFargoRate IDでプレイヤー情報を紐づける）
 - ゲスト（IDを持たないユーザーの自己申告）
 
-前者の入口は `/link` である。独自のIDもパスワードも持たず、FargoRate IDを知っていれば誰にでもなれるため、本人性を検証する仕組みではない。実態は「このブラウザのセッションを、FargoRateの公開プロフィールへ紐づける」ことなので、その操作を指す `link` を名前に採っている。UIの見出しも「FargoRateとリンクする」「Link your FargoRate」で揃える。ここに本人確認や認証の強さを匂わせる語を持ち込まないこと。
+前者の入口は `/link` である。独自のIDもパスワードも持たず、名前とFargoRate IDを知っていれば誰にでもなれるため、本人性を検証する仕組みではない。実態は「このブラウザのセッションを、FargoRateの公開プロフィールへ紐づける」ことなので、その操作を指す `link` を名前に採っている。UIの見出しも「FargoRateとリンクする」「Link your FargoRate」で揃える。ここに本人確認や認証の強さを匂わせる語を持ち込まないこと。
 
 このため、UI・翻訳・ドキュメント・テスト名で「サインイン」「Sign in」という語は使わない。セッションを始める操作は「リンク」または「利用を開始する」と書く。ただしセッションを終える操作は「サインアウト」「Sign out」のままにしてある（Nuxt Auth Utils 内蔵の `DELETE /api/_auth/session` に対応する操作であり、破棄することに曖昧さが無いため）。
 
 いっぽう、外部APIへの問い合わせそのものは「検索」であり、`server/utils/lookup.ts` の `lookupPlayerProfile`・`server/api/*/lookup.post.ts`・`docs/*-lookup-api.md` は名前と実態が合っているため `lookup` のまま残してある。機能の名前（`link`）と操作の名前（`lookup`）を混ぜないこと。
 
-リンクの導線での検索は、CSI で姓名を引き、その姓名で FargoRate を引く二段で固定である。三段目が増えることはないため、段数を可変にする作りにはしないこと。いっぽうプレイヤー検索（`/lookup`）は FargoRate だけを引く一段で、CSI は経由しない。
+リンクの導線での検索もプレイヤー検索（`/lookup`）も、FargoRate のAPIを名前で引く一段だけである。かつてはリンクの導線だけ「CSIをIDで引いて姓名を得て、その姓名でFargoRateを引く」二段だったが、FargoRate IDが必ずしもCSIに登録されていないことが判明したため、CSIは使わない。段数を増やす作りに戻さないこと。
+
+「FargoRate ID」はユーザーに見せるための表記であり、内部の変数・プロパティはFargoRateのAPIのレスポンスに合わせて `membershipId` で統一する。`fargorateId` という名前を新たに作らないこと。また、FargoRate IDはかつて13桁の固定長と考えていたが、桁数が一定しないことが判明した。検証は `shared/utils/membershipId.ts` の `isValidMembershipId`（数字だけで構成されていることのみを確かめる）に一本化してあり、桁数を前提にした検証や文言を持ち込まないこと。
 
 このルックアップ層は認証の一部ではなく、認証から使われている共有部品である。他プレイヤーのレーティングを閲覧するような、セッションと無関係の用途からも同じ層を呼べる状態に保つこと。具体的には次を守る。
 
 - `server/utils/lookup.ts` と `POST /api/link/lookup` に、セッションの読み書きや「本人かどうか」の判断を持ち込まない。それらは `POST /api/auth/session` の責務である
-- ルートは機能ごとに分ける。根拠はゲートと応答の形の違いであって、reCAPTCHAではない。リンクの導線はIDで1件に絞る確認のための経路、プレイヤー検索は名前で複数件を返す一覧の経路であり、返すものが違う
+- ルートは機能ごとに分ける。根拠はゲートと応答の形の違いであって、reCAPTCHAではない。リンクの導線は名前で検索した候補をメンバーシップIDの一致で1件に絞る確認のための経路、プレイヤー検索は名前で複数件を返す一覧の経路であり、返すものが違う
 - reCAPTCHAのアクション名も機能ごとに分け、サーバールート側に直書きする（`link` と `playerLookup`）。管理コンソールでスコアの分布を機能ごとに見分け、しきい値を個別に調整できるようにするためである
 - ただし**アクション名はアクセス制御ではない**。サイトキーは公開値であり、アクションを決めるのはクライアントなので、攻撃者は目的のアクションのトークンを自分で発行できる。アクション名で総当たりを止められると考えないこと。直書きにしているのは、クライアント制御の入力をルートの契約から減らすためと、分析の値を素直に保つためである
 - 逆に、リンクの導線でしか使わないものへ `lookup` と名付けないこと。自分のFargoRate IDの調べ方を案内するモーダルは、他人を検索する機能と紛れないよう `FargoRateIdGuideModal`（座標は `app/utils/fargorateIdGuide.ts`、文言は `fargorateIdGuide.*`）としてある
@@ -222,13 +224,15 @@ Nuxt v4の公式が推奨する構成に原則として則ること。
 
 フローは次のとおり。
 
-1. ユーザーが `/link` でFargoRate IDを入力する
-2. CSIメンバーシップルックアップAPIをIDで検索し、姓名・リーグ・リージョン・チームを得る
-3. その姓名でFargoRateメンバーシップルックアップAPIを検索し、メンバーシップIDの一致で1件に絞ってレーティングと信頼度を得る
+1. ユーザーが `/link` で名前とFargoRate IDを入力する
+2. その名前でFargoRateメンバーシップルックアップAPIを検索し、同姓同名を含む候補の一覧を得る
+3. 候補からメンバーシップIDの一致で1件に絞り、名前・所在地・レーティング・信頼度を得る
 4. 得られたプレイヤー情報をユーザーに見せ、本人かどうかを確認する
 5. 本人だと確認できたらセッションに保存する
 
-確認の確定時（`POST /api/auth/session`）にクライアントから受け取るのはFargoRate IDだけとし、セッションに保存する情報はサーバー側でルックアップし直した結果を使う。クライアントが任意の名前やレーティングを自称できないようにするため、この方針を崩さないこと。
+FargoRateのAPIはメンバーシップIDでの検索を受け付けない（IDで引けるのは `readableId` だけで、ユーザーがそれを事前に知る術は無い）。名前での検索が唯一の経路であり、名前を入力させるのはそのためであって、本人確認のためではない。
+
+確認の確定時（`POST /api/auth/session`）にクライアントから受け取る名前とメンバーシップIDは検索の鍵としてだけ使い、セッションに保存する情報はサーバー側でルックアップし直した結果を使う。実在のプレイヤーとメンバーシップIDが一致しない限りセッションは作られないため、クライアントが任意の名前やレーティングを自称することはできない。この方針を崩さないこと。
 
 #### ゲスト認証
 
@@ -236,7 +240,7 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 レーティングの範囲は `shared/utils/guestPlayer.ts` の `GUEST_RATING_MIN` と `GUEST_RATING_MAX`（-90 〜 930）に一本化してある。USAPLが公開しているハンディキャップ計算ツール（https://usaplraceto.azurewebsites.net/）が受け付ける入力レンジに合わせたものである。フォームとサーバールートの双方でこの関数を使い、条件を二重に書かないこと。
 
-ゲストは `POST /api/auth/guest` という別のルートに分けてある。`auth/session` に相乗りさせると、IDを送るだけのつもりの経路に自称の値が紛れ込む余地が生まれるためである。ハンドラーはボディを展開せず、`readGuestPlayer()` が読み取った項目だけでオブジェクトを組み立てる。`fargorateId` や `kind: 'fargorate'` を送られても効かないのはこのためで、`tests/unit/server/api/auth/guest.post.spec.ts` がそれを固定している。
+ゲストは `POST /api/auth/guest` という別のルートに分けてある。`auth/session` に相乗りさせると、検索の鍵を送るだけのつもりの経路に自称の値が紛れ込む余地が生まれるためである。ハンドラーはボディを展開せず、`readGuestPlayer()` が読み取った項目だけでオブジェクトを組み立てる。`membershipId` や `kind: 'fargorate'` を送られても効かないのはこのためで、`tests/unit/server/api/auth/guest.post.spec.ts` がそれを固定している。
 
 このルートにもreCAPTCHAを付けている（アクションは `guest`）。外部APIは一切呼ばないが、未認証で誰でも叩けてセッションを無制限に発行できるためである。そのセッションは `POST /api/players/lookup` のreCAPTCHAを免れる鍵にもなるので、ここを素通しにすると外部APIへの総当たりの入口が開く。
 
@@ -251,7 +255,7 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 `FargoRatePlayer | GuestPlayer` のユニオンで表せると素直だが、`User` はインターフェースであり、インターフェースはユニオン型を継承できない。そのため両者の上位型として `SessionPlayer` を挟んである。
 
-どちらであるかの判別には必ず `isFargoRatePlayer()`（`shared/utils/player.ts`）を使い、`robustness` や `fargorateId` の有無を見る形にしないこと。ゲストの自己申告値を、FargoRateで確認が取れた値と取り違えないためである。`GuestPlayer` がFargoRate固有の項目を型として持たないのも同じ理由による。
+どちらであるかの判別には必ず `isFargoRatePlayer()`（`shared/utils/player.ts`）を使い、`robustness` や `membershipId` の有無を見る形にしないこと。ゲストの自己申告値を、FargoRateで確認が取れた値と取り違えないためである。`GuestPlayer` がFargoRate固有の項目を型として持たないのも同じ理由による。
 
 **reCAPTCHAを付けるかどうかは「外部APIを呼ぶか」ではなく「ボットに攻撃されうるか」で決める。** 未認証で誰でも叩けるルートは、外部APIを呼ばなくても対象になる。判定は `server/utils/recaptcha.ts` の `verifyRecaptchaToken`、クライアント側のトークン取得は `app/composables/useRecaptcha.ts` が担う。
 
@@ -290,8 +294,8 @@ Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり�
 `/lookup` はFargoRateのプレイヤーを名前で検索し、レーティングと信頼度を見るページである。対戦相手の実力の目安を知るためのもので、認証を要さない公開ページとして置いてある。セッションには一切触れない。
 
 - 検索は `POST /api/players/lookup`。reCAPTCHAのアクションは `playerLookup` で、未認証のときだけ通す（認証済みは免除。前述の「reCAPTCHA」を参照）
-- 検索の実体は `server/utils/lookup.ts` の `searchPlayers` で、**FargoRateのAPIだけ**を引く。CSIはIDでしか引けず、この経路の主な入力は名前であるため経由しない。したがってリーグ・リージョン・チームは得られず、結果は `FargoRateSearchResult`（名前・ID・所在地・レーティング・信頼度）になる
-- 検索語はそのまま `q` に渡す。このAPIは姓名のほかレスポンスの `readableId` でも引けるため、入力を名前に限定する検証を入れないこと。`readableId` は桁数が一定せず、リンクに使う13桁のFargoRate ID（`membershipId`）とは別物である。両者を取り違えないこと
+- 検索の実体は `server/utils/lookup.ts` の `searchPlayers` で、リンクの導線と同じFargoRateのAPIを引く。違いは絞り込みで、リンクの導線（`lookupPlayerProfile`）がメンバーシップIDの一致で1件に絞るのに対し、こちらは絞らずヒットした全件を `FargoRateSearchResult`（名前・ID・所在地・レーティング・信頼度）で返す
+- 検索語はそのまま `q` に渡す。このAPIは姓名のほかレスポンスの `readableId` でも引けるため、入力を名前に限定する検証を入れないこと。`readableId` は表示用のIDで、リンクに使うFargoRate ID（`membershipId`）とは別物である。両者を取り違えないこと
 - 結果の一覧は `card` で見せ、レーティングと信頼度は `stat` に置く。所在地は名前の下に小さく添える
 - 該当が無いことは異常ではないため、404ではなく空配列を返す
 - 読み取れない行が混じっても一覧全体は落とさず、行単位で除く。1件の異常で他の正常な結果まで見せられなくなるのを避けるため

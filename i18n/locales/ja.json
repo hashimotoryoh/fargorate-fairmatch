@@ -22,12 +22,10 @@
     "commitTitle": "コミット {sha} で動作しています"
   },
   "player": {
-    "fargorateId": "FargoRate ID",
+    "membershipId": "FargoRate ID",
     "name": "名前",
     "guestName": "ゲストプレイヤー",
-    "league": "リーグ",
-    "region": "リージョン",
-    "team": "チーム",
+    "location": "所在地",
     "rating": "レーティング",
     "robustness": "信頼度",
     "robustnessNone": "None"
@@ -35,11 +33,11 @@
   "seo": {
     "index": {
       "title": "FargoRateで対戦を記録する",
-      "description": "FargoRateのレーティングをもとに、ビリヤードの対戦スコアの入力と振り返りを補助するウェブアプリ。FargoRate IDだけで使い始められます。"
+      "description": "FargoRateのレーティングをもとに、ビリヤードの対戦スコアの入力と振り返りを補助するウェブアプリ。名前とFargoRate IDだけで使い始められます。"
     },
     "link": {
       "title": "FargoRateとリンクする",
-      "description": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力して、FargoRateのプレイヤー情報とリンクします。IDの調べ方も画面上で案内します。"
+      "description": "名前と、FargoRateアプリのプレイヤーカードに表示されるFargoRate IDを入力して、FargoRateのプレイヤー情報とリンクします。IDの調べ方も画面上で案内します。"
     },
     "guest": {
       "title": "ゲストとして始める",
@@ -116,13 +114,14 @@
       }
     },
     "gettingStartedHeading": "はじめかた",
-    "gettingStartedBody": "FargoRateアプリのプレイヤーカードに表示される13桁のFargoRate IDを入力するだけです。パスワードの登録は要りません。IDの調べ方は入力画面で案内します。",
+    "gettingStartedBody": "名前と、FargoRateアプリのプレイヤーカードに表示されるFargoRate IDを入力するだけです。パスワードの登録は要りません。IDの調べ方は入力画面で案内します。",
     "gettingStartedNote": "このアプリはFargoRateからレーティングを取得しますが、対戦結果を公式システムへ送信することはありません。ここでの記録によってあなたのレーティングが変わることはありません。"
   },
   "link": {
     "heading": "FargoRateとリンクする",
-    "lead": "FargoRate IDであなたの情報を探します。",
-    "idLabel": "FargoRate ID（13桁の数字）",
+    "lead": "名前とFargoRate IDであなたの情報を探します。名前はFargoRateに登録されている表記で入力してください。",
+    "nameLabel": "名前",
+    "idLabel": "FargoRate ID",
     "recentAccounts": {
       "label": "最近使用したアカウント:",
       "remove": "{name} をサジェストから削除"
@@ -133,8 +132,10 @@
     "confirm": "はい、これは私です",
     "reject": "いいえ",
     "errors": {
-      "invalidId": "FargoRate IDは13桁の数字で入力してください。",
-      "notFound": "そのFargoRate IDのプレイヤーは見つかりませんでした。",
+      "invalidName": "名前は {min} 文字以上 {max} 文字以内で入力してください。",
+      "invalidId": "FargoRate IDは数字で入力してください。",
+      "invalidInput": "入力の内容を確認してください。",
+      "notFound": "その名前とFargoRate IDに一致するプレイヤーは見つかりませんでした。名前がFargoRateの表記と一致しているか確認してください。",
       "recaptchaFailed": "ロボットではないことを確認できませんでした。しばらくしてからもう一度お試しください。",
       "unexpected": "通信に失敗しました。しばらくしてからもう一度お試しください。"
     }
@@ -171,7 +172,7 @@
   "fargorateIdGuide": {
     "trigger": "FargoRate IDの確認方法",
     "heading": "FargoRate IDの確認方法",
-    "lead": "FargoRateアプリで次の手順をたどると、13桁のFargoRate IDを確認できます。",
+    "lead": "FargoRateアプリで次の手順をたどると、FargoRate IDを確認できます。",
     "steps": {
       "menu": {
         "title": "左上のメニューを開く",
@@ -182,8 +183,8 @@
         "alt": "FargoRateアプリのメニュー。先頭にプレイヤーカードの項目がある。"
       },
       "number": {
-        "title": "一番下の13桁の数字を読む",
-        "alt": "FargoRateアプリのプレイヤーカード。バーコードの下に13桁の数字がある。"
+        "title": "一番下の数字を読む",
+        "alt": "FargoRateアプリのプレイヤーカード。バーコードの下にFargoRate IDの数字がある。"
       }
     },
     "close": "閉じる"
@@ -212,7 +213,7 @@
   "settings": {
     "heading": "設定",
     "account": "アカウント",
-    "playingAs": "{name}（{fargorateId}）として利用しています。",
+    "playingAs": "{name}（{membershipId}）として利用しています。",
     "playingAsGuest": "{name}（ゲスト）として利用しています。レーティングは自己申告のため、FargoRateの記録とは結び付いていません。",
     "signOut": "サインアウト",
     "theme": "テーマ",

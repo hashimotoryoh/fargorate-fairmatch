@@ -1,25 +1,4 @@
 /**
- * CSIメンバーシップルックアップAPIのレスポンス。
- * 実際にはより多くの項目が返るが、このアプリで利用するものだけを定義している。
- * フィールド名は外部サービスの仕様どおりPascalCaseのままとする。
- *
- * @see docs/csi-membership-lookup-api.md
- */
-export type CsiMember = {
-  MembershipNumber: string
-  FirstName: string
-  LastName: string
-  LeagueName: string | null
-  Region: string | null
-  TeamNames: string | null
-}
-
-export type CsiLookupResponse = {
-  data: CsiMember[]
-  total: number
-}
-
-/**
  * FargoRateメンバーシップルックアップAPIのレスポンス。
  * レーティング系の項目は数値ではなく文字列で返ってくる点に注意。
  *
@@ -28,7 +7,7 @@ export type CsiLookupResponse = {
 export type FargoRateLookupPlayer = {
   /**
    * FargoRateの表示用ID。桁数は一定しない。名前の代わりにこの値でも検索できる。
-   * 13桁の `membershipId`（このアプリでいうFargoRate ID）とは別物である。
+   * `membershipId`（このアプリでいうFargoRate ID）とは別物である。
    */
   readableId: string | null
   membershipId: string | null
@@ -73,26 +52,26 @@ export type SessionPlayer = Player & {
    * 頼らず、明示的な判別子で区別する。
    */
   kind: 'fargorate' | 'guest'
-  fargorateId?: string
-  leagueName?: string | null
-  region?: string | null
-  teamNames?: string | null
+  membershipId?: string
+  location?: string | null
   robustness?: number
 }
 
 /**
- * 2つのAPIの結果を統合した、FargoRateで確認が取れたプレイヤー。
+ * FargoRateで確認が取れたプレイヤー。
  * 確認画面の表示と、認証済みユーザーのセッションの両方でこの型を使う。
  */
 export type FargoRatePlayer = Player & {
   kind: 'fargorate'
   /** FargoRate側から姓名が必ず得られるため、ゲストと違って `null` にならない。 */
   name: string
-  /** FargoRate ID。CSIの MembershipNumber、FargoRateの membershipId にあたる13桁の数値。 */
-  fargorateId: string
-  leagueName: string | null
-  region: string | null
-  teamNames: string | null
+  /**
+   * メンバーシップID。UIでは「FargoRate ID」と表記する。FargoRateのAPIの
+   * `membershipId` にあたる、桁数が一定しない数字列。
+   */
+  membershipId: string
+  /** 所在地。空文字で返ることがあるため `null` に寄せて持つ。 */
+  location: string | null
   /** レーティングの信頼度。 */
   robustness: number
 }
@@ -108,18 +87,17 @@ export type GuestPlayer = Player & {
 /**
  * プレイヤー検索の結果1件。
  *
- * `FargoRatePlayer` と違い、リーグ・リージョン・チームを持たない。それらはCSIから
- * 得る情報であり、名前での検索はFargoRate側しか引かないためである。IDが欠けている
- * プレイヤーが混じるため、`fargorateId` は `null` を取りうる。
+ * リンクの確認に使う `FargoRatePlayer` と違い、IDが欠けているプレイヤーが
+ * 混じるため、`membershipId` は `null` を取りうる。
  */
 export type FargoRateSearchResult = Player & {
   name: string
   /**
-   * FargoRateの表示用ID。桁数は一定しない。リンクに使う13桁のFargoRate ID
-   * （`fargorateId`）とは別物なので、取り違えないこと。
+   * FargoRateの表示用ID。桁数は一定しない。リンクに使うFargoRate ID
+   * （`membershipId`）とは別物なので、取り違えないこと。
    */
   readableId: string | null
-  fargorateId: string | null
+  membershipId: string | null
   location: string | null
   robustness: number
 }

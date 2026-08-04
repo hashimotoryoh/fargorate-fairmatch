@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import handler from '../../../../../server/api/link/lookup.post'
 import { callHandler } from '../../../../helpers/h3'
 import {
-  FARGORATE_ID,
+  MEMBERSHIP_ID,
   createFargoRatePlayer,
 } from '../../../../helpers/fixtures'
 
@@ -24,18 +24,22 @@ describe('POST /api/link/lookup', () => {
     )
   })
 
-  it('該当するプレイヤーの情報を返す', async () => {
+  it('名前とメンバーシップIDで引いたプレイヤーの情報を返す', async () => {
     const profile = createFargoRatePlayer()
     lookupPlayerProfile.mockResolvedValue(profile)
 
     const response = await callHandler(handler, {
-      fargorateId: FARGORATE_ID,
+      name: 'Taro Yamada',
+      membershipId: MEMBERSHIP_ID,
       recaptchaToken: 'valid-token',
     })
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual(profile)
-    expect(lookupPlayerProfile).toHaveBeenCalledWith(FARGORATE_ID)
+    expect(lookupPlayerProfile).toHaveBeenCalledWith(
+      'Taro Yamada',
+      MEMBERSHIP_ID,
+    )
   })
 
   // 外部APIへの総当たりを防ぐための関門なので、ここで弾けばルックアップ自体をさせない。
@@ -46,7 +50,8 @@ describe('POST /api/link/lookup', () => {
     )
 
     const response = await callHandler(handler, {
-      fargorateId: FARGORATE_ID,
+      name: 'Taro Yamada',
+      membershipId: MEMBERSHIP_ID,
       recaptchaToken: 'invalid-token',
     })
 
@@ -58,7 +63,8 @@ describe('POST /api/link/lookup', () => {
     lookupPlayerProfile.mockResolvedValue(null)
 
     const response = await callHandler(handler, {
-      fargorateId: FARGORATE_ID,
+      name: 'Taro Yamada',
+      membershipId: MEMBERSHIP_ID,
       recaptchaToken: 'valid-token',
     })
 
@@ -66,16 +72,53 @@ describe('POST /api/link/lookup', () => {
     expect(response.statusMessage).toBe('Player not found')
   })
 
-  it('FargoRate IDの形式が不正なら 400 を返し、ルックアップを行わない', async () => {
-    const response = await callHandler(handler, { fargorateId: '123' })
+  it('メンバーシップIDの形式が不正なら 400 を返し、ルックアップを行わない', async () => {
+    const response = await callHandler(handler, {
+      name: 'Taro Yamada',
+      membershipId: '99000012345ab',
+    })
 
     expect(response.status).toBe(400)
-    expect(response.statusMessage).toBe('fargorateId must be a 13-digit number')
+    expect(response.statusMessage).toBe(
+      'membershipId must be a string of digits',
+    )
     expect(lookupPlayerProfile).not.toHaveBeenCalled()
   })
 
-  it('FargoRate IDが無ければ 400 を返す', async () => {
-    const response = await callHandler(handler, {})
+  // かつては13桁の固定長としていたが、桁数が一定しないことが判明した。
+  it('13桁でないメンバーシップIDも受け付ける', async () => {
+    const profile = createFargoRatePlayer({ membershipId: '123' })
+    lookupPlayerProfile.mockResolvedValue(profile)
+
+    const response = await callHandler(handler, {
+      name: 'Taro Yamada',
+      membershipId: '123',
+      recaptchaToken: 'valid-token',
+    })
+
+    expect(response.status).toBe(200)
+    expect(lookupPlayerProfile).toHaveBeenCalledWith('Taro Yamada', '123')
+  })
+
+  it('名前が短すぎれば 400 を返し、ルックアップを行わない', async () => {
+    const response = await callHandler(handler, {
+      name: 'a',
+      membershipId: MEMBERSHIP_ID,
+    })
+
+    expect(response.status).toBe(400)
+    expect(lookupPlayerProfile).not.toHaveBeenCalled()
+  })
+
+  it('名前が無ければ 400 を返す', async () => {
+    const response = await callHandler(handler, { membershipId: MEMBERSHIP_ID })
+
+    expect(response.status).toBe(400)
+    expect(lookupPlayerProfile).not.toHaveBeenCalled()
+  })
+
+  it('メンバーシップIDが無ければ 400 を返す', async () => {
+    const response = await callHandler(handler, { name: 'Taro Yamada' })
 
     expect(response.status).toBe(400)
     expect(lookupPlayerProfile).not.toHaveBeenCalled()
@@ -86,12 +129,13 @@ describe('POST /api/link/lookup', () => {
     lookupPlayerProfile.mockRejectedValue(
       createError({
         statusCode: 502,
-        statusMessage: 'Failed to reach the CSI membership lookup API',
+        statusMessage: 'Failed to reach the FargoRate membership lookup API',
       }),
     )
 
     const response = await callHandler(handler, {
-      fargorateId: FARGORATE_ID,
+      name: 'Taro Yamada',
+      membershipId: MEMBERSHIP_ID,
       recaptchaToken: 'valid-token',
     })
 
@@ -105,7 +149,8 @@ describe('POST /api/link/lookup', () => {
     lookupPlayerProfile.mockResolvedValue(createFargoRatePlayer())
 
     await callHandler(handler, {
-      fargorateId: FARGORATE_ID,
+      name: 'Taro Yamada',
+      membershipId: MEMBERSHIP_ID,
       recaptchaToken: 'valid-token',
     })
 

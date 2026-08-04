@@ -8,7 +8,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, type VueWrapper } from '@vue/test-utils'
 import LookupPage from '../../../app/pages/lookup.vue'
 import { jaMessage } from '../../helpers/i18n'
-import { FARGORATE_ID } from '../../helpers/fixtures'
+import { MEMBERSHIP_ID } from '../../helpers/fixtures'
 import {
   PLAYER_QUERY_MAX_LENGTH,
   PLAYER_QUERY_MIN_LENGTH,
@@ -33,7 +33,7 @@ function createSearchResult(overrides: Record<string, unknown> = {}) {
   return {
     name: 'Taro Yamada',
     readableId: '1234567',
-    fargorateId: FARGORATE_ID,
+    membershipId: MEMBERSHIP_ID,
     location: 'Tokyo',
     rating: 523,
     robustness: 412,
@@ -135,7 +135,7 @@ describe('プレイヤー検索ページ', () => {
   // IDを持たないプレイヤーが混じっても、描画で落ちてはならない。
   it('IDが無いプレイヤーも一覧に出す', async () => {
     lookupHandler.mockReturnValue([
-      createSearchResult({ readableId: null, fargorateId: null }),
+      createSearchResult({ readableId: null, membershipId: null }),
     ])
 
     const component = await mountSuspended(LookupPage)

@@ -20,8 +20,11 @@ const { recentAccounts, addRecentAccount, removeRecentAccount } =
   useRecentAccounts()
 const { execute: executeRecaptcha } = useRecaptcha()
 
-const fargorateId = ref('')
-// 'input' はID入力、'confirm' は本人確認のステップ。
+// FargoRateのAPIはメンバーシップID（UIでいうFargoRate ID）での検索を受け付け
+// ないため、名前で検索した候補をIDの一致で絞る。それに必要な2項目を入力させる。
+const playerName = ref('')
+const membershipId = ref('')
+// 'input' は名前とIDの入力、'confirm' は本人確認のステップ。
 const step = ref<'input' | 'confirm'>('input')
 
 // サジェストの表示にも、削除ボタンのaria-label（対象の識別）にも使う。
@@ -43,6 +46,13 @@ const guestPath = computed(() =>
 const pending = ref(false)
 const errorMessage = ref('')
 
+const invalidNameMessage = computed(() =>
+  t('link.errors.invalidName', {
+    min: PLAYER_QUERY_MIN_LENGTH,
+    max: PLAYER_QUERY_MAX_LENGTH,
+  }),
+)
+
 // サーバールートは英語のstatusMessageしか返さないため、表示する文言は
 // ステータスコードからこちらで組み立てる。
 function toErrorMessage(error: unknown) {
@@ -51,8 +61,9 @@ function toErrorMessage(error: unknown) {
   if (statusCode === 404) {
     return t('link.errors.notFound')
   }
+  // 400はどちらの項目が弾かれたか判別できないため、両方の確認を促す。
   if (statusCode === 400) {
-    return t('link.errors.invalidId')
+    return t('link.errors.invalidInput')
   }
   if (statusCode === 422) {
     return t('link.errors.recaptchaFailed')
@@ -61,7 +72,11 @@ function toErrorMessage(error: unknown) {
 }
 
 async function searchPlayer() {
-  if (!isValidFargorateId(fargorateId.value)) {
+  if (!isValidPlayerQuery(playerName.value)) {
+    errorMessage.value = invalidNameMessage.value
+    return
+  }
+  if (!isValidMembershipId(membershipId.value)) {
     errorMessage.value = t('link.errors.invalidId')
     return
   }
@@ -73,7 +88,11 @@ async function searchPlayer() {
     const recaptchaToken = await executeRecaptcha('link')
     candidate.value = await $fetch<FargoRatePlayer>('/api/link/lookup', {
       method: 'POST',
-      body: { fargorateId: fargorateId.value, recaptchaToken },
+      body: {
+        name: playerName.value,
+        membershipId: membershipId.value,
+        recaptchaToken,
+      },
     })
     step.value = 'confirm'
   } catch (error) {
@@ -86,14 +105,14 @@ async function searchPlayer() {
 // リンクを確定し、アカウントを記憶したうえで元々開こうとしていたページへ移動する。
 // サーバーが再ルックアップした最新のプレイヤー情報を記憶に使う。呼び出し元が
 // 持つ情報（サジェストのlocalStorageの値など）は古い可能性があるため使わない。
-async function completeLink(id: string) {
+async function completeLink(name: string, id: string) {
   pending.value = true
   errorMessage.value = ''
 
   try {
     const profile = await $fetch<FargoRatePlayer>('/api/auth/session', {
       method: 'POST',
-      body: { fargorateId: id },
+      body: { name, membershipId: id },
     })
     addRecentAccount(profile)
     await refreshSession()
@@ -108,19 +127,22 @@ async function completeLink(id: string) {
   }
 }
 
-// 本人だと確認できたのでリンクを確定する。
+// 本人だと確認できたのでリンクを確定する。入力欄の値ではなく、ルックアップで
+// 得たプレイヤーの名前とIDを使う。状態が食い違った場合に、ユーザーが確認して
+// いない別のプレイヤーでリンクしないため。
 async function confirm() {
   if (!candidate.value) return
-  await completeLink(candidate.value.fargorateId)
+  await completeLink(candidate.value.name, candidate.value.membershipId)
 }
 
 // 過去に本人確認したアカウントは、選んだ時点で本人だとわかっているため、
-// 確認画面を経由せず直接リンクを確定する。
+// 確認画面を経由せず直接リンクを確定する。記憶している名前はサーバーが
+// ルックアップした結果なので、そのまま検索の鍵に使える。
 async function selectRecentAccount(account: RecentAccount) {
-  await completeLink(account.fargorateId)
+  await completeLink(account.name, account.membershipId)
 }
 
-// 本人ではなかったので、ID入力からやり直す。
+// 本人ではなかったので、入力からやり直す。
 function reject() {
   candidate.value = null
   step.value = 'input'
@@ -150,13 +172,24 @@ function reject() {
           @submit.prevent="searchPlayer"
         >
           <label class="floating-label">
+            <span>{{ $t('link.nameLabel') }}</span>
+            <input
+              v-model.trim="playerName"
+              class="input input-bordered w-full"
+              type="text"
+              :maxlength="PLAYER_QUERY_MAX_LENGTH"
+              placeholder="Ryoh Hashimoto"
+              required
+            />
+          </label>
+
+          <label class="floating-label">
             <span>{{ $t('link.idLabel') }}</span>
             <input
-              v-model.trim="fargorateId"
+              v-model.trim="membershipId"
               class="input input-bordered w-full"
               type="text"
               inputmode="numeric"
-              maxlength="13"
               placeholder="9900006315553"
               required
             />
@@ -171,7 +204,7 @@ function reject() {
             </span>
             <div
               v-for="account in recentAccounts"
-              :key="account.fargorateId"
+              :key="account.membershipId"
               class="join"
             >
               <button
@@ -191,7 +224,7 @@ function reject() {
                   })
                 "
                 :disabled="pending"
-                @click="removeRecentAccount(account.fargorateId)"
+                @click="removeRecentAccount(account.membershipId)"
               >
                 ✕
               </button>

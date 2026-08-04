@@ -180,7 +180,7 @@ export default defineNuxtConfig({
           {
             title: 'Link your FargoRate',
             description:
-              'Link your FargoRate player profile with the 13-digit FargoRate ID shown on your player card in the FargoRate app.',
+              'Link your FargoRate player profile with your name and the FargoRate ID shown on your player card in the FargoRate app.',
             href: '/en/link',
           },
           {

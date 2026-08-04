@@ -6,7 +6,7 @@ import type { GuestPlayer } from '#shared/types/player'
  * ゲストは名前もレーティングも自己申告であり、FargoRateのように引き直して
  * 裏を取ることができない。せめて混入だけは防ぐため、ボディを展開せず必要な
  * 項目だけを読み、ここで組み立てたオブジェクトをセッションに渡す。
- * これにより `fargorateId` や `kind: 'fargorate'` を送られても効かない。
+ * これにより `membershipId` や `kind: 'fargorate'` を送られても効かない。
  */
 export function readGuestPlayer(body: {
   name?: unknown

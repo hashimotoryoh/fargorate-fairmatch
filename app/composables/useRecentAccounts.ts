@@ -6,20 +6,23 @@ const MAX_ENTRIES = 5
 
 /**
  * ゲストは対象外である。リンクのたびにサーバーが引き直すための鍵となる
- * FargoRate IDを持たず、レーティングも自己申告なので、記憶しても再現できない。
+ * メンバーシップIDを持たず、レーティングも自己申告なので、記憶しても
+ * 再現できない。
  */
 export type RecentAccount = Pick<
   FargoRatePlayer,
-  'fargorateId' | 'name' | 'rating'
+  'membershipId' | 'name' | 'rating'
 >
 
 function isRecentAccount(value: unknown): value is RecentAccount {
   if (typeof value !== 'object' || value === null) return false
   const account = value as Record<string, unknown>
 
+  // 旧形式（`fargorateId` キー）の値はここで弾かれ、サジェストから消える。
+  // 記憶し直せば復元できるだけの値なので、移行処理は持たない。
   return (
-    typeof account.fargorateId === 'string' &&
-    isValidFargorateId(account.fargorateId) &&
+    typeof account.membershipId === 'string' &&
+    isValidMembershipId(account.membershipId) &&
     typeof account.name === 'string' &&
     typeof account.rating === 'number'
   )
@@ -61,14 +64,14 @@ export function useRecentAccounts() {
 
   function addRecentAccount(profile: RecentAccount) {
     const account: RecentAccount = {
-      fargorateId: profile.fargorateId,
+      membershipId: profile.membershipId,
       name: profile.name,
       rating: profile.rating,
     }
     const next = [
       account,
       ...recentAccounts.value.filter(
-        (stored) => stored.fargorateId !== account.fargorateId,
+        (stored) => stored.membershipId !== account.membershipId,
       ),
     ].slice(0, MAX_ENTRIES)
     recentAccounts.value = next
@@ -76,9 +79,9 @@ export function useRecentAccounts() {
   }
 
   // ユーザーが任意のタイミングでサジェストから個別に消せるようにする。
-  function removeRecentAccount(fargorateId: string) {
+  function removeRecentAccount(membershipId: string) {
     const next = recentAccounts.value.filter(
-      (stored) => stored.fargorateId !== fargorateId,
+      (stored) => stored.membershipId !== membershipId,
     )
     recentAccounts.value = next
     writeStoredAccounts(next)

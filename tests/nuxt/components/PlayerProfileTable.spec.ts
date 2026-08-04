@@ -27,32 +27,27 @@ describe('PlayerProfileTable', () => {
     expect(component.find('tbody').text()).toContain('Hanako Suzuki')
   })
 
-  it('リーグ・リージョン・チームを見せる', async () => {
+  it('所在地を見せる', async () => {
     const component = await mountSuspended(PlayerProfileTable, {
       props: { player: createFargoRatePlayer() },
     })
     const rows = component.findAll('tbody tr').map((row) => row.text())
 
-    expect(rows).toHaveLength(4)
-    expect(rows.join('\n')).toContain('Tokyo League')
-    expect(rows.join('\n')).toContain('Kanto')
-    expect(rows.join('\n')).toContain('Team Alpha')
+    expect(rows).toHaveLength(2)
+    expect(rows.join('\n')).toContain(jaMessage('player.location'))
+    expect(rows.join('\n')).toContain('Tokyo')
   })
 
-  // 外部APIは任意項目を null で返しうる。空欄のままだと行の意味が伝わらない。
+  // 外部APIは所在地を空で返しうる。空欄のままだと行の意味が伝わらない。
   it('値が null の項目をハイフンで見せる', async () => {
     const component = await mountSuspended(PlayerProfileTable, {
       props: {
-        player: createFargoRatePlayer({
-          leagueName: null,
-          region: null,
-          teamNames: null,
-        }),
+        player: createFargoRatePlayer({ location: null }),
       },
     })
     const values = component.findAll('tbody td').map((cell) => cell.text())
 
-    expect(values).toEqual(['Taro Yamada', '-', '-', '-'])
+    expect(values).toEqual(['Taro Yamada', '-'])
   })
 
   // 確認画面ではユーザーが今まさに入力したIDなので出さない。
@@ -61,18 +56,18 @@ describe('PlayerProfileTable', () => {
       props: { player: createFargoRatePlayer() },
     })
 
-    expect(component.text()).not.toContain(jaMessage('player.fargorateId'))
+    expect(component.text()).not.toContain(jaMessage('player.membershipId'))
     expect(component.text()).not.toContain('9900001234567')
   })
 
-  it('show-fargorate-id を付けるとFargoRate IDを先頭の行に出す', async () => {
+  it('show-membership-id を付けるとFargoRate IDを先頭の行に出す', async () => {
     const component = await mountSuspended(PlayerProfileTable, {
-      props: { player: createFargoRatePlayer(), showFargorateId: true },
+      props: { player: createFargoRatePlayer(), showMembershipId: true },
     })
     const rows = component.findAll('tbody tr')
 
-    expect(rows).toHaveLength(5)
-    expect(rows[0]?.text()).toContain(jaMessage('player.fargorateId'))
+    expect(rows).toHaveLength(3)
+    expect(rows[0]?.text()).toContain(jaMessage('player.membershipId'))
     expect(rows[0]?.text()).toContain('9900001234567')
   })
 
@@ -90,14 +85,14 @@ describe('PlayerProfileTable', () => {
     // 持っていない項目を空欄で並べても読み手に伝わるものが無い。
     it('FargoRate固有の項目を行ごと出さない', async () => {
       const component = await mountSuspended(PlayerProfileTable, {
-        props: { player: createGuestPlayer(), showFargorateId: true },
+        props: { player: createGuestPlayer(), showMembershipId: true },
       })
       const rows = component.findAll('tbody tr')
 
       expect(rows).toHaveLength(1)
       expect(rows[0]?.text()).toContain('Jiro Suzuki')
-      expect(component.text()).not.toContain(jaMessage('player.fargorateId'))
-      expect(component.text()).not.toContain(jaMessage('player.league'))
+      expect(component.text()).not.toContain(jaMessage('player.membershipId'))
+      expect(component.text()).not.toContain(jaMessage('player.location'))
     })
 
     // 既定名は言語で変わるため、セッションではなく描画時に補う。

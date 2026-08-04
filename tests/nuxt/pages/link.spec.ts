@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, type VueWrapper } from '@vue/test-utils'
 import LinkPage from '../../../app/pages/link.vue'
 import { jaMessage } from '../../helpers/i18n'
-import { FARGORATE_ID, createFargoRatePlayer } from '../../helpers/fixtures'
+import { MEMBERSHIP_ID, createFargoRatePlayer } from '../../helpers/fixtures'
 
 const {
   routeQuery,
@@ -58,9 +58,24 @@ async function useLocale(code: 'ja' | 'en') {
   navigateToMock.mockClear()
 }
 
-/** 送信して、読み込み中の表示が消える（＝処理が終わる）まで待つ。 */
-async function fillAndSubmit(component: VueWrapper, value: string) {
-  await component.find('input[type="text"]').setValue(value)
+/** 名前の入力欄。フォームの1つ目のテキスト入力。 */
+function nameInput(component: VueWrapper) {
+  return component.find('input[type="text"]')
+}
+
+/** FargoRate IDの入力欄。数字入力を示す inputmode で見分ける。 */
+function idInput(component: VueWrapper) {
+  return component.find('input[inputmode="numeric"]')
+}
+
+/** 名前とIDを入力して送信し、読み込み中の表示が消える（＝処理が終わる）まで待つ。 */
+async function fillAndSubmit(
+  component: VueWrapper,
+  name: string,
+  membershipId: string,
+) {
+  await nameInput(component).setValue(name)
+  await idInput(component).setValue(membershipId)
   await component.find('form').trigger('submit')
   await flushPromises()
   await vi.waitFor(() =>
@@ -95,16 +110,23 @@ describe('リンクページ', () => {
     sessionHandler.mockReturnValue(createFargoRatePlayer())
   })
 
-  it('FargoRate IDの入力欄と検索ボタンを出す', async () => {
+  it('名前とFargoRate IDの入力欄と検索ボタンを出す', async () => {
     const component = await mountSuspended(LinkPage)
-    const input = component.find('input[type="text"]')
 
     expect(component.text()).toContain(jaMessage('link.heading'))
-    expect(input.attributes('inputmode')).toBe('numeric')
-    expect(input.attributes('maxlength')).toBe('13')
+    expect(component.text()).toContain(jaMessage('link.nameLabel'))
+    expect(component.text()).toContain(jaMessage('link.idLabel'))
+    expect(idInput(component).attributes('inputmode')).toBe('numeric')
     expect(component.find('button[type="submit"]').text()).toContain(
       jaMessage('link.submit'),
     )
+  })
+
+  // かつては13桁の固定長としていたが、桁数が一定しないことが判明した。
+  it('IDの入力欄に桁数の制限を設けない', async () => {
+    const component = await mountSuspended(LinkPage)
+
+    expect(idInput(component).attributes('maxlength')).toBeUndefined()
   })
 
   it('IDの調べ方への導線を置く', async () => {
@@ -114,10 +136,21 @@ describe('リンクページ', () => {
   })
 
   // 形式が明らかに不正なうちは、外部APIまで問い合わせない。
-  it('13桁でないIDは送信せずその場で知らせる', async () => {
+  it('短すぎる名前は送信せずその場で知らせる', async () => {
     const component = await mountSuspended(LinkPage)
 
-    await fillAndSubmit(component, '123')
+    await fillAndSubmit(component, 'a', MEMBERSHIP_ID)
+
+    expect(lookupHandler).not.toHaveBeenCalled()
+    expect(component.find('[role="alert"]').text()).toContain(
+      jaMessage('link.errors.invalidName', { min: '2', max: '64' }),
+    )
+  })
+
+  it('数字でないIDは送信せずその場で知らせる', async () => {
+    const component = await mountSuspended(LinkPage)
+
+    await fillAndSubmit(component, 'Taro Yamada', '99000012345ab')
 
     expect(lookupHandler).not.toHaveBeenCalled()
     expect(component.find('[role="alert"]').text()).toContain(
@@ -125,10 +158,35 @@ describe('リンクページ', () => {
     )
   })
 
+  // かつての13桁の検証を残すと、実在する桁数違いのIDで検索できなくなる。
+  it('13桁でないIDも送信する', async () => {
+    const component = await mountSuspended(LinkPage)
+
+    await fillAndSubmit(component, 'Taro Yamada', '123')
+
+    expect(lookupHandler).toHaveBeenCalledTimes(1)
+  })
+
+  it('入力した名前とFargoRate IDでルックアップする', async () => {
+    lookupHandler.mockImplementation(async (event) => {
+      expect(await readBody(event)).toEqual({
+        name: 'Taro Yamada',
+        membershipId: MEMBERSHIP_ID,
+        recaptchaToken: 'test-token',
+      })
+      return createFargoRatePlayer()
+    })
+
+    const component = await mountSuspended(LinkPage)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
+
+    expect(lookupHandler).toHaveBeenCalledTimes(1)
+  })
+
   it('見つかったプレイヤーを本人確認の画面で見せる', async () => {
     const component = await mountSuspended(LinkPage)
 
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     expect(lookupHandler).toHaveBeenCalledTimes(1)
     expect(component.text()).toContain(jaMessage('link.confirmQuestion'))
@@ -141,16 +199,16 @@ describe('リンクページ', () => {
   it('本人確認の画面にFargoRate IDを出さない', async () => {
     const component = await mountSuspended(LinkPage)
 
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
-    expect(component.text()).not.toContain(FARGORATE_ID)
+    expect(component.text()).not.toContain(MEMBERSHIP_ID)
   })
 
   it('該当が無ければ見つからなかったことを知らせる', async () => {
     lookupHandler.mockImplementation(notFound)
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     expect(component.find('[role="alert"]').text()).toContain(
       jaMessage('link.errors.notFound'),
@@ -164,7 +222,7 @@ describe('リンクページ', () => {
     })
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     expect(component.find('[role="alert"]').text()).toContain(
       jaMessage('link.errors.unexpected'),
@@ -177,7 +235,7 @@ describe('リンクページ', () => {
     })
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     expect(component.find('[role="alert"]').text()).toContain(
       jaMessage('link.errors.recaptchaFailed'),
@@ -186,7 +244,7 @@ describe('リンクページ', () => {
 
   it('本人だと答えるとセッションを確定してダッシュボードへ移動する', async () => {
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     await component.findAll('button')[0]?.trigger('click')
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
@@ -196,20 +254,29 @@ describe('リンクページ', () => {
     expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
   })
 
-  // 入力欄の値ではなく、ルックアップで得たプレイヤーのIDでリンクを確定する。
-  // 状態が食い違った場合に、ユーザーが確認していない別IDでリンクしないため。
-  it('確認画面ではルックアップで得たプレイヤーのIDでリンクを確定する', async () => {
+  // 入力欄の値ではなく、ルックアップで得たプレイヤーの名前とIDでリンクを確定する。
+  // 状態が食い違った場合に、ユーザーが確認していない別のプレイヤーでリンクしないため。
+  it('確認画面ではルックアップで得たプレイヤーの名前とIDでリンクを確定する', async () => {
     const candidateId = '9900009999999'
     lookupHandler.mockReturnValue(
-      createFargoRatePlayer({ fargorateId: candidateId }),
+      createFargoRatePlayer({
+        name: 'Hanako Suzuki',
+        membershipId: candidateId,
+      }),
     )
     sessionHandler.mockImplementation(async (event) => {
-      expect(await readBody(event)).toEqual({ fargorateId: candidateId })
-      return createFargoRatePlayer({ fargorateId: candidateId })
+      expect(await readBody(event)).toEqual({
+        name: 'Hanako Suzuki',
+        membershipId: candidateId,
+      })
+      return createFargoRatePlayer({
+        name: 'Hanako Suzuki',
+        membershipId: candidateId,
+      })
     })
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     await component.findAll('button')[0]?.trigger('click')
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
@@ -221,7 +288,7 @@ describe('リンクページ', () => {
     routeQuery.redirect = '/game'
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     await component.findAll('button')[0]?.trigger('click')
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
@@ -234,7 +301,7 @@ describe('リンクページ', () => {
     routeQuery.redirect = 'https://example.com'
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     await component.findAll('button')[0]?.trigger('click')
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
@@ -251,7 +318,7 @@ describe('リンクページ', () => {
     await useLocale('en')
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     await component.findAll('button')[0]?.trigger('click')
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
@@ -266,7 +333,7 @@ describe('リンクページ', () => {
     await useLocale('en')
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     await component.findAll('button')[0]?.trigger('click')
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
@@ -278,7 +345,7 @@ describe('リンクページ', () => {
     sessionHandler.mockImplementation(notFound)
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     await component.findAll('button')[0]?.trigger('click')
     await vi.waitFor(() =>
@@ -296,7 +363,7 @@ describe('リンクページ', () => {
     })
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     await component.findAll('button')[0]?.trigger('click')
     await vi.waitFor(() =>
@@ -304,14 +371,14 @@ describe('リンクページ', () => {
     )
 
     expect(component.find('[role="alert"]').text()).toContain(
-      jaMessage('link.errors.invalidId'),
+      jaMessage('link.errors.invalidInput'),
     )
     expect(navigateToMock).not.toHaveBeenCalled()
   })
 
-  it('本人でないと答えるとID入力へ戻す', async () => {
+  it('本人でないと答えると入力へ戻す', async () => {
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     await component.findAll('button')[1]?.trigger('click')
     await component.vm.$nextTick()
@@ -324,17 +391,17 @@ describe('リンクページ', () => {
     lookupHandler.mockImplementationOnce(notFound)
 
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     expect(component.find('[role="alert"]').exists()).toBe(true)
 
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     expect(component.find('[role="alert"]').exists()).toBe(false)
   })
 
   const SECOND_ACCOUNT = {
-    fargorateId: '9900007654321',
+    membershipId: '9900007654321',
     name: 'Jiro Suzuki',
     rating: 400,
   }
@@ -364,7 +431,7 @@ describe('リンクページ', () => {
     localStorage.setItem(
       'fairrace:recentAccounts',
       JSON.stringify([
-        { fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 },
+        { membershipId: MEMBERSHIP_ID, name: 'Taro Yamada', rating: 523 },
       ]),
     )
 
@@ -372,7 +439,23 @@ describe('リンクページ', () => {
 
     expect(component.text()).toContain(jaMessage('link.recentAccounts.label'))
     expect(component.text()).toContain('Taro Yamada (523)')
-    expect(component.text()).not.toContain(FARGORATE_ID)
+    expect(component.text()).not.toContain(MEMBERSHIP_ID)
+  })
+
+  // 旧形式（`fargorateId` キー）の値は復元できないため、静かに読み飛ばす。
+  it('旧形式で保存されたサジェストは無視する', async () => {
+    localStorage.setItem(
+      'fairrace:recentAccounts',
+      JSON.stringify([
+        { fargorateId: MEMBERSHIP_ID, name: 'Taro Yamada', rating: 523 },
+      ]),
+    )
+
+    const component = await mountSuspended(LinkPage)
+
+    expect(component.text()).not.toContain(
+      jaMessage('link.recentAccounts.label'),
+    )
   })
 
   // 壊れた値でも例外を握りつぶし、サジェスト無しで入力を続けられるようにする。
@@ -389,7 +472,7 @@ describe('リンクページ', () => {
   // 保存形式が想定より多件数になっていても、表示件数の上限（直近5件）を崩さない。
   it('保存件数が上限を超えていても直近5件までしかサジェストしない', async () => {
     const accounts = Array.from({ length: 7 }, (_, i) => ({
-      fargorateId: String(9900000000000 + i),
+      membershipId: String(9900000000000 + i),
       name: `Player ${i}`,
       rating: 400 + i,
     }))
@@ -400,12 +483,12 @@ describe('リンクページ', () => {
     expect(findRemoveButtons(component)).toHaveLength(5)
   })
 
-  // 選んだ時点で本人だとわかっているため、IDの入力や確認画面を経由しない。
+  // 選んだ時点で本人だとわかっているため、入力や確認画面を経由しない。
   it('サジェストを選ぶと確認画面を経ずに直接リンクを確定する', async () => {
     localStorage.setItem(
       'fairrace:recentAccounts',
       JSON.stringify([
-        { fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 },
+        { membershipId: MEMBERSHIP_ID, name: 'Taro Yamada', rating: 523 },
       ]),
     )
 
@@ -421,9 +504,35 @@ describe('リンクページ', () => {
     expect(refreshSessionMock).toHaveBeenCalledTimes(1)
     expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
 
-    const input = component.find('input[type="text"]')
-      .element as HTMLInputElement
+    const input = nameInput(component).element as HTMLInputElement
     expect(input.value).toBe('')
+  })
+
+  // 記憶している名前はサーバーがルックアップした結果なので、検索の鍵に使える。
+  it('サジェストからのリンクでは記憶した名前とIDを送る', async () => {
+    localStorage.setItem(
+      'fairrace:recentAccounts',
+      JSON.stringify([SECOND_ACCOUNT]),
+    )
+    sessionHandler.mockImplementation(async (event) => {
+      expect(await readBody(event)).toEqual({
+        name: SECOND_ACCOUNT.name,
+        membershipId: SECOND_ACCOUNT.membershipId,
+      })
+      return createFargoRatePlayer({
+        name: SECOND_ACCOUNT.name,
+        membershipId: SECOND_ACCOUNT.membershipId,
+      })
+    })
+
+    const component = await mountSuspended(LinkPage)
+    await component
+      .findAll('button')
+      .find((button) => button.text() === 'Jiro Suzuki (400)')
+      ?.trigger('click')
+    await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
+
+    expect(sessionHandler).toHaveBeenCalledTimes(1)
   })
 
   // サジェストは古いスナップショットの可能性があるため、サーバーが
@@ -435,7 +544,7 @@ describe('リンクページ', () => {
     )
     sessionHandler.mockReturnValue(
       createFargoRatePlayer({
-        fargorateId: SECOND_ACCOUNT.fargorateId,
+        membershipId: SECOND_ACCOUNT.membershipId,
         name: SECOND_ACCOUNT.name,
         rating: 450,
       }),
@@ -476,7 +585,7 @@ describe('リンクページ', () => {
     localStorage.setItem(
       'fairrace:recentAccounts',
       JSON.stringify([
-        { fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 },
+        { membershipId: MEMBERSHIP_ID, name: 'Taro Yamada', rating: 523 },
         SECOND_ACCOUNT,
       ]),
     )
@@ -510,13 +619,15 @@ describe('リンクページ', () => {
 
   it('本人だと確認すると次回のために名前とレーティングを記憶する', async () => {
     const component = await mountSuspended(LinkPage)
-    await fillAndSubmit(component, FARGORATE_ID)
+    await fillAndSubmit(component, 'Taro Yamada', MEMBERSHIP_ID)
 
     await component.findAll('button')[0]?.trigger('click')
     await vi.waitFor(() => expect(navigateToMock).toHaveBeenCalled())
 
     expect(
       JSON.parse(localStorage.getItem('fairrace:recentAccounts') ?? '[]'),
-    ).toEqual([{ fargorateId: FARGORATE_ID, name: 'Taro Yamada', rating: 523 }])
+    ).toEqual([
+      { membershipId: MEMBERSHIP_ID, name: 'Taro Yamada', rating: 523 },
+    ])
   })
 })
