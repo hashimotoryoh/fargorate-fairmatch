@@ -2,6 +2,8 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { Icon } from '#components'
 import { describe, expect, it } from 'vitest'
 import AppHeader from '../../../app/components/AppHeader.vue'
+import LocaleSwitcher from '../../../app/components/LocaleSwitcher.vue'
+import ThemeSwitcher from '../../../app/components/ThemeSwitcher.vue'
 import { mainNavItems } from '../../../app/utils/navigation'
 import { jaMessage } from '../../helpers/i18n'
 
@@ -31,7 +33,7 @@ describe('AppHeader', () => {
     for (const showNav of [false, true]) {
       const component = await mountSuspended(AppHeader, { props: { showNav } })
 
-      expect(component.find('select').exists()).toBe(true)
+      expect(component.findComponent(LocaleSwitcher).exists()).toBe(true)
     }
   })
 
@@ -40,25 +42,49 @@ describe('AppHeader', () => {
     for (const showNav of [false, true]) {
       const component = await mountSuspended(AppHeader, { props: { showNav } })
 
-      expect(component.find('button').exists()).toBe(true)
+      expect(component.findComponent(ThemeSwitcher).exists()).toBe(true)
     }
   })
 
-  it('show-nav を付けると主要ナビゲーションを出す', async () => {
+  /**
+   * プレイヤー検索は認証の要らない機能で、ヘッダーのこのボタンとフッターだけが
+   * 導線になる。アイコンだけのボタンなので、名称はツールチップと読み上げ用
+   * ラベルで補う。
+   */
+  it('ナビゲーションの有無によらずプレイヤー検索への導線を出す', async () => {
+    for (const showNav of [false, true]) {
+      const component = await mountSuspended(AppHeader, { props: { showNav } })
+      const lookup = component.find('a[href="/lookup"]')
+
+      expect(lookup.attributes('aria-label')).toBe(jaMessage('nav.lookup'))
+      expect(lookup.findComponent(Icon).props('name')).toBe('heroicons:users')
+      expect(component.find('.tooltip').attributes('data-tip')).toBe(
+        jaMessage('nav.lookup'),
+      )
+    }
+  })
+
+  it('show-nav を付けると主要ナビゲーションをタブで出す', async () => {
     const component = await mountSuspended(AppHeader, {
       props: { showNav: true },
     })
-    const links = component.findAll('nav a')
+    const tablist = component.find('nav [role="tablist"]')
+    const tabs = component.findAll('nav a')
 
-    expect(links.map((link) => link.text())).toEqual(
+    expect(tablist.classes()).toContain('tabs')
+    expect(tablist.classes()).toContain('tabs-border')
+    expect(tabs.map((tab) => tab.text())).toEqual(
       mainNavItems.map((item) => jaMessage(item.labelKey)),
     )
-    expect(links.map((link) => link.attributes('href'))).toEqual(
+    expect(tabs.map((tab) => tab.attributes('href'))).toEqual(
       mainNavItems.map((item) => item.to),
+    )
+    expect(tabs.map((tab) => tab.findComponent(Icon).props('name'))).toEqual(
+      mainNavItems.map((item) => item.icon),
     )
   })
 
-  // ドックはスマホ幅で下部に固定されるため、デスクトップ幅のナビゲーションと
+  // FABはスマホ幅で右下に固定されるため、デスクトップ幅のナビゲーションと
   // 出し分ける。片方だけが常時見えると同じ項目が二重に並ぶ。
   it('ナビゲーションはスマホ幅では隠す', async () => {
     const component = await mountSuspended(AppHeader, {
@@ -66,6 +92,6 @@ describe('AppHeader', () => {
     })
 
     expect(component.find('nav').classes()).toContain('hidden')
-    expect(component.find('nav').classes()).toContain('sm:block')
+    expect(component.find('nav').classes()).toContain('sm:flex')
   })
 })
