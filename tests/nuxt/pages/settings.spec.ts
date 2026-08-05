@@ -37,6 +37,24 @@ async function useLocale(code: 'ja' | 'en') {
   navigateToMock.mockClear()
 }
 
+// サインアウトのボタンは独立したグループの中央揃えのボタンであり、
+// DOM順で最初のボタンとは限らないため、文言で特定する。表示中のロケールで
+// 探さないと、英語表示のテストで見つからなくなる。
+function findSignOutButton(
+  component: Awaited<ReturnType<typeof mountSuspended>>,
+) {
+  const signOutLabel = useNuxtApp().$i18n.t('settings.signOut')
+  const button = component
+    .findAll('button')
+    .find((button) => button.text().includes(signOutLabel))
+
+  if (!button) {
+    throw new Error('サインアウトのボタンが見つかりません')
+  }
+
+  return button
+}
+
 describe('設定ページ', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
@@ -83,13 +101,13 @@ describe('設定ページ', () => {
 
     expect(component.text()).not.toContain('Taro Yamada')
     expect(component.text()).not.toContain('9900001234567')
-    expect(component.find('button').exists()).toBe(true)
+    expect(findSignOutButton(component).exists()).toBe(true)
   })
 
   it('サインアウトするとセッションを破棄してトップページへ移動する', async () => {
     const component = await mountSuspended(SettingsPage)
 
-    await component.find('button').trigger('click')
+    await findSignOutButton(component).trigger('click')
     await flushPromises()
 
     expect(clearMock).toHaveBeenCalledTimes(1)
@@ -102,7 +120,7 @@ describe('設定ページ', () => {
 
     const component = await mountSuspended(SettingsPage)
 
-    await component.find('button').trigger('click')
+    await findSignOutButton(component).trigger('click')
     await flushPromises()
 
     expect(navigateToMock).toHaveBeenCalledWith('/en')
@@ -112,9 +130,12 @@ describe('設定ページ', () => {
     const component = await mountSuspended(SettingsPage)
 
     expect(component.text()).toContain(jaMessage('settings.theme'))
-    expect(component.findComponent(Icon).props('name')).toBe(
-      'mdi:theme-light-dark',
-    )
+    expect(
+      component
+        .findAllComponents(Icon)
+        .map((icon) => icon.props('name'))
+        .includes('mdi:theme-light-dark'),
+    ).toBe(true)
   })
 
   // Dockにはタブを追加しない方針のため、設定画面がブログへの唯一の導線になる。
@@ -146,9 +167,9 @@ describe('設定ページ', () => {
     )
 
     const component = await mountSuspended(SettingsPage)
-    await component.find('button').trigger('click')
+    await findSignOutButton(component).trigger('click')
 
-    expect(component.find('button').attributes('disabled')).toBeDefined()
+    expect(findSignOutButton(component).attributes('disabled')).toBeDefined()
     expect(component.find('.loading-spinner').exists()).toBe(true)
 
     resolveClear?.()
