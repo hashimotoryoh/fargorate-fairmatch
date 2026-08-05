@@ -27,13 +27,15 @@ describe('エージェント向けガイド', () => {
 
 /**
  * ライセンスの表記は3か所に散っている。どれか一つだけを変えると食い違うため、
- * 揃っていることを確かめる。
+ * 揃っていることを確かめる。フッターの表記は翻訳ファイルの `footer.license`
+ * にある。
  */
 describe('ライセンスの表記', () => {
   it('package.json・LICENSE・フッターの表記が揃っている', () => {
     expect(packageJson.license).toBe('MIT')
     expect(read('LICENSE')).toContain('MIT License')
-    expect(read('app/components/AppFooter.vue')).toContain('MIT License')
+    expect(read('i18n/locales/en.json')).toContain('MIT License')
+    expect(read('i18n/locales/ja.json')).toContain('MITライセンス')
   })
 })
 

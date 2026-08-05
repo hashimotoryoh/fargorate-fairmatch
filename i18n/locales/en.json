@@ -8,8 +8,11 @@
   "nav": {
     "dashboard": "Dashboard",
     "games": "Games",
+    "settings": "Settings",
     "lookup": "Lookup a Player",
-    "settings": "Settings"
+    "open": "Open navigation",
+    "link": "Link your FargoRate",
+    "guest": "Start as a guest"
   },
   "document": {
     "blog": "Blog",
@@ -19,6 +22,13 @@
     "updatedAt": "Last updated:"
   },
   "footer": {
+    "support": "Support",
+    "reportBug": "Report a bug",
+    "legal": "Legal",
+    "license": "MIT License",
+    "frameworks": "Frameworks",
+    "thanks": "Thanks",
+    "repository": "GitHub repository",
     "commitTitle": "Running on commit {sha}"
   },
   "player": {
