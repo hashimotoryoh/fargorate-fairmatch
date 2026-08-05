@@ -273,7 +273,9 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 `POST /api/players/lookup` はセッションがあるときreCAPTCHAを省く。セッションを持つ利用者は `/link` か `/guest` のどちらかで一度reCAPTCHAを通っており、二重に課すと画面を開くたびにスクリプトを読み込ませることになるためである。この免除が成立するのは**セッションを作る経路の両方にreCAPTCHAが付いている**ことが前提なので、`POST /api/auth/guest` から外さないこと。
 
-Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり、このアプリでは使えない。v2の `siteverify` の応答には `score` も `action` も含まれず、スコア判定で必ず落ちるためである。v3用のテストキーは公開されていないので、ローカル開発でも `localhost` をドメインに加えた自分のv3キーを使うこと。検証が通らないことを理由に `score` や `action` のチェックを緩めてはならない。
+開発環境（`NODE_ENV=development`、つまり `npm run dev`）ではreCAPTCHAを使わない。`verifyRecaptchaToken` は検証ごと省いて素通しし、クライアント側の `useRecaptcha` もスクリプトを読み込まずダミーのトークンを返すため、キーが未設定でも動く。v3にはテスト用キーが無いためである。Googleが公開しているテストキー（`6LeIxAcT...`）はv2用であり、このアプリでは使えない。v2の `siteverify` の応答には `score` も `action` も含まれず、スコア判定で必ず落ちるためである。reCAPTCHAそのものの動作をローカルで確かめる場合は、`localhost` をドメインに加えた自分のv3キーを設定し、本番ビルドで起動すること。素通しは `NODE_ENV` が `development` のときに限り、検証が通らないことを理由に `score` や `action` のチェックを緩めてはならない。
+
+開発環境だけ挙動を変える分岐の書き方は2種類あり、使い分ける。実行時のコード（`server/`・`app/`）では `process.env.NODE_ENV === 'development'` で判定する。Nuxtの慣用である `import.meta.dev` はビルド時に静的展開される定数で、テストから `vi.stubEnv()` で切り替えられないためである。いっぽう `nuxt.config.ts` の設定値は `$development` の上書きで変える。実機確認（`npm run dev:host`）が平文HTTPになるためにセッションクッキーの `secure` を開発環境だけ外しているのがその例で、この上書きが `$development` に閉じていることは `tests/unit/repository/session-cookie.spec.ts` が検査する。
 
 認証なしでアクセスできるのは `/`、`/link`、`/guest`、`/lookup`、`/blog`、`/blog/[スラッグ]`、`/faq`、`/privacy-policy`、`/terms-conditions` で、これは検索エンジンに開放するページと一致する。保護は名前付きミドルウェアで行う。
 
