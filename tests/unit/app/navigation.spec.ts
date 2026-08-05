@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
-  documentNavItems,
-  footerNavItems,
+  footerLegalNavItems,
+  footerStartNavItems,
+  footerSupportNavItems,
   mainNavItems,
   resolveRedirectPath,
 } from '../../../app/utils/navigation'
@@ -15,17 +16,18 @@ describe('mainNavItems', () => {
     ])
   })
 
-  // プレイヤー検索はフッターからだけ辿らせる方針。ドックに増やさない。
+  // プレイヤー検索はヘッダー右のボタンとフッターから辿らせる方針。
+  // 主要ナビゲーションに増やさない。
   it('プレイヤー検索を含めない', () => {
     expect(mainNavItems.map((item) => item.to)).not.toContain('/lookup')
   })
 
-  it('すべての項目が自サイト内の絶対パスと表示名のキーとMaterial Design Iconsのアイコン名を持つ', () => {
+  it('すべての項目が自サイト内の絶対パスと表示名のキーとアイコン名を持つ', () => {
     for (const item of mainNavItems) {
       expect(item.to.startsWith('/')).toBe(true)
       expect(item.to.startsWith('//')).toBe(false)
       expect(item.labelKey).not.toBe('')
-      expect(item.icon.startsWith('mdi:')).toBe(true)
+      expect(item.icon).toMatch(/^(heroicons|mdi):/)
     }
   })
 
@@ -35,6 +37,7 @@ describe('mainNavItems', () => {
     expect(new Set(paths).size).toBe(paths.length)
   })
 
+  // ビリヤードのラックはHeroiconsに無いため、ゲームだけMDIを使う。
   it('ゲームタブは mdi:billiards-rack を使う', () => {
     const games = mainNavItems.find((item) => item.to === '/games')
 
@@ -42,20 +45,52 @@ describe('mainNavItems', () => {
   })
 })
 
-describe('footerNavItems', () => {
+describe('フッターの導線', () => {
   /**
-   * プレイヤー検索はヘッダーにもドックにも置かないため、フッターが唯一の
-   * 経路になる。ここから外れると辿り着けなくなる。
+   * 認証の要らない機能はブランドエリアに置く。とくにプレイヤー検索は
+   * ヘッダー右のボタンとここだけが経路で、外れると辿り着けなくなる。
    */
-  it('プレイヤー検索とドキュメントへの導線を並べる', () => {
-    expect(footerNavItems.map((item) => item.to)).toEqual([
+  it('ブランドエリアにリンク・ゲスト・プレイヤー検索を並べる', () => {
+    expect(footerStartNavItems.map((item) => item.to)).toEqual([
+      '/link',
+      '/guest',
       '/lookup',
-      ...documentNavItems.map((item) => item.to),
     ])
   })
 
-  it('遷移先が重複しない', () => {
-    const paths = footerNavItems.map((item) => item.to)
+  /**
+   * リンクとゲストの入口は認証済みには `guest` ミドルウェアで弾かれる
+   * デッドリンクになるため、未認証だけに出す印を付ける。プレイヤー検索は
+   * 認証の有無によらず機能するため印を付けない。
+   */
+  it('利用開始の導線だけに未認証専用の印を付ける', () => {
+    const guestOnlyPaths = footerStartNavItems
+      .filter((item) => item.guestOnly)
+      .map((item) => item.to)
+
+    expect(guestOnlyPaths).toEqual(['/link', '/guest'])
+  })
+
+  it('Support欄によくある質問とブログを並べる', () => {
+    expect(footerSupportNavItems.map((item) => item.to)).toEqual([
+      '/faq',
+      '/blog',
+    ])
+  })
+
+  it('Legal欄に利用規約とプライバシーポリシーを並べる', () => {
+    expect(footerLegalNavItems.map((item) => item.to)).toEqual([
+      '/terms-conditions',
+      '/privacy-policy',
+    ])
+  })
+
+  it('遷移先が欄をまたいでも重複しない', () => {
+    const paths = [
+      ...footerStartNavItems,
+      ...footerSupportNavItems,
+      ...footerLegalNavItems,
+    ].map((item) => item.to)
 
     expect(new Set(paths).size).toBe(paths.length)
   })

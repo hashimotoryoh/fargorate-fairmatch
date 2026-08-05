@@ -26,14 +26,14 @@ describe('エージェント向けガイド', () => {
 })
 
 /**
- * ライセンスの表記は3か所に散っている。どれか一つだけを変えると食い違うため、
- * 揃っていることを確かめる。
+ * ライセンスの表記は2か所に散っている。どちらか一方だけを変えると食い違う
+ * ため、揃っていることを確かめる。フッターのLegal欄は `LICENSE` へリンク
+ * するだけで、ライセンス名は持たない。
  */
 describe('ライセンスの表記', () => {
-  it('package.json・LICENSE・フッターの表記が揃っている', () => {
+  it('package.json と LICENSE の表記が揃っている', () => {
     expect(packageJson.license).toBe('MIT')
     expect(read('LICENSE')).toContain('MIT License')
-    expect(read('app/components/AppFooter.vue')).toContain('MIT License')
   })
 })
 

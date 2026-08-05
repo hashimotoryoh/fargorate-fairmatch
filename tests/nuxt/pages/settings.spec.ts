@@ -134,11 +134,12 @@ describe('設定ページ', () => {
       component
         .findAllComponents(Icon)
         .map((icon) => icon.props('name'))
-        .includes('mdi:theme-light-dark'),
+        .includes('heroicons:sun'),
     ).toBe(true)
   })
 
-  // Dockにはタブを追加しない方針のため、設定画面がブログへの唯一の導線になる。
+  // 主要ナビゲーションにはタブを追加しない方針のため、設定画面がフッターと
+  // 並ぶブログへの導線になる。
   it('ブログページへのリンクを出す', async () => {
     const component = await mountSuspended(SettingsPage)
     const link = component.find('a[href="/blog"]')

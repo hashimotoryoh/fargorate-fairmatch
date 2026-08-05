@@ -110,13 +110,11 @@ cp .env.example .env
 
 `NUXT_PUBLIC_SITE_URL` は公開URLのオリジンで、OGPやcanonical、hreflang、sitemap の絶対URLの組み立てに使う。開発中は空のままでよい。空の場合はそれらのメタタグとsitemapを出力しない。
 
-この値はコミットハッシュと同じくビルド時に解決する。実行時に渡しても反映されないため、ビルドを行う環境で設定すること。
+この値はビルド時に解決する。実行時に渡しても反映されないため、ビルドを行う環境で設定すること。
 
 `NUXT_PUBLIC_RECAPTCHA_SITE_KEY` と `NUXT_RECAPTCHA_SECRET_KEY` は `/link`・`/guest`・`/lookup` のBot対策に使う reCAPTCHA v3 のキー（`/lookup` は未認証のときのみ）。[reCAPTCHA admin console](https://www.google.com/recaptcha/admin) でv3のサイトを登録して取得する。開発環境（`npm run dev`）ではreCAPTCHAを素通しにするため、未設定のままでよい。
 
 reCAPTCHAそのものの動作をローカルで確かめる場合は、ドメインに `localhost` を加えたキーを設定し、本番ビルドで起動する。Googleが公開しているテストキー（`6LeIxAcT...`）はv2用なので使わないこと。v2の `siteverify` の応答にはv3の `score` が含まれず、スコア判定で必ず失敗する。v3用のテストキーは公開されていない。
-
-フッターに表示するコミットハッシュはビルド時に解決する。ホスティングが渡す環境変数（`VERCEL_GIT_COMMIT_SHA` や `GITHUB_SHA` など）があればそれを使い、無ければローカルの `git rev-parse` にフォールバックする。どちらも得られない場合はバージョン表示自体を省く。
 
 ## 開発サーバー
 
