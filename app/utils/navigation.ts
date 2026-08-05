@@ -33,12 +33,18 @@ export const mainNavItems: NavItem[] = [
 
 /**
  * フッターのブランドエリアに出す、認証の要らない機能への導線。
- * 認証の有無によらずどのページからも辿れる必要がある。プレイヤー検索は
- * ヘッダー右のアイコンボタンとここだけが経路なので、外すと辿り着けなくなる。
+ * プレイヤー検索はヘッダー右のアイコンボタンとここだけが経路なので、
+ * 外すと辿り着けなくなる。
+ *
+ * `guestOnly` は未認証のユーザーだけに出す印。リンクとゲストの入口には
+ * `guest` ミドルウェアが付いており、認証済みが開いても `/dashboard` へ
+ * 戻されるだけのデッドリンクになるため、認証済みには見せない。
  */
-export const footerStartNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
-  { to: '/link', labelKey: 'nav.link' },
-  { to: '/guest', labelKey: 'nav.guest' },
+export const footerStartNavItems: (Pick<NavItem, 'to' | 'labelKey'> & {
+  guestOnly?: boolean
+})[] = [
+  { to: '/link', labelKey: 'nav.link', guestOnly: true },
+  { to: '/guest', labelKey: 'nav.guest', guestOnly: true },
   { to: '/lookup', labelKey: 'nav.lookup' },
 ]
 

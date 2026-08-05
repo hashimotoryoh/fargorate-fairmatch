@@ -3,6 +3,13 @@ const { repositoryUrl } = useRuntimeConfig().public
 
 const localePath = useLocalePath()
 const theme = useTheme()
+const { loggedIn } = useUserSession()
+
+// リンクとゲストの入口は認証済みには `guest` ミドルウェアで弾かれる
+// デッドリンクになるため、未認証のユーザーだけに出す。
+const startNavItems = computed(() =>
+  footerStartNavItems.filter((item) => !loggedIn.value || !item.guestOnly),
+)
 
 // Nuxtのロゴは文字色を含むため、テーマの明暗に合わせて画像ごと差し替える。
 const nuxtLogo = computed(() =>
@@ -30,7 +37,7 @@ const nuxtLogo = computed(() =>
         <!-- 認証の要らない機能への導線。どのページからも辿れる必要がある。 -->
         <nav class="mt-2 flex flex-col items-start gap-1">
           <NuxtLink
-            v-for="item in footerStartNavItems"
+            v-for="item in startNavItems"
             :key="item.to"
             class="link link-hover"
             :to="localePath(item.to)"

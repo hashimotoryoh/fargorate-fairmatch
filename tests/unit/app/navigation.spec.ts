@@ -58,6 +58,19 @@ describe('フッターの導線', () => {
     ])
   })
 
+  /**
+   * リンクとゲストの入口は認証済みには `guest` ミドルウェアで弾かれる
+   * デッドリンクになるため、未認証だけに出す印を付ける。プレイヤー検索は
+   * 認証の有無によらず機能するため印を付けない。
+   */
+  it('利用開始の導線だけに未認証専用の印を付ける', () => {
+    const guestOnlyPaths = footerStartNavItems
+      .filter((item) => item.guestOnly)
+      .map((item) => item.to)
+
+    expect(guestOnlyPaths).toEqual(['/link', '/guest'])
+  })
+
   it('Support欄によくある質問とブログを並べる', () => {
     expect(footerSupportNavItems.map((item) => item.to)).toEqual([
       '/faq',

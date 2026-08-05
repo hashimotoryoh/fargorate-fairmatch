@@ -1,5 +1,6 @@
-import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it } from 'vitest'
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { computed } from 'vue'
 import AppFooter from '../../../app/components/AppFooter.vue'
 import {
   footerLegalNavItems,
@@ -10,7 +11,18 @@ import { jaMessage } from '../../helpers/i18n'
 
 const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairrace'
 
+// mockNuxtImport のファクトリはファイル先頭へ巻き上げられるため、
+// 差し替える状態も同じタイミングで用意する必要がある。
+const session = vi.hoisted(() => ({ loggedIn: false }))
+
+mockNuxtImport('useUserSession', () => () => ({
+  loggedIn: computed(() => session.loggedIn),
+}))
+
 describe('AppFooter', () => {
+  beforeEach(() => {
+    session.loggedIn = false
+  })
   it('ブランドエリアにロゴと名前とアプリの説明を出す', async () => {
     const component = await mountSuspended(AppFooter)
     const aside = component.find('aside')
@@ -38,7 +50,7 @@ describe('AppFooter', () => {
    * とくにプレイヤー検索は、未認証のユーザーにはヘッダーのボタンとここだけが
    * 経路になる。
    */
-  it('ページ内の導線をすべて出す', async () => {
+  it('未認証ならページ内の導線をすべて出す', async () => {
     const component = await mountSuspended(AppFooter)
     const items = [
       ...footerStartNavItems,
@@ -51,6 +63,19 @@ describe('AppFooter', () => {
         jaMessage(item.labelKey),
       )
     }
+  })
+
+  // リンクとゲストの入口は認証済みには `guest` ミドルウェアで弾かれる
+  // デッドリンクになるため出さない。プレイヤー検索は認証の有無によらず
+  // 機能するため残す。
+  it('認証済みなら利用開始の導線を出さずプレイヤー検索は残す', async () => {
+    session.loggedIn = true
+
+    const component = await mountSuspended(AppFooter)
+
+    expect(component.find('a[href="/link"]').exists()).toBe(false)
+    expect(component.find('a[href="/guest"]').exists()).toBe(false)
+    expect(component.find('a[href="/lookup"]').exists()).toBe(true)
   })
 
   it('Support欄にバグ報告と llms.txt への導線を出す', async () => {
