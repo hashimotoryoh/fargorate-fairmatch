@@ -102,7 +102,6 @@ export default defineNuxtConfig({
       { code: 'ja', language: 'ja-JP', name: '日本語', file: 'ja.json' },
       { code: 'en', language: 'en-US', name: 'English', file: 'en.json' },
     ],
-    lazy: true,
     // hreflang の絶対URLに使う。空のうちは相対URLになるため、
     // `app.vue` 側で該当のメタタグそのものを出さない。
     baseUrl: SITE_URL,
