@@ -2,7 +2,11 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { useRuntimeConfig } from '#imports'
 import { afterEach, describe, expect, it } from 'vitest'
 import AppFooter from '../../../app/components/AppFooter.vue'
-import { footerNavItems } from '../../../app/utils/navigation'
+import {
+  footerLegalNavItems,
+  footerStartNavItems,
+  footerSupportNavItems,
+} from '../../../app/utils/navigation'
 import { jaMessage } from '../../helpers/i18n'
 
 const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairrace'
@@ -17,31 +21,94 @@ describe('AppFooter', () => {
     setPublicConfig({ commitSha: '' })
   })
 
-  it('著作権表示とライセンスへのリンクを出す', async () => {
+  it('ブランドエリアにロゴと名前とアプリの説明を出す', async () => {
     const component = await mountSuspended(AppFooter)
-    const license = component.find(
-      `a[href="${REPOSITORY_URL}/blob/main/LICENSE"]`,
-    )
+    const aside = component.find('aside')
 
-    expect(component.text()).toContain('© 2026')
-    expect(component.text()).toContain('Ryoh Hashimoto')
-    expect(license.text()).toBe('MIT License')
+    expect(aside.text()).toContain('FargoRate FairRace')
+    expect(aside.text()).toContain(jaMessage('index.lead'))
   })
 
   /**
    * ドキュメントと、認証の要らない機能はどのページからも辿れる必要がある。
    * フッターは両方のレイアウトから使うため、ここに導線があれば全ページを賄える。
-   * とくにプレイヤー検索は、ヘッダーとドックが `authenticated` レイアウトに
-   * しか出ないため、未認証のユーザーにはここが唯一の経路になる。
+   * とくにプレイヤー検索は、未認証のユーザーにはヘッダーのボタンとここだけが
+   * 経路になる。
    */
-  it('フッターの導線をすべて出す', async () => {
+  it('ページ内の導線をすべて出す', async () => {
     const component = await mountSuspended(AppFooter)
+    const items = [
+      ...footerStartNavItems,
+      ...footerSupportNavItems,
+      ...footerLegalNavItems,
+    ]
 
-    for (const item of footerNavItems) {
+    for (const item of items) {
       expect(component.find(`a[href="${item.to}"]`).text()).toBe(
         jaMessage(item.labelKey),
       )
     }
+  })
+
+  it('Support欄にバグ報告と llms.txt への導線を出す', async () => {
+    const component = await mountSuspended(AppFooter)
+    const reportBug = component.find(`a[href="${REPOSITORY_URL}/issues/new"]`)
+    const llmsTxt = component.find('a[href="/llms.txt"]')
+
+    expect(reportBug.text()).toBe(jaMessage('footer.reportBug'))
+    expect(llmsTxt.text()).toBe('llms.txt')
+  })
+
+  it('Legal欄からライセンスの全文へ繋ぐ', async () => {
+    const component = await mountSuspended(AppFooter)
+    const license = component.find(
+      `a[href="${REPOSITORY_URL}/blob/main/LICENSE"]`,
+    )
+
+    expect(license.text()).toBe(jaMessage('footer.license'))
+  })
+
+  // 見出しは footer-title で揃える。並びは Support → Legal → Frameworks →
+  // Thanks で、翻訳キーの取り違えを検出するため全件を確かめる。
+  it('リンク集の見出しを並べる', async () => {
+    const component = await mountSuspended(AppFooter)
+
+    expect(
+      component.findAll('.footer-title').map((title) => title.text()),
+    ).toEqual([
+      jaMessage('footer.support'),
+      jaMessage('footer.legal'),
+      jaMessage('footer.frameworks'),
+      jaMessage('footer.thanks'),
+    ])
+  })
+
+  // Nuxtはブランドガイドラインの公式ロゴ画像で、そのほかはテキストで繋ぐ。
+  it('FrameworksとThanksの外部リンクを出す', async () => {
+    const component = await mountSuspended(AppFooter)
+    const nuxt = component.find('a[href="https://nuxt.com/"]')
+
+    expect(nuxt.find('img').attributes('alt')).toBe('Nuxt')
+    for (const href of [
+      'https://daisyui.com/',
+      'https://www.fargorate.com/',
+      'https://www.playcsipool.com/',
+      'https://github.com/',
+      'https://claude.com/',
+    ]) {
+      expect(component.find(`a[href="${href}"]`).exists()).toBe(true)
+    }
+  })
+
+  it('著作権表示とリポジトリへのリンクを出す', async () => {
+    const component = await mountSuspended(AppFooter)
+    const repository = component.find(`a[href="${REPOSITORY_URL}"]`)
+
+    expect(component.text()).toContain('© 2026')
+    expect(component.text()).toContain('Ryoh Hashimoto')
+    expect(repository.attributes('aria-label')).toBe(
+      jaMessage('footer.repository'),
+    )
   })
 
   // 外部サイトを新しいタブで開くため、逆参照を渡さない指定を必ず添える。
