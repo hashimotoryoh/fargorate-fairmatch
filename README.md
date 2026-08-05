@@ -126,6 +126,14 @@ reCAPTCHAそのものの動作をローカルで確かめる場合は、ドメ�
 npm run dev
 ```
 
+スマホなど同一ネットワークの実機から確認する場合は、LANに公開して起動する。
+
+```bash
+npm run dev:host
+```
+
+実機からはHTTPSではなくLAN IPへの平文HTTPでのアクセスになるため、開発環境ではセッションクッキーの `Secure` 属性を外してある（`nuxt.config.ts` の `$development`）。本番のクッキーは `Secure` のままである。
+
 ## 本番ビルド
 
 ```bash

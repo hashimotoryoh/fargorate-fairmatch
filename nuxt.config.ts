@@ -234,6 +234,18 @@ export default defineNuxtConfig({
       templateParams: { siteName: 'FargoRate FairRace', separator: '-' },
     },
   },
+  // 実機確認（`npm run dev:host`）ではLAN IPへ平文HTTPでアクセスするため、
+  // `Secure` 属性付きのクッキーをブラウザが保存せず、セッションが作れない
+  // （`localhost` はHTTPでも特例で保存されるため、PC上の開発では気づけない）。
+  // セッションクッキーの `secure` はh3の既定で有効なので、開発環境に限って
+  // 外す。本番はHTTPS前提であり、この上書きを開発環境の外へ広げないこと。
+  $development: {
+    runtimeConfig: {
+      session: {
+        cookie: { secure: false },
+      },
+    },
+  },
   runtimeConfig: {
     // reCAPTCHA v3 のシークレットキー。サーバー側での検証にのみ使うため public
     // には置かない。
