@@ -23,11 +23,16 @@ const localePath = useLocalePath()
         <Icon name="heroicons:bars-3" class="size-6" />
       </div>
 
-      <!-- アイコンだけのボタンなので、名称はツールチップと読み上げ用ラベルで補う。 -->
+      <!--
+        アイコンだけのボタンなので、名称はツールチップと読み上げ用ラベルで補う。
+        最初の項目はトリガーの真横（180度）に開くため、ツールチップを上に
+        出すと斜め上の項目と重なる。この項目だけ左に出す。
+      -->
       <div
-        v-for="item in mainNavItems"
+        v-for="(item, index) in mainNavItems"
         :key="item.to"
         class="tooltip"
+        :class="{ 'tooltip-left': index === 0 }"
         :data-tip="$t(item.labelKey)"
       >
         <NuxtLink

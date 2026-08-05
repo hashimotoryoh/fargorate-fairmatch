@@ -60,6 +60,18 @@ describe('AppFab', () => {
     )
   })
 
+  // 最初の項目はトリガーの真横（180度）に開くため、ツールチップを上に出すと
+  // 斜め上の項目と重なる。この項目だけ左に出す。
+  it('最初の項目のツールチップだけ左に出す', async () => {
+    const component = await mountSuspended(AppFab)
+    const tooltips = component.findAll('.tooltip')
+
+    expect(tooltips[0]?.classes()).toContain('tooltip-left')
+    for (const tooltip of tooltips.slice(1)) {
+      expect(tooltip.classes()).not.toContain('tooltip-left')
+    }
+  })
+
   // daisyUIのFABはフォーカスの有無で開閉するため、トリガーが
   // フォーカス可能でないと開けない。
   it('開閉のトリガーがフォーカス可能で読み上げ用ラベルを持つ', async () => {
