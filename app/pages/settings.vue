@@ -20,6 +20,23 @@ async function signOut() {
     signingOut.value = false
   }
 }
+
+const { clearRecentOpponents } = useRecentOpponents()
+const { clearRecentAccounts } = useRecentAccounts()
+const { clearGameSetup } = useGameSetup()
+const { resetMatch } = useFairSingleRace()
+
+const localDataCleared = ref(false)
+
+// 消すのはこの端末に保存したデータだけ。サーバー側のAPIキャッシュは
+// 全ユーザー共有なので、個人の設定からは触らない。
+function clearLocalData() {
+  clearRecentOpponents()
+  clearRecentAccounts()
+  clearGameSetup()
+  resetMatch()
+  localDataCleared.value = true
+}
 </script>
 
 <template>
@@ -122,6 +139,32 @@ async function signOut() {
           <NuxtLink :to="localePath('/faq')" class="btn btn-outline">
             {{ $t('document.faq') }}
           </NuxtLink>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-base-200">
+      <div class="card-body gap-4">
+        <div>
+          <h2 class="card-title text-base">
+            {{ $t('settings.localData.heading') }}
+          </h2>
+          <p class="text-base-content/70 mt-1 text-sm">
+            {{ $t('settings.localData.description') }}
+          </p>
+        </div>
+
+        <div class="card-actions items-center gap-3">
+          <button
+            class="btn btn-outline btn-error"
+            type="button"
+            @click="clearLocalData"
+          >
+            {{ $t('settings.localData.clear') }}
+          </button>
+          <span v-if="localDataCleared" class="text-base-content/70 text-sm">
+            {{ $t('settings.localData.cleared') }}
+          </span>
         </div>
       </div>
     </div>

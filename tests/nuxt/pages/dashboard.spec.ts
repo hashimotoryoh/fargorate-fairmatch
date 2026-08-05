@@ -16,31 +16,33 @@ describe('ダッシュボードページ', () => {
     session.user = ref(createFargoRatePlayer())
   })
 
-  it('セッションのプレイヤー情報をFargoRate IDごと見せる', async () => {
+  it('セッションのプレイヤーをカードで見せ、レーティングと信頼度をstatに出す', async () => {
     const component = await mountSuspended(DashboardPage)
 
     expect(component.find('h1').text()).toBe(jaMessage('dashboard.heading'))
-    expect(component.text()).toContain('Taro Yamada')
-    expect(component.text()).toContain('523')
-    expect(component.text()).toContain('FargoRate ID')
-    expect(component.text()).toContain('9900001234567')
+    const card = component.get('.card')
+    expect(card.text()).toContain('Taro Yamada')
+    expect(card.text()).toContain('Tokyo')
+    expect(card.findAll('.stat')).toHaveLength(2)
+    expect(card.text()).toContain('523')
+    expect(card.text()).toContain('412')
   })
 
   it('ゲームを始める導線を置く', async () => {
     const component = await mountSuspended(DashboardPage)
-    const link = component.find('a[href="/game"]')
+    const link = component.find('a[href="/games"]')
 
     expect(link.exists()).toBe(true)
     expect(link.text()).toBe(jaMessage('dashboard.startGame'))
   })
 
   // セッションの復元が済むまで `user` は null になりうる。
-  it('プレイヤー情報が無い間は表を出さない', async () => {
+  it('プレイヤー情報が無い間はカードを出さない', async () => {
     session.user = ref(null)
 
     const component = await mountSuspended(DashboardPage)
 
-    expect(component.find('table').exists()).toBe(false)
-    expect(component.find('a[href="/game"]').exists()).toBe(true)
+    expect(component.find('.stat').exists()).toBe(false)
+    expect(component.find('a[href="/games"]').exists()).toBe(true)
   })
 })

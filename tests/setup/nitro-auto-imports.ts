@@ -1,4 +1,4 @@
-import { createError, defineEventHandler, readBody } from 'h3'
+import { createError, defineEventHandler, getQuery, readBody } from 'h3'
 import { isValidMembershipId } from '../../shared/utils/membershipId'
 import {
   GUEST_NAME_MAX_LENGTH,
@@ -12,15 +12,13 @@ import {
   PLAYER_QUERY_MIN_LENGTH,
   isValidPlayerQuery,
 } from '../../shared/utils/playerQuery'
-import { readGuestPlayer } from '../../server/utils/guest'
 import {
-  lookupPlayerProfile,
-  readMembershipId,
-  readPlayerName,
-  readPlayerQuery,
-  searchPlayers,
-} from '../../server/utils/lookup'
-import { verifyRecaptchaToken } from '../../server/utils/recaptcha'
+  RATING_MAX,
+  RATING_MIN,
+  isValidRating,
+} from '../../shared/utils/rating'
+import { isFargoRatePlayer } from '../../shared/utils/player'
+import { readGuestPlayer } from '../../server/utils/guest'
 
 /**
  * `server/` のコードはNitroの自動インポートに依存しており、素のNode環境では
@@ -35,6 +33,7 @@ Object.assign(globalThis, {
   defineEventHandler,
   // @nuxtjs/sitemap の実体もh3の defineEventHandler そのままの再エクスポート。
   defineSitemapEventHandler: defineEventHandler,
+  getQuery,
   readBody,
   isValidMembershipId,
   GUEST_NAME_MAX_LENGTH,
@@ -45,14 +44,37 @@ Object.assign(globalThis, {
   PLAYER_QUERY_MAX_LENGTH,
   PLAYER_QUERY_MIN_LENGTH,
   isValidPlayerQuery,
-  lookupPlayerProfile,
+  RATING_MAX,
+  RATING_MIN,
+  isValidRating,
+  isFargoRatePlayer,
   readGuestPlayer,
-  readMembershipId,
-  readPlayerName,
-  readPlayerQuery,
-  searchPlayers,
-  verifyRecaptchaToken,
+  // キャッシュはテストの検証対象ではないため、素通しで実体の関数を呼ばせる。
+  defineCachedFunction: (fn: unknown) => fn,
 })
+
+/**
+ * `server/utils/` 同士は自動インポートで参照し合うため、グローバルへの登録が
+ * モジュールの評価より先に必要になる。上の `Object.assign` を済ませてから
+ * 動的に読み込み、循環を避ける。
+ */
+const lookup = await import('../../server/utils/lookup')
+const races = await import('../../server/utils/races')
+
+Object.assign(globalThis, {
+  lookupPlayerProfile: lookup.lookupPlayerProfile,
+  readMembershipId: lookup.readMembershipId,
+  readPlayerName: lookup.readPlayerName,
+  readPlayerQuery: lookup.readPlayerQuery,
+  searchPlayers: lookup.searchPlayers,
+  fetchRaces: races.fetchRaces,
+  raceOptionsFor: races.raceOptionsFor,
+  readRatingParam: races.readRatingParam,
+})
+
+const { verifyRecaptchaToken } = await import('../../server/utils/recaptcha')
+
+Object.assign(globalThis, { verifyRecaptchaToken })
 
 /**
  * `useRuntimeConfig` はテスト用の固定値を返す。値そのものに検証したい意味は
@@ -67,11 +89,11 @@ Object.assign(globalThis, {
 })
 
 /**
- * `$fetch` と `setUserSession` は既定で必ず失敗させる。
+ * `$fetch` とセッション系の関数は既定で必ず失敗させる。
  *
- * 前者を素通しにすると外部APIへ実通信してしまい、後者を素通しにすると
- * セッションの書き込みを検証しないまま通ってしまう。テスト側での
- * `vi.stubGlobal` を強制するため、呼ばれた時点で落とす。
+ * 素通しにすると外部APIへ実通信したり、セッションの読み書きを検証しないまま
+ * 通ってしまったりする。テスト側での `vi.stubGlobal` を強制するため、
+ * 呼ばれた時点で落とす。
  */
 Object.assign(globalThis, {
   $fetch: () => {
@@ -82,6 +104,9 @@ Object.assign(globalThis, {
   },
   getUserSession: () => {
     throw new Error('getUserSession は vi.stubGlobal で差し替えること')
+  },
+  requireUserSession: () => {
+    throw new Error('requireUserSession は vi.stubGlobal で差し替えること')
   },
   queryCollection: () => {
     throw new Error('queryCollection は vi.stubGlobal で差し替えること')

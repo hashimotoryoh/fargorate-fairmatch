@@ -16,13 +16,15 @@ const faqPluginSource = readFileSync(
 
 /**
  * 保護ページのパス一覧。ここで独自に列挙すると、保護ページが増えたときに
- * このテストだけ追随せず検知が漏れる。`sitemap.exclude`（`app/pages/` との
- * 網羅性は `page-protection.spec.ts` が検査済み）から取り出して使い回す。
+ * このテストだけ追随せず検知が漏れる。`PROTECTED_PAGE_PATHS`（`app/pages/`
+ * との網羅性は `page-protection.spec.ts` が検査済み）から取り出して使い回す。
+ * 抽出に失敗すると検査が空回りして無言で通ってしまうため、取り出せたことは
+ * テスト側で表明する。
  */
 function protectedPagePaths(): string[] {
-  const exclude = source.match(/exclude: \[(.*?)\]/s)?.[1] ?? ''
+  const listed = source.match(/PROTECTED_PAGE_PATHS = \[(.*?)\]/s)?.[1] ?? ''
 
-  return [...exclude.matchAll(/'([^']+)'/g)].map(([, path]) => path)
+  return [...listed.matchAll(/'([^']+)'/g)].map(([, path]) => path)
 }
 
 function llmsBlock(): string {
@@ -56,6 +58,12 @@ function llmsSectionsBlock(): string {
  * しまう類のものなので、リポジトリ規約として機械的に固定する。
  */
 describe('llms.txt の設定', () => {
+  // 抽出の正規表現が nuxt.config.ts の形の変化で壊れると、後続の it.each が
+  // 0件になり検査ごと消える。空でないことを先に固定する。
+  it('保護ページのパスを1件以上取り出せている', () => {
+    expect(protectedPagePaths().length).toBeGreaterThan(0)
+  })
+
   it('domain が別のドメイン文字列でなく SITE_URL を参照している', () => {
     expect(llmsBlock()).toMatch(/domain: SITE_URL/)
   })

@@ -17,9 +17,6 @@ const localePath = useLocalePath()
 const { fetch: refreshSession } = useUserSession()
 const { execute: executeRecaptcha } = useRecaptcha()
 
-const name = ref('')
-// 空欄と 0 を区別する必要があるため、数値ではなく入力された文字列のまま持つ。
-const rating = ref('')
 const pending = ref(false)
 const errorMessage = ref('')
 
@@ -37,27 +34,7 @@ function toErrorMessage(error: unknown) {
   return t('guest.errors.unexpected')
 }
 
-async function startAsGuest() {
-  const parsedRating = Number(rating.value)
-
-  // `Number('')` は 0 になるため、空欄は別に見る。
-  if (rating.value === '' || !isValidGuestRating(parsedRating)) {
-    errorMessage.value = t('guest.errors.invalidRating', {
-      min: GUEST_RATING_MIN,
-      max: GUEST_RATING_MAX,
-    })
-    return
-  }
-
-  const trimmedName = name.value.trim()
-
-  if (!isValidGuestName(trimmedName)) {
-    errorMessage.value = t('guest.errors.invalidName', {
-      max: GUEST_NAME_MAX_LENGTH,
-    })
-    return
-  }
-
+async function startAsGuest(player: GuestPlayer) {
   pending.value = true
   errorMessage.value = ''
 
@@ -65,8 +42,7 @@ async function startAsGuest() {
     const recaptchaToken = await executeRecaptcha('guest')
     await $fetch<GuestPlayer>('/api/auth/guest', {
       method: 'POST',
-      // 未入力は null で送り、既定名は表示側の言語で補わせる。
-      body: { name: trimmedName || null, rating: parsedRating, recaptchaToken },
+      body: { name: player.name, rating: player.rating, recaptchaToken },
     })
     await refreshSession()
     // `resolveRedirectPath` はロケールを知らない純粋な関数に保つ。オープン
@@ -107,46 +83,12 @@ const linkPath = computed(() =>
           {{ errorMessage }}
         </div>
 
-        <form class="flex flex-col gap-4" @submit.prevent="startAsGuest">
-          <label class="floating-label">
-            <span>{{ $t('guest.nameLabel') }}</span>
-            <input
-              v-model="name"
-              class="input input-bordered w-full"
-              type="text"
-              :maxlength="GUEST_NAME_MAX_LENGTH"
-              :placeholder="$t('player.guestName')"
-            />
-          </label>
-
-          <label class="floating-label">
-            <span>{{ $t('guest.ratingLabel') }}</span>
-            <input
-              v-model="rating"
-              class="input input-bordered w-full"
-              type="number"
-              :min="GUEST_RATING_MIN"
-              :max="GUEST_RATING_MAX"
-              step="1"
-              placeholder="450"
-              required
-            />
-          </label>
-
-          <p class="text-base-content/60 text-xs">
-            {{
-              $t('guest.ratingHint', {
-                min: GUEST_RATING_MIN,
-                max: GUEST_RATING_MAX,
-              })
-            }}
-          </p>
-
-          <button class="btn btn-primary" type="submit" :disabled="pending">
-            <span v-if="pending" class="loading loading-spinner" />
-            {{ $t('guest.submit') }}
-          </button>
-        </form>
+        <GuestPlayerForm
+          :submit-label="$t('guest.submit')"
+          :pending="pending"
+          @submit="startAsGuest"
+          @invalid="errorMessage = $event"
+        />
 
         <div class="text-center">
           <NuxtLink :to="linkPath" class="btn btn-link btn-sm">

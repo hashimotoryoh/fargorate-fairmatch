@@ -62,10 +62,23 @@ describe('lookupPlayerProfile', () => {
       kind: 'fargorate',
       name: 'Taro Yamada',
       membershipId: MEMBERSHIP_ID,
+      readableId: '1234567',
       location: 'Tokyo',
       rating: 523,
       robustness: 412,
     })
+  })
+
+  // `readableId` はレーティングの引き直しの検索キーに使うため、応答に無ければ
+  // 名前で検索できるよう `null` に寄せて返す。
+  it('readableIdが空のときは null にして返す', async () => {
+    stubFetch(
+      fargorateResponse([createFargoRateLookupPlayer({ readableId: '' })]),
+    )
+
+    await expect(
+      lookupPlayerProfile('Taro Yamada', MEMBERSHIP_ID),
+    ).resolves.toMatchObject({ readableId: null })
   })
 
   it('名前をそのまま検索語としてFargoRateへ渡す', async () => {

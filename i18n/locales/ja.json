@@ -7,7 +7,7 @@
   },
   "nav": {
     "dashboard": "ダッシュボード",
-    "game": "ゲーム",
+    "games": "ゲーム",
     "lookup": "プレイヤーを探す",
     "settings": "設定"
   },
@@ -27,8 +27,7 @@
     "guestName": "ゲストプレイヤー",
     "location": "所在地",
     "rating": "レーティング",
-    "robustness": "信頼度",
-    "robustnessNone": "None"
+    "robustness": "信頼度"
   },
   "seo": {
     "index": {
@@ -50,8 +49,19 @@
     "dashboard": {
       "title": "ダッシュボード"
     },
-    "game": {
-      "title": "ゲーム"
+    "games": {
+      "title": "ゲーム",
+      "briefing": {
+        "title": "ゲームを開始する"
+      },
+      "fairSingleRace": {
+        "briefing": {
+          "title": "ゲームを開始する"
+        },
+        "scoreboard": {
+          "title": "フェアセットマッチ"
+        }
+      }
     },
     "settings": {
       "title": "設定"
@@ -194,21 +204,87 @@
     "lead": "FargoRateから取得したあなたの情報です。",
     "startGame": "ゲームを始める"
   },
-  "game": {
+  "games": {
     "heading": "ゲーム",
-    "lead": "種目を選んで新しいゲームを始めます。",
-    "typeLegend": "種目",
+    "lead": "ゲームか対戦プレイヤーを選んで始めます。",
+    "comingSoon": "準備中",
     "types": {
-      "9ball": {
-        "label": "9ボール",
-        "description": "1番から9番までを順番に落とし、9番を先に落とした方が取得する。"
+      "fairSingleRace": {
+        "label": "フェアセットマッチ",
+        "description": "FargoRateが計算する公平なセット数でプレイします。"
       },
-      "8ball": {
-        "label": "8ボール",
-        "description": "自分の組の7個を落としきってから8番を落とした方が取得する。"
+      "customSingleRace": {
+        "label": "カスタムセットマッチ",
+        "description": "セット数を自分で決めてプレイします。"
+      },
+      "usapl9Ball": {
+        "label": "JCL 9ボール",
+        "description": "JCLの9ボールのルールでスコアを付けます。"
+      },
+      "usapl8Ball": {
+        "label": "JCL 8ボール",
+        "description": "JCLの8ボールのルールでスコアを付けます。"
       }
     },
-    "start": "ゲームを開始する（準備中）"
+    "recentOpponents": {
+      "label": "最近の対戦プレイヤー",
+      "remove": "{name} を最近の対戦プレイヤーから削除"
+    },
+    "header": {
+      "quit": "中断",
+      "quitConfirmHeading": "ゲームを中断しますか？",
+      "quitConfirmLead": "内容は保存されません。",
+      "interruptConfirmHeading": "プレイを中断しますか？",
+      "interruptConfirmLead": "記録中のスコアは保存されません。プレイ開始前のページに戻ります。",
+      "confirm": "中断する",
+      "cancel": "続ける"
+    },
+    "briefing": {
+      "heading": "ゲームを開始する",
+      "steps": {
+        "game": "ゲーム",
+        "opponent": "対戦プレイヤー",
+        "setup": "ゲーム設定"
+      },
+      "game": {
+        "heading": "ゲームを選択"
+      },
+      "opponent": {
+        "heading": "対戦プレイヤーを選択",
+        "lead": "あなた（{name}）の対戦相手を選びます。",
+        "methodSearch": "FargoRateで探す",
+        "methodGuest": "ゲスト",
+        "search": "検索",
+        "noId": "FargoRate IDが無いため選べません。",
+        "guestSubmit": "この相手で決定",
+        "clear": "クリア"
+      }
+    },
+    "rotate": {
+      "heading": "端末を横向きにしてください",
+      "lead": "スコアボードは横向きで使います。回転しない場合は、端末側の画面の向きのロックを解除してください。",
+      "retry": "横向きにする"
+    },
+    "fairSingleRace": {
+      "briefing": {
+        "heading": "セット数を選ぶ",
+        "changePlayer": "相手プレイヤーを変更",
+        "recommended": "最もフェア",
+        "otherRaces": "他の候補から選ぶ（{count}）",
+        "play": "プレイ開始",
+        "racesUnavailable": "セット数の候補を取得できませんでした。しばらくしてからもう一度お試しください。",
+        "retry": "再試行"
+      },
+      "scoreboard": {
+        "trail": "スコア推移",
+        "increase": "{name} の得点を1増やす",
+        "decrease": "{name} の得点を1減らす",
+        "winner": "{name} の勝ち",
+        "rematch": "もう一度",
+        "finish": "終了",
+        "backToBoard": "スコアボードに戻る"
+      }
+    }
   },
   "settings": {
     "heading": "設定",
@@ -221,7 +297,13 @@
     "language": "言語",
     "languageDescription": "画面の表示に使う言語を選びます。",
     "blogDescription": "アプリの更新情報などのブログを確認できます。",
-    "faqDescription": "使い方やFargoRateとの関係について、よくある質問を確認できます。"
+    "faqDescription": "使い方やFargoRateとの関係について、よくある質問を確認できます。",
+    "localData": {
+      "heading": "端末に保存したデータ",
+      "description": "最近の対戦相手、最近使用したアカウント、進行中のゲームなど、この端末に保存したデータを削除します。サインインの状態は変わりません。",
+      "clear": "削除する",
+      "cleared": "削除しました。"
+    }
   },
   "blog": {
     "heading": "ブログ",

@@ -19,9 +19,11 @@ const { user } = useUserSession()
       </p>
     </div>
 
-    <PlayerProfileTable v-if="user" :player="user" show-membership-id />
+    <div v-if="user" class="card bg-base-200">
+      <PlayerCard :player="user" />
+    </div>
 
-    <NuxtLink :to="localePath('/game')" class="btn btn-primary">
+    <NuxtLink :to="localePath('/games')" class="btn btn-primary">
       {{ $t('dashboard.startGame') }}
     </NuxtLink>
   </div>

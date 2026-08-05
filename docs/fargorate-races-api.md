@@ -20,3 +20,25 @@ $ curl 'https://lms.fargorate.com/api/ratingcalc/racesbytype?type=1&ratingOne=57
   -H 'sec-ch-ua-platform: "macOS"'
 [{"highPlayerRaceTo":3,"lowPlayerRaceTo":2,"delta":0.0,"closest":false},{"highPlayerRaceTo":4,"lowPlayerRaceTo":2,"delta":0.0,"closest":false},{"highPlayerRaceTo":5,"lowPlayerRaceTo":3,"delta":0.0,"closest":false},{"highPlayerRaceTo":6,"lowPlayerRaceTo":3,"delta":0.0,"closest":false},{"highPlayerRaceTo":7,"lowPlayerRaceTo":4,"delta":0.0,"closest":false},{"highPlayerRaceTo":8,"lowPlayerRaceTo":4,"delta":0.0,"closest":false},{"highPlayerRaceTo":9,"lowPlayerRaceTo":4,"delta":0.0,"closest":false},{"highPlayerRaceTo":10,"lowPlayerRaceTo":5,"delta":0.0,"closest":false},{"highPlayerRaceTo":11,"lowPlayerRaceTo":5,"delta":0.0,"closest":false},{"highPlayerRaceTo":12,"lowPlayerRaceTo":5,"delta":0.0,"closest":true},{"highPlayerRaceTo":13,"lowPlayerRaceTo":6,"delta":0.0,"closest":false}]
 ```
+
+## レスポンス
+
+トップレベルが配列で、ルックアップAPIのようなラッパーオブジェクトは無い。
+
+| フィールド         | 型      | 意味                                                        |
+| ------------------ | ------- | ----------------------------------------------------------- |
+| `highPlayerRaceTo` | number  | レーティングが高い側の必要セット数                          |
+| `lowPlayerRaceTo`  | number  | レーティングが低い側の必要セット数                          |
+| `delta`            | number  | 上の例では全件 `0.0`。意味は未調査                          |
+| `closest`          | boolean | 最も公平な候補にだけ `true` が付く。上の例では `12-5` の1件 |
+
+## パラメータ
+
+- `type`: レーティングが高い側への厳しさ。`0` = mild、`1` = medium、`2` = hot。このアプリでは常に medium（`1`）を使う
+- `ratingOne`: レーティングが高い側。レスポンスが `high`/`low` の名前で返るため、アプリ側で高低を正規化してから渡す
+- `ratingTwo`: レーティングが低い側
+
+## 補足
+
+- 認証・Cookieは不要。上のcURLのヘッダーはブラウザからのコピーそのままで、必須ではない
+- このAPIを使うのはフェアセットマッチ（`fair-single-race`）だけである
