@@ -1,77 +1,193 @@
 <script setup lang="ts">
-const { commitSha, repositoryUrl } = useRuntimeConfig().public
+const { repositoryUrl } = useRuntimeConfig().public
 
 const localePath = useLocalePath()
+const theme = useTheme()
+const { loggedIn } = useUserSession()
 
-// GitHub上の表示に合わせて先頭7桁だけを見せる。
-const shortCommitSha = computed(() => commitSha.slice(0, 7))
+// リンクとゲストの入口は認証済みには `guest` ミドルウェアで弾かれる
+// デッドリンクになるため、未認証のユーザーだけに出す。
+const startNavItems = computed(() =>
+  footerStartNavItems.filter((item) => !loggedIn.value || !item.guestOnly),
+)
+
+// Nuxtのロゴは文字色を含むため、テーマの明暗に合わせて画像ごと差し替える。
+const nuxtLogo = computed(() =>
+  theme.value === 'dark'
+    ? '/img/nuxt/logo-green-white.svg'
+    : '/img/nuxt/logo-green-black.svg',
+)
 </script>
 
 <template>
   <footer class="bg-base-200 border-base-300 border-t">
     <!--
-      daisyUI の footer は「中央に著作権・右端にバージョン」を素直に表現できない
-      （footer-center は全体を中央寄せしてしまう）ため、ユーティリティで組む。
-      3カラムの1つ目を空にすることで、中央のセルがビューポートに対して中央に来る。
+      1段目: ブランドエリアとリンク集。daisyUIの footer で組み、
+      スマホ幅では縦積み、sm以上では横並びにする。
     -->
     <div
-      class="text-base-content/70 container mx-auto flex flex-col items-center gap-1 p-4 text-xs sm:grid sm:grid-cols-3 sm:items-center"
+      class="footer sm:footer-horizontal container mx-auto p-6 text-sm sm:p-10"
     >
-      <!--
-        3カラムの1つ目は中央のセルをビューポート中央に置くための余白でもある。
-        ドキュメントと、認証の要らない機能への導線はどのページからも辿れる
-        必要があるため、ここに置く。
-      -->
-      <nav
-        class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-start"
-      >
+      <aside class="max-w-xs">
+        <p class="flex items-center gap-2 text-base font-bold">
+          <Icon name="custom:app-logo" class="text-primary size-7 shrink-0" />
+          <span>FargoRate FairRace</span>
+        </p>
+        <p class="text-base-content/70">{{ $t('index.lead') }}</p>
+        <!-- 認証の要らない機能への導線。どのページからも辿れる必要がある。 -->
+        <nav class="mt-2 flex flex-col items-start gap-1">
+          <NuxtLink
+            v-for="item in startNavItems"
+            :key="item.to"
+            class="link link-hover"
+            :to="localePath(item.to)"
+          >
+            {{ $t(item.labelKey) }}
+          </NuxtLink>
+        </nav>
+        <p class="mt-2 flex items-center gap-1.5">
+          <span>{{ $t('footer.builtWith') }}</span>
+          <NuxtImg :src="nuxtLogo" alt="Nuxt" class="h-4 w-auto" />
+        </p>
+      </aside>
+
+      <nav>
+        <h6 class="footer-title">{{ $t('footer.support') }}</h6>
         <NuxtLink
-          v-for="item in footerNavItems"
+          v-for="item in footerSupportNavItems"
           :key="item.to"
           class="link link-hover"
           :to="localePath(item.to)"
         >
           {{ $t(item.labelKey) }}
         </NuxtLink>
-      </nav>
-
-      <!--
-        要素間の間隔は gap で作る。テンプレート上の改行はコンパイル時に
-        除去されるため、空白文字に頼ると単語同士がくっつく。
-      -->
-      <p class="flex flex-wrap items-center justify-center gap-x-1">
-        <span>&copy; 2026</span>
         <a
           class="link link-hover"
-          href="https://hashimotoryoh.github.io"
+          :href="`${repositoryUrl}/issues/new`"
           target="_blank"
           rel="noopener"
         >
-          Ryoh Hashimoto
+          {{ $t('footer.reportBug') }}
         </a>
-        <span aria-hidden="true">&middot;</span>
+        <!-- Nitroが生成する静的ルートでNuxtのページではないため、素のアンカーで開く。 -->
+        <a
+          class="link link-hover"
+          href="/llms.txt"
+          target="_blank"
+          rel="noopener"
+        >
+          llms.txt
+        </a>
+      </nav>
+
+      <nav>
+        <h6 class="footer-title">{{ $t('footer.legal') }}</h6>
+        <NuxtLink
+          v-for="item in footerLegalNavItems"
+          :key="item.to"
+          class="link link-hover"
+          :to="localePath(item.to)"
+        >
+          {{ $t(item.labelKey) }}
+        </NuxtLink>
         <a
           class="link link-hover"
           :href="`${repositoryUrl}/blob/main/LICENSE`"
           target="_blank"
           rel="noopener"
         >
-          MIT License
+          {{ $t('footer.license') }}
         </a>
-      </p>
+      </nav>
 
-      <p class="text-center sm:text-right">
+      <nav>
+        <h6 class="footer-title">{{ $t('footer.frameworks') }}</h6>
         <a
-          v-if="commitSha"
-          class="link link-hover font-mono"
-          :href="`${repositoryUrl}/commit/${commitSha}`"
+          class="link link-hover"
+          href="https://nuxt.com/"
           target="_blank"
           rel="noopener"
-          :title="$t('footer.commitTitle', { sha: shortCommitSha })"
         >
-          {{ shortCommitSha }}
+          Nuxt
         </a>
-      </p>
+        <a
+          class="link link-hover"
+          href="https://daisyui.com/"
+          target="_blank"
+          rel="noopener"
+        >
+          daisyUI
+        </a>
+      </nav>
+
+      <nav>
+        <h6 class="footer-title">{{ $t('footer.thanks') }}</h6>
+        <a
+          class="link link-hover"
+          href="https://www.fargorate.com/"
+          target="_blank"
+          rel="noopener"
+        >
+          FargoRate
+        </a>
+        <a
+          class="link link-hover"
+          href="https://www.playcsipool.com/"
+          target="_blank"
+          rel="noopener"
+        >
+          CueSports International
+        </a>
+        <a
+          class="link link-hover"
+          href="https://github.com/"
+          target="_blank"
+          rel="noopener"
+        >
+          GitHub
+        </a>
+        <a
+          class="link link-hover"
+          href="https://claude.com/"
+          target="_blank"
+          rel="noopener"
+        >
+          Claude
+        </a>
+      </nav>
+    </div>
+
+    <!-- 2段目: 著作権情報（左寄せ）とリポジトリへの導線（右寄せ）。 -->
+    <div class="border-base-300 border-t">
+      <div
+        class="text-base-content/70 container mx-auto flex items-center justify-between gap-2 px-4 py-2 text-xs"
+      >
+        <!--
+          要素間の間隔は gap で作る。テンプレート上の改行はコンパイル時に
+          除去されるため、空白文字に頼ると単語同士がくっつく。
+        -->
+        <p class="flex flex-wrap items-center gap-x-1">
+          <span>&copy; 2026</span>
+          <a
+            class="link link-hover"
+            href="https://hashimotoryoh.github.io"
+            target="_blank"
+            rel="noopener"
+          >
+            Ryoh Hashimoto
+          </a>
+        </p>
+
+        <a
+          class="btn btn-ghost btn-circle btn-sm"
+          :href="repositoryUrl"
+          target="_blank"
+          rel="noopener"
+          :aria-label="$t('footer.repository')"
+        >
+          <Icon name="fa7-brands:github" class="size-5" />
+        </a>
+      </div>
     </div>
   </footer>
 </template>

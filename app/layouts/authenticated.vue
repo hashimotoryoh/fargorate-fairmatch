@@ -6,20 +6,17 @@ useSeoMeta({ robots: 'noindex, nofollow' })
 
 <template>
   <!--
-    下部の余白はドックの高さぶん。daisyUI のドックは
-    `height: calc(4rem + env(safe-area-inset-bottom))` なので、単純な pb-16 だと
-    iPhone のホームインジケーターの分だけフッターが隠れる。
+    min-h-dvh と flex-1 の組み合わせで、コンテンツが短くてもフッターが
+    画面の最下部に張り付く。FABに隠れないための余白は AppFab 自身が持つ。
   -->
-  <div
-    class="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] sm:pb-0"
-  >
-    <AppHeader show-nav />
+  <div class="flex min-h-dvh flex-col">
+    <AppHeader />
 
     <main class="container mx-auto w-full flex-1 p-4">
       <slot />
     </main>
 
     <AppFooter />
-    <AppDock />
+    <AppFab />
   </div>
 </template>

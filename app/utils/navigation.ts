@@ -10,41 +10,60 @@ export type NavItem = {
    */
   labelKey: string
   /**
-   * `@nuxt/icon` の `<Icon name>` にそのまま渡す、Material Design Icons
-   * （`mdi:` プレフィックス）のアイコン名。
+   * `@nuxt/icon` の `<Icon name>` にそのまま渡すアイコン名
+   * （`heroicons:` または `mdi:` プレフィックス）。
    */
   icon: string
 }
 
 /**
  * 認証済みユーザー向けの主要ナビゲーション。
- * ヘッダーのリンクとスマホのドックで同じ項目を出すため、定義を一箇所に集める。
+ * ヘッダーのタブとスマホのFAB（スピードダイヤル）で同じ項目を出すため、
+ * 定義を一箇所に集める。
  */
 export const mainNavItems: NavItem[] = [
-  { to: '/dashboard', labelKey: 'nav.dashboard', icon: 'mdi:view-dashboard' },
+  {
+    to: '/dashboard',
+    labelKey: 'nav.dashboard',
+    icon: 'heroicons:squares-2x2',
+  },
   { to: '/games', labelKey: 'nav.games', icon: 'mdi:billiards-rack' },
-  { to: '/settings', labelKey: 'nav.settings', icon: 'mdi:cog' },
+  { to: '/settings', labelKey: 'nav.settings', icon: 'heroicons:cog' },
 ]
 
 /**
- * フッターに出すドキュメントへの導線。認証の有無によらずどのページからも
- * 辿れる。本文は `content/` のMarkdownにある。
+ * フッターのブランドエリアに出す、認証の要らない機能への導線。
+ * プレイヤー検索はヘッダー右のアイコンボタンとここだけが経路なので、
+ * 外すと辿り着けなくなる。
+ *
+ * `guestOnly` は未認証のユーザーだけに出す印。リンクとゲストの入口には
+ * `guest` ミドルウェアが付いており、認証済みが開いても `/dashboard` へ
+ * 戻されるだけのデッドリンクになるため、認証済みには見せない。
  */
-export const documentNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
-  { to: '/blog', labelKey: 'document.blog' },
-  { to: '/faq', labelKey: 'document.faq' },
-  { to: '/privacy-policy', labelKey: 'document.privacyPolicy' },
-  { to: '/terms-conditions', labelKey: 'document.termsConditions' },
-]
-
-/**
- * フッターに出す導線。ドキュメントに加えて、認証の有無によらず使える機能も
- * 並べる。プレイヤー検索はヘッダーにもドックにも置かない方針なので、
- * ここが唯一の経路になる。外すと辿り着けなくなるため注意すること。
- */
-export const footerNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
+export const footerStartNavItems: (Pick<NavItem, 'to' | 'labelKey'> & {
+  guestOnly?: boolean
+})[] = [
+  { to: '/link', labelKey: 'nav.link', guestOnly: true },
+  { to: '/guest', labelKey: 'nav.guest', guestOnly: true },
   { to: '/lookup', labelKey: 'nav.lookup' },
-  ...documentNavItems,
+]
+
+/**
+ * フッターのSupport欄に出すページ内の導線。バグ報告や `/llms.txt` のような
+ * 外部・生成物へのリンクは `localePath()` に通せないため `AppFooter` に直接置く。
+ */
+export const footerSupportNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
+  { to: '/faq', labelKey: 'document.faq' },
+  { to: '/blog', labelKey: 'document.blog' },
+]
+
+/**
+ * フッターのLegal欄に出すページ内の導線。本文は `content/` のMarkdownにある。
+ * ライセンスはリポジトリ上のファイルへの外部リンクなので `AppFooter` に直接置く。
+ */
+export const footerLegalNavItems: Pick<NavItem, 'to' | 'labelKey'>[] = [
+  { to: '/terms-conditions', labelKey: 'document.termsConditions' },
+  { to: '/privacy-policy', labelKey: 'document.privacyPolicy' },
 ]
 
 /** 認証後の既定の遷移先。 */

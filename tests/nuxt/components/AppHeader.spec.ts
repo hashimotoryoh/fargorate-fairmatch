@@ -1,11 +1,26 @@
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { Icon } from '#components'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { computed } from 'vue'
 import AppHeader from '../../../app/components/AppHeader.vue'
+import LocaleSwitcher from '../../../app/components/LocaleSwitcher.vue'
+import ThemeSwitcher from '../../../app/components/ThemeSwitcher.vue'
 import { mainNavItems } from '../../../app/utils/navigation'
 import { jaMessage } from '../../helpers/i18n'
 
+// mockNuxtImport のファクトリはファイル先頭へ巻き上げられるため、
+// 差し替える状態も同じタイミングで用意する必要がある。
+const session = vi.hoisted(() => ({ loggedIn: false }))
+
+mockNuxtImport('useUserSession', () => () => ({
+  loggedIn: computed(() => session.loggedIn),
+}))
+
 describe('AppHeader', () => {
+  beforeEach(() => {
+    session.loggedIn = false
+  })
+
   it('サイト名からトップページへ戻れる', async () => {
     const component = await mountSuspended(AppHeader)
     const home = component.find('a[href="/"]')
@@ -15,57 +30,81 @@ describe('AppHeader', () => {
     expect(home.findComponent(Icon).props('name')).toBe('custom:app-logo')
   })
 
-  /**
-   * ナビゲーションの有無はセッションではなくレイアウトの都合で決まる。
-   * `/` は認証済みでも紹介ページのままなので、既定では出さない。
-   */
-  it('既定ではナビゲーションを出さない', async () => {
+  it('未認証ならナビゲーションを出さない', async () => {
     const component = await mountSuspended(AppHeader)
 
     expect(component.find('nav').exists()).toBe(false)
   })
 
-  // 言語の切り替えはどのページからも要る。ナビゲーションを出さない公開ページ
-  // でも消えないことを固定する。
-  it('ナビゲーションの有無によらず言語の切り替えを出す', async () => {
-    for (const showNav of [false, true]) {
-      const component = await mountSuspended(AppHeader, { props: { showNav } })
+  // 言語の切り替えはどのページからも要る。認証の有無で消えないことを固定する。
+  it('認証の有無によらず言語の切り替えを出す', async () => {
+    for (const loggedIn of [false, true]) {
+      session.loggedIn = loggedIn
+      const component = await mountSuspended(AppHeader)
 
-      expect(component.find('select').exists()).toBe(true)
+      expect(component.findComponent(LocaleSwitcher).exists()).toBe(true)
     }
   })
 
   // テーマの切り替えも言語と同様、どのページからも要る。
-  it('ナビゲーションの有無によらずテーマの切り替えを出す', async () => {
-    for (const showNav of [false, true]) {
-      const component = await mountSuspended(AppHeader, { props: { showNav } })
+  it('認証の有無によらずテーマの切り替えを出す', async () => {
+    for (const loggedIn of [false, true]) {
+      session.loggedIn = loggedIn
+      const component = await mountSuspended(AppHeader)
 
-      expect(component.find('button').exists()).toBe(true)
+      expect(component.findComponent(ThemeSwitcher).exists()).toBe(true)
     }
   })
 
-  it('show-nav を付けると主要ナビゲーションを出す', async () => {
-    const component = await mountSuspended(AppHeader, {
-      props: { showNav: true },
-    })
-    const links = component.findAll('nav a')
+  /**
+   * プレイヤー検索は認証の要らない機能で、ヘッダーのこのボタンとフッターだけが
+   * 導線になる。アイコンだけのボタンなので、名称はツールチップと読み上げ用
+   * ラベルで補う。
+   */
+  it('認証の有無によらずプレイヤー検索への導線を出す', async () => {
+    for (const loggedIn of [false, true]) {
+      session.loggedIn = loggedIn
+      const component = await mountSuspended(AppHeader)
+      const lookup = component.find('a[href="/lookup"]')
 
-    expect(links.map((link) => link.text())).toEqual(
+      expect(lookup.attributes('aria-label')).toBe(jaMessage('nav.lookup'))
+      expect(lookup.findComponent(Icon).props('name')).toBe('heroicons:users')
+      expect(component.find('.tooltip').attributes('data-tip')).toBe(
+        jaMessage('nav.lookup'),
+      )
+    }
+  })
+
+  // ナビゲーションはレイアウトによらず認証状態だけで決まる。`/` のような
+  // 公開ページでも、認証済みならナビゲーションが出る。
+  it('認証済みなら主要ナビゲーションをタブで出す', async () => {
+    session.loggedIn = true
+
+    const component = await mountSuspended(AppHeader)
+    const tablist = component.find('nav [role="tablist"]')
+    const tabs = component.findAll('nav a')
+
+    expect(tablist.classes()).toContain('tabs')
+    expect(tablist.classes()).toContain('tabs-border')
+    expect(tabs.map((tab) => tab.text())).toEqual(
       mainNavItems.map((item) => jaMessage(item.labelKey)),
     )
-    expect(links.map((link) => link.attributes('href'))).toEqual(
+    expect(tabs.map((tab) => tab.attributes('href'))).toEqual(
       mainNavItems.map((item) => item.to),
+    )
+    expect(tabs.map((tab) => tab.findComponent(Icon).props('name'))).toEqual(
+      mainNavItems.map((item) => item.icon),
     )
   })
 
-  // ドックはスマホ幅で下部に固定されるため、デスクトップ幅のナビゲーションと
+  // FABはスマホ幅で右下に固定されるため、デスクトップ幅のナビゲーションと
   // 出し分ける。片方だけが常時見えると同じ項目が二重に並ぶ。
   it('ナビゲーションはスマホ幅では隠す', async () => {
-    const component = await mountSuspended(AppHeader, {
-      props: { showNav: true },
-    })
+    session.loggedIn = true
+
+    const component = await mountSuspended(AppHeader)
 
     expect(component.find('nav').classes()).toContain('hidden')
-    expect(component.find('nav').classes()).toContain('sm:block')
+    expect(component.find('nav').classes()).toContain('sm:flex')
   })
 })

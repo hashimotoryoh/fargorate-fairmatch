@@ -1,13 +1,13 @@
 <script setup lang="ts">
-// ナビゲーションの有無はセッションではなくレイアウトの都合で決まる。
-// `/` は認証済みでも紹介ページのままなので、ここで `loggedIn` を見てはいけない。
-const { showNav = false } = defineProps<{ showNav?: boolean }>()
+// ナビゲーションは認証済みなら、このヘッダーを使うどのページでも出す。
+// `/` は認証済みでも紹介ページのままだが、ナビゲーションだけは出る。
+const { loggedIn } = useUserSession()
 
 const localePath = useLocalePath()
 </script>
 
 <template>
-  <!-- z-30 はドック（z-index: 1）より上、モーダル（999）より下に置くための値。 -->
+  <!-- z-30 はFABとモーダル（どちらも z-index: 999）より下に置くための値。 -->
   <header
     class="navbar bg-base-200 sticky top-0 z-30 min-h-14 gap-2 px-2 sm:px-4"
   >
@@ -21,20 +21,37 @@ const localePath = useLocalePath()
       </NuxtLink>
     </div>
 
+    <!-- スマホ幅では同じ導線をFAB（スピードダイヤル）が担うため、タブは出さない。 -->
+    <nav v-if="loggedIn" class="navbar-center hidden sm:flex">
+      <div role="tablist" class="tabs tabs-border">
+        <NuxtLink
+          v-for="item in mainNavItems"
+          :key="item.to"
+          role="tab"
+          class="tab gap-1.5"
+          active-class="tab-active"
+          :to="localePath(item.to)"
+        >
+          <Icon :name="item.icon" class="size-4" />
+          {{ $t(item.labelKey) }}
+        </NuxtLink>
+      </div>
+    </nav>
+
     <!--
-      テーマと言語の切り替えはどのページからも要るため、`navbar-end` 自体は
-      `showNav` によらず置き、その中でナビゲーションだけを出し分ける。
+      プレイヤー検索とテーマ・言語の切り替えはどのページからも要るため、
+      `navbar-end` の中身は認証の有無によらず出す。
     -->
-    <div class="navbar-end gap-2">
-      <nav v-if="showNav" class="hidden sm:block">
-        <ul class="menu menu-horizontal gap-1 px-1">
-          <li v-for="item in mainNavItems" :key="item.to">
-            <NuxtLink :to="localePath(item.to)" active-class="menu-active">
-              {{ $t(item.labelKey) }}
-            </NuxtLink>
-          </li>
-        </ul>
-      </nav>
+    <div class="navbar-end gap-1 sm:gap-2">
+      <div class="tooltip tooltip-bottom" :data-tip="$t('nav.lookup')">
+        <NuxtLink
+          :to="localePath('/lookup')"
+          class="btn btn-ghost btn-circle btn-sm"
+          :aria-label="$t('nav.lookup')"
+        >
+          <Icon name="heroicons:users" class="size-5" />
+        </NuxtLink>
+      </div>
 
       <ThemeSwitcher />
       <LocaleSwitcher />

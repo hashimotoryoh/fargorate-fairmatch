@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process'
 import { createResolver } from 'nuxt/kit'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -26,36 +25,6 @@ const SITE_URL = process.env.NUXT_PUBLIC_SITE_URL ?? ''
  * 機械的に確かめている。追加漏れをレビューに頼らないため。
  */
 const PROTECTED_PAGE_PATHS = ['/dashboard', '/games', '/settings']
-
-/**
- * フッターのバージョン表示に使うコミットハッシュを解決する。
- *
- * デプロイ先が未定なので、主要なホスティングが注入する環境変数を順に見て、
- * どれも無ければローカルの git から取る。`.git` を持たないビルド環境では
- * 空文字を返し、フッター側でバージョン表示そのものを省く。
- */
-function resolveCommitSha(): string {
-  const fromEnv =
-    process.env.VERCEL_GIT_COMMIT_SHA ??
-    process.env.GITHUB_SHA ??
-    process.env.CF_PAGES_COMMIT_SHA ??
-    process.env.COMMIT_REF ??
-    process.env.RENDER_GIT_COMMIT
-
-  if (fromEnv) {
-    return fromEnv
-  }
-
-  try {
-    return execSync('git rev-parse HEAD', {
-      stdio: ['ignore', 'pipe', 'ignore'],
-    })
-      .toString()
-      .trim()
-  } catch {
-    return ''
-  }
-}
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -97,10 +66,24 @@ export default defineNuxtConfig({
     // canonical も `/` 基準の素直な形になる。
     strategy: 'prefix_except_default',
     locales: [
-      // `name` はセレクトボックスに出す表示名。読めない言語に切り替えた人が
+      // `name` は言語切り替えの選択肢に出す表示名。読めない言語に切り替えた人が
       // 戻ってこられるよう、翻訳せずそれぞれの言語の自称表記のままにする。
-      { code: 'ja', language: 'ja-JP', name: '日本語', file: 'ja.json' },
-      { code: 'en', language: 'en-US', name: 'English', file: 'en.json' },
+      // `flag` は選択肢に添える国旗の絵文字。言語と国は一対一ではないため、
+      // `language` の地域サブタグ（ja-JP・en-US）の国に合わせている。
+      {
+        code: 'ja',
+        language: 'ja-JP',
+        name: '日本語',
+        flag: '🇯🇵',
+        file: 'ja.json',
+      },
+      {
+        code: 'en',
+        language: 'en-US',
+        name: 'English',
+        flag: '🇺🇸',
+        file: 'en.json',
+      },
     ],
     // hreflang の絶対URLに使う。空のうちは相対URLになるため、
     // `app.vue` 側で該当のメタタグそのものを出さない。
@@ -252,7 +235,6 @@ export default defineNuxtConfig({
     // には置かない。
     recaptchaSecretKey: '',
     public: {
-      commitSha: resolveCommitSha(),
       repositoryUrl: REPOSITORY_URL,
       // OGP や canonical で必要な絶対URLの組み立てに使う。
       // 未設定のうちは絶対URLを作れないため、該当するメタを出力しない。
