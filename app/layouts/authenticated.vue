@@ -6,9 +6,9 @@ useSeoMeta({ robots: 'noindex, nofollow' })
 
 <template>
   <!--
-    下部の余白はドックの高さぶん。daisyUI のドックは
-    `height: calc(4rem + env(safe-area-inset-bottom))` なので、単純な pb-16 だと
-    iPhone のホームインジケーターの分だけフッターが隠れる。
+    下部の余白はFAB（btn-lg + bottom: 1rem）が収まる高さぶん。ページ末尾の
+    コンテンツやフッター右下の導線がFABに隠れないようにする。セーフエリアを
+    足すのは、iPhone のホームインジケーターの分だけ隠れるのを避けるため。
   -->
   <div
     class="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] sm:pb-0"
@@ -20,6 +20,6 @@ useSeoMeta({ robots: 'noindex, nofollow' })
     </main>
 
     <AppFooter />
-    <AppDock />
+    <AppFab />
   </div>
 </template>

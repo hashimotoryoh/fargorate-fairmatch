@@ -15,11 +15,11 @@ describe('default レイアウト', () => {
   })
 
   // `/` は認証済みでも紹介ページのままにするため、ナビゲーションを出さない。
-  it('ヘッダーのナビゲーションとドックを出さない', async () => {
+  it('ヘッダーのナビゲーションとFABを出さない', async () => {
     const component = await mountSuspended(DefaultLayout, { slots: SLOTS })
 
     expect(component.find('header nav').exists()).toBe(false)
-    expect(component.find('.dock').exists()).toBe(false)
+    expect(component.find('.fab').exists()).toBe(false)
   })
 })
 
@@ -34,13 +34,13 @@ describe('authenticated レイアウト', () => {
     expect(component.find('footer').exists()).toBe(true)
   })
 
-  it('ヘッダーのナビゲーションとドックの両方を出す', async () => {
+  it('ヘッダーのナビゲーションとFABの両方を出す', async () => {
     const component = await mountSuspended(AuthenticatedLayout, {
       slots: SLOTS,
     })
 
     expect(component.find('header nav').exists()).toBe(true)
-    expect(component.find('.dock').exists()).toBe(true)
+    expect(component.find('.fab').exists()).toBe(true)
   })
 
   /**
@@ -58,8 +58,9 @@ describe('authenticated レイアウト', () => {
     })
   })
 
-  // ドックはセーフエリアぶんだけ高くなるため、単純な pb-16 だとフッターが隠れる。
-  it('スマホ幅でドックの高さぶんの余白を確保する', async () => {
+  // FABに隠れないための余白。セーフエリアを足さないと、iPhone のホーム
+  // インジケーターの分だけフッター右下の導線が隠れる。
+  it('スマホ幅でFABが収まる高さぶんの余白を確保する', async () => {
     const component = await mountSuspended(AuthenticatedLayout, {
       slots: SLOTS,
     })
