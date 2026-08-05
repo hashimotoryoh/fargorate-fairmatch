@@ -1,6 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { useRuntimeConfig } from '#imports'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import AppFooter from '../../../app/components/AppFooter.vue'
 import {
   footerLegalNavItems,
@@ -10,23 +9,27 @@ import {
 import { jaMessage } from '../../helpers/i18n'
 
 const REPOSITORY_URL = 'https://github.com/hashimotoryoh/fargorate-fairrace'
-const COMMIT_SHA = '0123456789abcdef0123456789abcdef01234567'
-
-function setPublicConfig(overrides: { commitSha?: string }) {
-  Object.assign(useRuntimeConfig().public, overrides)
-}
 
 describe('AppFooter', () => {
-  afterEach(() => {
-    setPublicConfig({ commitSha: '' })
-  })
-
   it('ブランドエリアにロゴと名前とアプリの説明を出す', async () => {
     const component = await mountSuspended(AppFooter)
     const aside = component.find('aside')
 
     expect(aside.text()).toContain('FargoRate FairRace')
     expect(aside.text()).toContain(jaMessage('index.lead'))
+  })
+
+  // Nuxtのブランドガイドラインの公式ロゴ画像を使う。既定のダークテーマでは
+  // 白文字のロゴを選ぶ。
+  it('ブランドエリアに Built with とNuxtのロゴを出す', async () => {
+    const component = await mountSuspended(AppFooter)
+    const aside = component.find('aside')
+
+    expect(aside.text()).toContain(jaMessage('footer.builtWith'))
+    expect(aside.find('img').attributes('alt')).toBe('Nuxt')
+    expect(aside.find('img').attributes('src')).toContain(
+      '/img/nuxt/logo-green-white.svg',
+    )
   })
 
   /**
@@ -83,13 +86,11 @@ describe('AppFooter', () => {
     ])
   })
 
-  // Nuxtはブランドガイドラインの公式ロゴ画像で、そのほかはテキストで繋ぐ。
   it('FrameworksとThanksの外部リンクを出す', async () => {
     const component = await mountSuspended(AppFooter)
-    const nuxt = component.find('a[href="https://nuxt.com/"]')
 
-    expect(nuxt.find('img').attributes('alt')).toBe('Nuxt')
     for (const href of [
+      'https://nuxt.com/',
       'https://daisyui.com/',
       'https://www.fargorate.com/',
       'https://www.playcsipool.com/',
@@ -120,26 +121,5 @@ describe('AppFooter', () => {
     for (const link of links) {
       expect(link.attributes('rel')).toBe('noopener')
     }
-  })
-
-  it('コミットハッシュを先頭7桁でGitHubのコミットへ繋ぐ', async () => {
-    setPublicConfig({ commitSha: COMMIT_SHA })
-
-    const component = await mountSuspended(AppFooter)
-    const version = component.find('a.font-mono')
-
-    expect(version.text()).toBe('0123456')
-    expect(version.attributes('href')).toBe(
-      `${REPOSITORY_URL}/commit/${COMMIT_SHA}`,
-    )
-  })
-
-  // `.git` を持たないビルド環境ではハッシュを解決できない。
-  it('コミットハッシュが無ければバージョン表示ごと省く', async () => {
-    setPublicConfig({ commitSha: '' })
-
-    const component = await mountSuspended(AppFooter)
-
-    expect(component.find('a.font-mono').exists()).toBe(false)
   })
 })

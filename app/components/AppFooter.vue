@@ -1,11 +1,8 @@
 <script setup lang="ts">
-const { commitSha, repositoryUrl } = useRuntimeConfig().public
+const { repositoryUrl } = useRuntimeConfig().public
 
 const localePath = useLocalePath()
 const theme = useTheme()
-
-// GitHub上の表示に合わせて先頭7桁だけを見せる。
-const shortCommitSha = computed(() => commitSha.slice(0, 7))
 
 // Nuxtのロゴは文字色を含むため、テーマの明暗に合わせて画像ごと差し替える。
 const nuxtLogo = computed(() =>
@@ -41,6 +38,10 @@ const nuxtLogo = computed(() =>
             {{ $t(item.labelKey) }}
           </NuxtLink>
         </nav>
+        <p class="mt-2 flex items-center gap-1.5">
+          <span>{{ $t('footer.builtWith') }}</span>
+          <NuxtImg :src="nuxtLogo" alt="Nuxt" class="h-4 w-auto" />
+        </p>
       </aside>
 
       <nav>
@@ -94,8 +95,13 @@ const nuxtLogo = computed(() =>
 
       <nav>
         <h6 class="footer-title">{{ $t('footer.frameworks') }}</h6>
-        <a href="https://nuxt.com/" target="_blank" rel="noopener">
-          <NuxtImg :src="nuxtLogo" alt="Nuxt" class="h-5 w-auto" />
+        <a
+          class="link link-hover"
+          href="https://nuxt.com/"
+          target="_blank"
+          rel="noopener"
+        >
+          Nuxt
         </a>
         <a
           class="link link-hover"
@@ -165,27 +171,15 @@ const nuxtLogo = computed(() =>
           </a>
         </p>
 
-        <p class="flex items-center gap-1">
-          <a
-            v-if="commitSha"
-            class="link link-hover font-mono"
-            :href="`${repositoryUrl}/commit/${commitSha}`"
-            target="_blank"
-            rel="noopener"
-            :title="$t('footer.commitTitle', { sha: shortCommitSha })"
-          >
-            {{ shortCommitSha }}
-          </a>
-          <a
-            class="btn btn-ghost btn-circle btn-sm"
-            :href="repositoryUrl"
-            target="_blank"
-            rel="noopener"
-            :aria-label="$t('footer.repository')"
-          >
-            <Icon name="fa7-brands:github" class="size-5" />
-          </a>
-        </p>
+        <a
+          class="btn btn-ghost btn-circle btn-sm"
+          :href="repositoryUrl"
+          target="_blank"
+          rel="noopener"
+          :aria-label="$t('footer.repository')"
+        >
+          <Icon name="fa7-brands:github" class="size-5" />
+        </a>
       </div>
     </div>
   </footer>

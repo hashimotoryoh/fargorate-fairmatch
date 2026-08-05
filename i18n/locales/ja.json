@@ -22,14 +22,14 @@
     "updatedAt": "最終更新日:"
   },
   "footer": {
+    "builtWith": "Built with",
     "support": "Support",
     "reportBug": "バグを報告する",
     "legal": "Legal",
-    "license": "MITライセンス",
+    "license": "ライセンス",
     "frameworks": "Frameworks",
     "thanks": "Thanks",
-    "repository": "GitHubリポジトリ",
-    "commitTitle": "コミット {sha} で動作しています"
+    "repository": "GitHubリポジトリ"
   },
   "player": {
     "membershipId": "FargoRate ID",

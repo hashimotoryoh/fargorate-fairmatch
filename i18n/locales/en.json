@@ -22,14 +22,14 @@
     "updatedAt": "Last updated:"
   },
   "footer": {
+    "builtWith": "Built with",
     "support": "Support",
     "reportBug": "Report a bug",
     "legal": "Legal",
-    "license": "MIT License",
+    "license": "License",
     "frameworks": "Frameworks",
     "thanks": "Thanks",
-    "repository": "GitHub repository",
-    "commitTitle": "Running on commit {sha}"
+    "repository": "GitHub repository"
   },
   "player": {
     "membershipId": "FargoRate ID",

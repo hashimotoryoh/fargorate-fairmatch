@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process'
 import { createResolver } from 'nuxt/kit'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -26,36 +25,6 @@ const SITE_URL = process.env.NUXT_PUBLIC_SITE_URL ?? ''
  * 機械的に確かめている。追加漏れをレビューに頼らないため。
  */
 const PROTECTED_PAGE_PATHS = ['/dashboard', '/games', '/settings']
-
-/**
- * フッターのバージョン表示に使うコミットハッシュを解決する。
- *
- * デプロイ先が未定なので、主要なホスティングが注入する環境変数を順に見て、
- * どれも無ければローカルの git から取る。`.git` を持たないビルド環境では
- * 空文字を返し、フッター側でバージョン表示そのものを省く。
- */
-function resolveCommitSha(): string {
-  const fromEnv =
-    process.env.VERCEL_GIT_COMMIT_SHA ??
-    process.env.GITHUB_SHA ??
-    process.env.CF_PAGES_COMMIT_SHA ??
-    process.env.COMMIT_REF ??
-    process.env.RENDER_GIT_COMMIT
-
-  if (fromEnv) {
-    return fromEnv
-  }
-
-  try {
-    return execSync('git rev-parse HEAD', {
-      stdio: ['ignore', 'pipe', 'ignore'],
-    })
-      .toString()
-      .trim()
-  } catch {
-    return ''
-  }
-}
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -266,7 +235,6 @@ export default defineNuxtConfig({
     // には置かない。
     recaptchaSecretKey: '',
     public: {
-      commitSha: resolveCommitSha(),
       repositoryUrl: REPOSITORY_URL,
       // OGP や canonical で必要な絶対URLの組み立てに使う。
       // 未設定のうちは絶対URLを作れないため、該当するメタを出力しない。
