@@ -74,7 +74,7 @@ MarkdownもPrettierの整形対象であるため、ドキュメントを変更�
 
 ### ライセンス
 
-MITライセンスで公開している。`LICENSE` はライセンスの定型文であり、英語の原文をそのまま置くこと。ライセンスを変更する場合は `LICENSE`、`package.json` の `license`、フッターの表記（`app/components/AppFooter.vue`）の3か所を揃えること。
+MITライセンスで公開している。`LICENSE` はライセンスの定型文であり、英語の原文をそのまま置くこと。ライセンスを変更する場合は `LICENSE`、`package.json` の `license`、フッターの表記（`i18n/locales/*.json` の `footer.license`）の3か所を揃えること。
 
 ## アプリケーション概要
 
@@ -306,7 +306,7 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 - 読み取れない行が混じっても一覧全体は落とさず、行単位で除く。1件の異常で他の正常な結果まで見せられなくなるのを避けるため
 - 入力の長さの条件は `shared/utils/playerQuery.ts` の `PLAYER_QUERY_MIN_LENGTH`・`PLAYER_QUERY_MAX_LENGTH` に一本化してある。フォームとサーバールートの双方で `isValidPlayerQuery()` を使い、条件を二重に書かないこと
 
-導線はフッターの `footerNavItems` だけに置いてある。ブログと同じく、ヘッダーとドックの `mainNavItems` には足さない方針である。`footerNavItems` から外すと辿り着けなくなるので注意すること。
+導線はヘッダー右のアイコンボタン（`heroicons:users`。名称はツールチップと読み上げ用ラベルで補う）と、フッターのブランドエリア（`footerStartNavItems`）に置いてある。ブログと同じく、主要ナビゲーションの `mainNavItems` には足さない方針である。両方から外すと辿り着けなくなるので注意すること。
 
 ### ゲーム
 
@@ -347,8 +347,8 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 レイアウトは3つある。`default` と `authenticated` はヘッダーとフッターが共通で、`AppHeader` と `AppFooter` を両者から使う。
 
 - `default`: 公開ページ（`/`、`/link`、`/guest`、`/lookup`、`/blog`、`/faq`、`/privacy-policy`、`/terms-conditions`）用
-- `authenticated`: 認証ページ（`/dashboard`、`/games`、`/settings`）用。スマホ幅でのみ `AppDock` を出し、デスクトップ幅ではヘッダーにナビゲーションを出す
-- `game`: ゲーム進行ページ（`/games/briefing` と `/games/<スラッグ>/` 配下）用。対局に集中させるため共通のヘッダー・フッター・ドックを出さず、各ページが `GameHeader` を置く。中央の見出しはページから渡す（ブリーフィングは「ゲームを開始する」、スコアボードはゲーム名）でリンクにしない。左は `GameExitButton`、右はページごとのスロット
+- `authenticated`: 認証ページ（`/dashboard`、`/games`、`/settings`）用。スマホ幅でのみ `AppFab`（daisyUIの `fab fab-flower` スピードダイヤル。アイコン表示で名称はツールチップ）を出し、デスクトップ幅ではヘッダー中央に `tabs tabs-border` のナビゲーションを出す
+- `game`: ゲーム進行ページ（`/games/briefing` と `/games/<スラッグ>/` 配下）用。対局に集中させるため共通のヘッダー・フッター・FABを出さず、各ページが `GameHeader` を置く。中央の見出しはページから渡す（ブリーフィングは「ゲームを開始する」、スコアボードはゲーム名）でリンクにしない。左は `GameExitButton`、右はページごとのスロット
 
 `authenticated` と `game` には `noindex` をまとめて指定してある。保護ページとこれらのレイアウトが対応するため、ページごとに書くより追加漏れが起きない。保護ページを追加する際は `definePageMeta({ middleware: 'auth', layout: 'authenticated' })`（ゲーム進行ページは `layout: 'game'`）を付けること。`tests/unit/repository/page-protection.spec.ts` が保護レイアウトの `noindex` 宣言ごと検査する。
 
@@ -360,7 +360,7 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 - URLの戦略は `prefix_except_default`。日本語は接頭辞なし、英語は `/en` を頭に付ける
 - 初回はブラウザの言語で振り分ける。振り分けるのはトップページに来たときだけとし、言語を指定したURLは尊重する。全ページで振り分けると、共有された `/en/privacy-policy` を日本語話者が開いたときに読めない側へ飛ばされる
-- 言語を増やす作業は、`i18n.locales` に1行足して `i18n/locales/<コード>.json` を置くだけで終わる状態に保つこと。`LocaleSwitcher` の選択肢は設定から作っており、言語名を書き並べた箇所を新たに作らないこと
+- 言語を増やす作業は、`i18n.locales` に1項目足して `i18n/locales/<コード>.json` を置くだけで終わる状態に保つこと。`LocaleSwitcher` の選択肢（表示名 `name` と国旗 `flag`）は設定から作っており、言語名や国旗を書き並べた箇所を新たに作らないこと
 
 文言は `i18n/locales/*.json` に置く。キーは画面やコンポーネント単位でネストし、テンプレートに現れる順に並べる。文言を足すときは必ず全ての言語に同じキーで足すこと。抜けは `fallbackLocale` に吸収されて別の言語の文面が混ざるだけなので、画面上は壊れて見えない。`tests/unit/repository/i18n.spec.ts` が過不足を検査する。
 
@@ -400,7 +400,7 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 - フロントマターには `title`・`description`・`updatedAt` を書く。`title` は見出しとタイトルタグ、`description` はメタタグ、`updatedAt` は最終更新日の表示に使う
 - 見出しは `##` から始める。ページの `h1` は `title` から出しているため、本文に `#` を書くと見出しが重なる
 - 文面を改訂したら `updatedAt` も改めること。文面が言語をまたぐ内容であれば、全ての言語を揃えて改訂すること
-- フッターに出す場合は `app/utils/navigation.ts` の `documentNavItems` に足す
+- フッターに出す場合は `app/utils/navigation.ts` の `footerSupportNavItems`（Support欄）か `footerLegalNavItems`（Legal欄）に足す
 
 ドキュメントを追加する際は、Markdownとページに加えて、公開ページであれば `tests/unit/repository/page-protection.spec.ts` の `PUBLIC_PAGES` も更新すること。
 
@@ -428,7 +428,7 @@ SEOのメタタグは `app/app.vue` の `useLocaleHead()` がまとめて作る�
 
 一覧・詳細のいずれも、このOGP画像を本文の見出し画像としてそのまま表示する。`<img>` を直接書かず `@nuxt/image` の `<NuxtImg>` を使うこと。`public/` 直下のローカル画像はIPXプロバイダーが追加設定なしで最適化を扱える。
 
-Dockやヘッダーの `mainNavItems` にはブログを追加しない方針。認証の有無によらず辿れる導線として `app/utils/navigation.ts` の `documentNavItems`（フッター）と、設定ページ（`/settings`）のカードにリンクを置いている。
+主要ナビゲーションの `mainNavItems`（ヘッダーのタブとFAB）にはブログを追加しない方針。認証の有無によらず辿れる導線として `app/utils/navigation.ts` の `footerSupportNavItems`（フッターのSupport欄）と、設定ページ（`/settings`）のカードにリンクを置いている。
 
 ### llms.txt
 
@@ -467,9 +467,9 @@ FargoRateアプリの表示言語は端末の設定に従うため、案内の�
 
 アイコンには [`@nuxt/icon`](https://nuxt.com/modules/icon) を使う。`<Icon name="..." />` に名前を渡すだけで描画され、生のSVGをコンポーネントへ書き下さない。
 
-- 一般的なアイコンは Material Design Icons（`mdi:` プレフィックス、例: `mdi:cog`）を使う。アイコン名は [icones.js.org](https://icones.js.org/collection/mdi) で探せる
+- 一般的なアイコンは Heroicons（`heroicons:` プレフィックス、例: `heroicons:cog`）を優先し、Heroiconsに無い図形（`mdi:billiards-rack` など）は Material Design Icons（`mdi:`）で補う。ブランドのアイコンは Font Awesome Brands（`fa7-brands:` プレフィックス、例: `fa7-brands:github`）を使う。アイコン名は [icones.js.org](https://icones.js.org/) で探せる
 - このアプリ固有の図形（アプリロゴなど）は `app/assets/icons/` にSVGを置き、`custom:` プレフィックスで参照する（例: `custom:app-logo`）。コレクションの設定は `nuxt.config.ts` の `icon.customCollections` にある
-- 描画モードは `nuxt.config.ts` の `icon.mode` で `svg` に固定してある。既定の `css`（背景画像）では `currentColor` へ色を委ねたい箇所（daisyUIのドックなど）と相性が悪いため
+- 描画モードは `nuxt.config.ts` の `icon.mode` で `svg` に固定してある。既定の `css`（背景画像）では `currentColor` へ色を委ねたい箇所（daisyUIのボタンなど）と相性が悪いため
 - `nuxt.config.ts` に `icon.clientBundle` や `icon.provider: 'none'` のようなテスト専用の分岐は加えないこと。`@nuxt/icon` のREADMEはVitest Browser ModeやCypress Component Testingのような、実サーバーを持たない環境向けにこの構成を案内しているが、Vitestの `nuxt` プロジェクトは `@nuxt/test-utils` が裏で実際にNitroを起動するため、アイコンはテスト中も本物のAPI経由で解決できる。動的に渡すアイコン名（`mainNavItems`の`icon`など）を検査する必要が生じても、まず本当に静的スキャンや事前バンドルが要るかを確かめてから足すこと
 
 ### コード品質
