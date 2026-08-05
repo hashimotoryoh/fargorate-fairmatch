@@ -292,10 +292,12 @@
     "playingAs": "You're using the app as {name} ({membershipId}).",
     "playingAsGuest": "You're using the app as {name} (guest). Your rating is self-reported and is not tied to any FargoRate record.",
     "signOut": "Sign out",
+    "appearanceSection": "Display",
     "theme": "Theme",
     "themeDescription": "Choose the color scheme used across the app.",
     "language": "Language",
     "languageDescription": "Choose the language used across the app.",
+    "helpSection": "Help",
     "blogDescription": "Check app updates and announcements.",
     "faqDescription": "Find answers to common questions about how to use the app and how it relates to FargoRate.",
     "localData": {

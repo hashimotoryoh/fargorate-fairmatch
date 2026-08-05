@@ -292,10 +292,12 @@
     "playingAs": "{name}（{membershipId}）として利用しています。",
     "playingAsGuest": "{name}（ゲスト）として利用しています。レーティングは自己申告のため、FargoRateの記録とは結び付いていません。",
     "signOut": "サインアウト",
+    "appearanceSection": "表示",
     "theme": "テーマ",
     "themeDescription": "画面の配色を選びます。",
     "language": "言語",
     "languageDescription": "画面の表示に使う言語を選びます。",
+    "helpSection": "ヘルプ",
     "blogDescription": "アプリの更新情報などのブログを確認できます。",
     "faqDescription": "使い方やFargoRateとの関係について、よくある質問を確認できます。",
     "localData": {
