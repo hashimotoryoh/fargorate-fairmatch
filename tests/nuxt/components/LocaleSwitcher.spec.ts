@@ -1,14 +1,7 @@
-import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { useNuxtApp } from '#imports'
-import { flushPromises } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import LocaleSwitcher from '../../../app/components/LocaleSwitcher.vue'
-
-// mockNuxtImport のファクトリはファイル先頭へ巻き上げられるため、
-// 差し替える関数も同じタイミングで用意する必要がある。
-const navigateTo = vi.hoisted(() => vi.fn())
-
-mockNuxtImport('navigateTo', () => navigateTo)
 
 /** `useI18n()` は setup の中でしか呼べないため、テストからは Nuxt 経由で引く。 */
 function i18n() {
@@ -16,55 +9,59 @@ function i18n() {
 }
 
 describe('LocaleSwitcher', () => {
-  beforeEach(() => {
-    navigateTo.mockClear()
-  })
-
   /**
    * 言語を増やす作業を設定と翻訳ファイルの追加だけで終わらせたいため、
    * 選択肢をコンポーネントに書かず `i18n.locales` から作っている。
    */
-  it('設定した全てのロケールを選択肢に並べる', async () => {
+  it('設定した全てのロケールを国旗を添えて選択肢に並べる', async () => {
     const component = await mountSuspended(LocaleSwitcher)
+    const options = component.findAll('.dropdown-content a')
 
-    expect(component.findAll('option').map((option) => option.text())).toEqual(
-      i18n().locales.value.map((item) => item.name),
+    // 要素間の空白はVueのコンパイル時に除去されるため、国旗と表示名は
+    // 連結された1つの文字列として比較する。
+    expect(options.map((option) => option.text())).toEqual(
+      i18n().locales.value.map((item) => `${item.flag}${item.name}`),
     )
   })
 
-  it('現在のロケールを選択した状態にする', async () => {
+  // 切り替え先は今いるページに対応する別ロケールのURLでなければならない。
+  // トップページへ戻してしまうと、読んでいた内容を見失う。
+  it('各選択肢が同じページの別ロケールのURLを指す', async () => {
     const component = await mountSuspended(LocaleSwitcher)
+    const options = component.findAll('.dropdown-content a')
 
-    expect(component.find<HTMLSelectElement>('select').element.value).toBe(
-      i18n().locale.value,
-    )
+    expect(options.map((option) => option.attributes('href'))).toEqual([
+      '/',
+      '/en',
+    ])
+  })
+
+  it('現在のロケールの選択肢に選択中の印を付ける', async () => {
+    const component = await mountSuspended(LocaleSwitcher)
+    const options = component.findAll('.dropdown-content a')
+
+    expect(options[0]?.classes()).toContain('menu-active')
+    expect(options[1]?.classes()).not.toContain('menu-active')
   })
 
   // 表示名は各言語の自称表記のままにする。翻訳すると、読めない言語に
   // 切り替えてしまった人が元の言語を見つけられなくなる。
   it('選択肢の表示名を翻訳しない', async () => {
     const component = await mountSuspended(LocaleSwitcher)
-    const labels = component.findAll('option').map((option) => option.text())
+    const labels = component
+      .findAll('.dropdown-content a')
+      .map((option) => option.text())
 
-    expect(labels).toContain('日本語')
-    expect(labels).toContain('English')
+    expect(labels.some((label) => label.includes('日本語'))).toBe(true)
+    expect(labels.some((label) => label.includes('English'))).toBe(true)
   })
 
-  // 切り替え先は今いるページに対応する別ロケールのURLでなければならない。
-  // トップページへ戻してしまうと、読んでいた内容を見失う。
-  it('選ぶと同じページの別ロケールのURLへ移る', async () => {
+  // 読み上げ環境ではアイコンだけのボタンが何の選択なのか分からない。
+  it('開閉のトリガーがフォーカス可能で読み上げ用のラベルを持つ', async () => {
     const component = await mountSuspended(LocaleSwitcher)
+    const trigger = component.find('[role="button"]')
 
-    await component.find('select').setValue('en')
-    await flushPromises()
-
-    expect(navigateTo).toHaveBeenCalledWith('/en')
-  })
-
-  // 読み上げ環境ではラベルの無いセレクトボックスが何の選択なのか分からない。
-  it('読み上げ用のラベルを持つ', async () => {
-    const component = await mountSuspended(LocaleSwitcher)
-
-    expect(component.find('select').attributes('aria-label')).not.toBe('')
+    expect(trigger.attributes('tabindex')).toBe('0')
+    expect(trigger.attributes('aria-label')).toBeTruthy()
   })
 })
