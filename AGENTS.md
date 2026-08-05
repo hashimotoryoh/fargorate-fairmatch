@@ -74,7 +74,7 @@ MarkdownもPrettierの整形対象であるため、ドキュメントを変更�
 
 ### ライセンス
 
-MITライセンスで公開している。`LICENSE` はライセンスの定型文であり、英語の原文をそのまま置くこと。ライセンスを変更する場合は `LICENSE`、`package.json` の `license`、フッターの表記（`i18n/locales/*.json` の `footer.license`）の3か所を揃えること。
+MITライセンスで公開している。`LICENSE` はライセンスの定型文であり、英語の原文をそのまま置くこと。ライセンスを変更する場合は `LICENSE` と `package.json` の `license` の2か所を揃えること。フッターのLegal欄は「ライセンス」というラベル（`footer.license`）で `LICENSE` へリンクするだけで、ライセンス名は持たない。
 
 ## アプリケーション概要
 
@@ -344,15 +344,15 @@ FargoRate IDを持たないユーザーは `/guest` で名前とレーティン�
 
 ### レイアウト
 
-レイアウトは3つある。`default` と `authenticated` はヘッダーとフッターが共通で、`AppHeader` と `AppFooter` を両者から使う。
+レイアウトは3つある。`default` と `authenticated` はヘッダー・フッター・FABが共通で、`AppHeader`・`AppFooter`・`AppFab` を両者から使う。
 
 - `default`: 公開ページ（`/`、`/link`、`/guest`、`/lookup`、`/blog`、`/faq`、`/privacy-policy`、`/terms-conditions`）用
-- `authenticated`: 認証ページ（`/dashboard`、`/games`、`/settings`）用。スマホ幅でのみ `AppFab`（daisyUIの `fab fab-flower` スピードダイヤル。アイコン表示で名称はツールチップ）を出し、デスクトップ幅ではヘッダー中央に `tabs tabs-border` のナビゲーションを出す
+- `authenticated`: 認証ページ（`/dashboard`、`/games`、`/settings`）用
 - `game`: ゲーム進行ページ（`/games/briefing` と `/games/<スラッグ>/` 配下）用。対局に集中させるため共通のヘッダー・フッター・FABを出さず、各ページが `GameHeader` を置く。中央の見出しはページから渡す（ブリーフィングは「ゲームを開始する」、スコアボードはゲーム名）でリンクにしない。左は `GameExitButton`、右はページごとのスロット
 
 `authenticated` と `game` には `noindex` をまとめて指定してある。保護ページとこれらのレイアウトが対応するため、ページごとに書くより追加漏れが起きない。保護ページを追加する際は `definePageMeta({ middleware: 'auth', layout: 'authenticated' })`（ゲーム進行ページは `layout: 'game'`）を付けること。`tests/unit/repository/page-protection.spec.ts` が保護レイアウトの `noindex` 宣言ごと検査する。
 
-ヘッダーのナビゲーションの有無は `showNav` の props で制御する。`useUserSession()` の `loggedIn` を見てはならない。`/` は認証済みでも紹介ページのままにする方針であり、ナビゲーションの有無は認証状態ではなくレイアウトの都合で決まるため。
+主要ナビゲーションは認証済みなら `AppHeader` を使うどのページでも出す。デスクトップ幅ではヘッダー中央の `tabs tabs-border`、スマホ幅では `AppFab`（daisyUIの `fab fab-flower` スピードダイヤル。アイコン表示で名称はツールチップ）が同じ項目（`mainNavItems`）を担う。出し分けは `AppHeader`・`AppFab` それぞれの中で `useUserSession()` の `loggedIn` を見て行い、レイアウトからpropsで制御しない。`/` は認証済みでも紹介ページのままにする方針だが、ナビゲーションは出る。
 
 ### 多言語化
 
