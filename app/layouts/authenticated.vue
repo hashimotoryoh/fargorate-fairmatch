@@ -6,14 +6,11 @@ useSeoMeta({ robots: 'noindex, nofollow' })
 
 <template>
   <!--
-    下部の余白はFAB（btn-lg + bottom: 1rem）が収まる高さぶん。ページ末尾の
-    コンテンツやフッター右下の導線がFABに隠れないようにする。セーフエリアを
-    足すのは、iPhone のホームインジケーターの分だけ隠れるのを避けるため。
+    min-h-dvh と flex-1 の組み合わせで、コンテンツが短くてもフッターが
+    画面の最下部に張り付く。FABに隠れないための余白は AppFab 自身が持つ。
   -->
-  <div
-    class="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] sm:pb-0"
-  >
-    <AppHeader show-nav />
+  <div class="flex min-h-dvh flex-col">
+    <AppHeader />
 
     <main class="container mx-auto w-full flex-1 p-4">
       <slot />

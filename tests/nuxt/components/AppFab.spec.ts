@@ -1,11 +1,33 @@
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { Icon } from '#components'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { computed } from 'vue'
 import AppFab from '../../../app/components/AppFab.vue'
 import { mainNavItems } from '../../../app/utils/navigation'
 import { jaMessage } from '../../helpers/i18n'
 
+// mockNuxtImport のファクトリはファイル先頭へ巻き上げられるため、
+// 差し替える状態も同じタイミングで用意する必要がある。
+const session = vi.hoisted(() => ({ loggedIn: true }))
+
+mockNuxtImport('useUserSession', () => () => ({
+  loggedIn: computed(() => session.loggedIn),
+}))
+
 describe('AppFab', () => {
+  beforeEach(() => {
+    session.loggedIn = true
+  })
+
+  // ヘッダーのナビゲーションと同じ条件。未認証のユーザーには導けるページが無い。
+  it('未認証なら何も描かない', async () => {
+    session.loggedIn = false
+
+    const component = await mountSuspended(AppFab)
+
+    expect(component.find('.fab').exists()).toBe(false)
+  })
+
   it('ヘッダーと同じ主要ナビゲーションを並べる', async () => {
     const component = await mountSuspended(AppFab)
     const links = component.findAll('a')
@@ -52,8 +74,19 @@ describe('AppFab', () => {
   it('デスクトップ幅では隠す', async () => {
     const component = await mountSuspended(AppFab)
 
-    expect(component.find('nav').classes()).toContain('fab')
-    expect(component.find('nav').classes()).toContain('fab-flower')
-    expect(component.find('nav').classes()).toContain('sm:hidden')
+    expect(component.find('.fab').classes()).toContain('fab-flower')
+    expect(component.find('div').classes()).toContain('sm:hidden')
+  })
+
+  // FABはfixedで浮くため、それ自身では場所を取らない。ページ末尾のコンテンツや
+  // フッター右下の導線が隠れないよう、流し込みの余白を自前で確保する。
+  it('スマホ幅でFABが収まる高さぶんの余白を確保する', async () => {
+    const component = await mountSuspended(AppFab)
+    // アイコンのSVGも aria-hidden を持つため、div に限定して余白だけを引く。
+    const spacer = component.find('div[aria-hidden="true"]')
+
+    expect(spacer.classes()).toContain(
+      'h-[calc(4rem+env(safe-area-inset-bottom))]',
+    )
   })
 })

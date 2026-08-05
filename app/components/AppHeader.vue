@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// ナビゲーションの有無はセッションではなくレイアウトの都合で決まる。
-// `/` は認証済みでも紹介ページのままなので、ここで `loggedIn` を見てはいけない。
-const { showNav = false } = defineProps<{ showNav?: boolean }>()
+// ナビゲーションは認証済みなら、このヘッダーを使うどのページでも出す。
+// `/` は認証済みでも紹介ページのままだが、ナビゲーションだけは出る。
+const { loggedIn } = useUserSession()
 
 const localePath = useLocalePath()
 </script>
@@ -22,7 +22,7 @@ const localePath = useLocalePath()
     </div>
 
     <!-- スマホ幅では同じ導線をFAB（スピードダイヤル）が担うため、タブは出さない。 -->
-    <nav v-if="showNav" class="navbar-center hidden sm:flex">
+    <nav v-if="loggedIn" class="navbar-center hidden sm:flex">
       <div role="tablist" class="tabs tabs-border">
         <NuxtLink
           v-for="item in mainNavItems"
@@ -40,7 +40,7 @@ const localePath = useLocalePath()
 
     <!--
       プレイヤー検索とテーマ・言語の切り替えはどのページからも要るため、
-      `navbar-end` の中身は `showNav` によらず出す。
+      `navbar-end` の中身は認証の有無によらず出す。
     -->
     <div class="navbar-end gap-1 sm:gap-2">
       <div class="tooltip tooltip-bottom" :data-tip="$t('nav.lookup')">
