@@ -112,12 +112,11 @@ describe('設定ページ', () => {
     const component = await mountSuspended(SettingsPage)
 
     expect(component.text()).toContain(jaMessage('settings.theme'))
-    expect(component.findComponent(Icon).props('name')).toBe(
-      'mdi:theme-light-dark',
-    )
+    expect(component.findComponent(Icon).props('name')).toBe('heroicons:sun')
   })
 
-  // Dockにはタブを追加しない方針のため、設定画面がブログへの唯一の導線になる。
+  // 主要ナビゲーションにはタブを追加しない方針のため、設定画面がフッターと
+  // 並ぶブログへの導線になる。
   it('ブログページへのリンクを出す', async () => {
     const component = await mountSuspended(SettingsPage)
     const link = component.find('a[href="/blog"]')

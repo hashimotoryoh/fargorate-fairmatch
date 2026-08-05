@@ -10,18 +10,26 @@ describe('ThemeSwitcher', () => {
     document.cookie = 'theme=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
   })
 
-  it('Material Design Iconsのアイコンを描く', async () => {
+  // swap-on（ライトテーマ）が太陽、swap-off（ダークテーマ）が月。
+  // テーマと逆のアイコンが出ると、押した結果が直感と食い違う。
+  it('太陽と月のアイコンをswapで切り替える', async () => {
     const component = await mountSuspended(ThemeSwitcher)
+    const icons = component.findAllComponents(Icon)
 
-    expect(component.findComponent(Icon).props('name')).toBe(
-      'mdi:theme-light-dark',
-    )
+    expect(component.find('.swap').classes()).toContain('swap-rotate')
+    expect(icons.map((icon) => icon.props('name'))).toEqual([
+      'heroicons:sun',
+      'heroicons:moon',
+    ])
+    expect(icons[0]?.classes()).toContain('swap-on')
+    expect(icons[1]?.classes()).toContain('swap-off')
   })
 
   it('既定のダークテーマでは押されていない状態にする', async () => {
     const component = await mountSuspended(ThemeSwitcher)
 
     expect(component.find('button').attributes('aria-pressed')).toBe('false')
+    expect(component.find('.swap').classes()).not.toContain('swap-active')
   })
 
   // クッキーへの保存を確かめる。セッションに入れると未認証ページや
@@ -33,6 +41,7 @@ describe('ThemeSwitcher', () => {
 
     expect(document.cookie).toContain('theme=light')
     expect(component.find('button').attributes('aria-pressed')).toBe('true')
+    expect(component.find('.swap').classes()).toContain('swap-active')
   })
 
   // 読み上げ環境ではアイコンだけのボタンが何のためのものか分からない。

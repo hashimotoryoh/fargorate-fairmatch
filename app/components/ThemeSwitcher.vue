@@ -14,6 +14,16 @@ function toggle() {
     :aria-label="$t('theme.switchLabel')"
     @click="toggle"
   >
-    <Icon name="mdi:theme-light-dark" class="size-5" />
+    <!--
+      daisyUIのswapはチェックボックスでも切り替えられるが、状態の実体が
+      クッキー（useTheme）にあるため、`swap-active` のクラスで制御する。
+    -->
+    <span
+      class="swap swap-rotate"
+      :class="{ 'swap-active': theme === 'light' }"
+    >
+      <Icon name="heroicons:sun" class="swap-on size-5" />
+      <Icon name="heroicons:moon" class="swap-off size-5" />
+    </span>
   </button>
 </template>
