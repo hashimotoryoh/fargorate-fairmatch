@@ -5,18 +5,9 @@
  * 選択肢は `nuxt.config.ts` の `i18n.locales` から作る。言語を増やす作業を
  * 設定と翻訳ファイルの追加だけで完結させるため、ここに言語を書かない。
  */
-const { locale, locales } = useI18n()
+const { locale } = useI18n()
 const switchLocalePath = useSwitchLocalePath()
-
-// `flag` は `LocaleObject` のカスタムプロパティで型が `unknown` のため、
-// ここで文字列に絞ってからテンプレートへ渡す。
-const localeOptions = computed(() =>
-  locales.value.map((item) => ({
-    code: item.code,
-    name: item.name ?? item.code,
-    flag: typeof item.flag === 'string' ? item.flag : '',
-  })),
-)
+const localeOptions = useLocaleOptions()
 
 // daisyUIのドロップダウンはフォーカスの有無で開閉するため、
 // 選んだ後にフォーカスを外して明示的に閉じる。
