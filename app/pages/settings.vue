@@ -47,9 +47,9 @@ function clearLocalData() {
     <div class="bg-base-200 rounded-box">
       <ul class="list">
         <li class="list-row items-center">
-          <div class="avatar placeholder">
-            <div class="bg-neutral text-neutral-content w-11 rounded-full">
-              <Icon name="mdi:account" class="size-6" />
+          <div class="avatar avatar-placeholder">
+            <div class="bg-neutral text-neutral-content size-9 rounded-full">
+              <Icon name="heroicons:user-solid" class="size-6" />
             </div>
           </div>
           <div class="list-col-grow min-w-0">
@@ -98,14 +98,18 @@ function clearLocalData() {
                 {{ $t('settings.themeDescription') }}
               </p>
             </div>
-            <ThemeSwitcher />
+            <label class="max-sm:toggle max-sm:text-base-content sm:flex sm:cursor-pointer sm:gap-2">
+              <input type="checkbox" value="synthwave" class="sm:toggle theme-controller" />
+              <Icon name="heroicons:sun" class="size-4 sm:size-5 sm:order-first" />
+              <Icon name="heroicons:moon" class="size-4 sm:size-5 sm:order-last" />
+            </label>
           </li>
 
           <li class="list-row items-center">
             <div
               class="bg-secondary text-secondary-content flex size-9 shrink-0 items-center justify-center rounded-lg"
             >
-              <Icon name="mdi:translate" class="size-5" />
+              <Icon name="heroicons:language" class="size-5" />
             </div>
             <div class="list-col-grow min-w-0">
               <p class="font-medium">{{ $t('settings.language') }}</p>
@@ -131,12 +135,13 @@ function clearLocalData() {
           <li>
             <NuxtLink
               :to="localePath('/blog')"
-              class="list-row hover:bg-base-300 items-center transition-colors"
+              class="list-row rounded-b-none hover:bg-base-300 items-center transition-colors"
+              target="_blank"
             >
               <div
-                class="bg-accent text-accent-content flex size-9 shrink-0 items-center justify-center rounded-lg"
+                class="bg-info text-info-content flex size-9 shrink-0 items-center justify-center rounded-lg"
               >
-                <Icon name="mdi:newspaper-variant-outline" class="size-5" />
+                <Icon name="heroicons:newspaper" class="size-5" />
               </div>
               <div class="list-col-grow min-w-0">
                 <p class="font-medium">{{ $t('document.blog') }}</p>
@@ -145,7 +150,7 @@ function clearLocalData() {
                 </p>
               </div>
               <Icon
-                name="mdi:chevron-right"
+                name="heroicons:chevron-right"
                 class="text-base-content/30 size-5"
               />
             </NuxtLink>
@@ -154,12 +159,13 @@ function clearLocalData() {
           <li>
             <NuxtLink
               :to="localePath('/faq')"
-              class="list-row hover:bg-base-300 items-center transition-colors"
+              class="list-row rounded-t-none hover:bg-base-300 items-center transition-colors"
+              target="_blank"
             >
               <div
                 class="bg-info text-info-content flex size-9 shrink-0 items-center justify-center rounded-lg"
               >
-                <Icon name="mdi:help-circle-outline" class="size-5" />
+                <Icon name="heroicons:question-mark-circle" class="size-5" />
               </div>
               <div class="list-col-grow min-w-0">
                 <p class="font-medium">{{ $t('document.faq') }}</p>
@@ -168,7 +174,7 @@ function clearLocalData() {
                 </p>
               </div>
               <Icon
-                name="mdi:chevron-right"
+                name="heroicons:chevron-right"
                 class="text-base-content/30 size-5"
               />
             </NuxtLink>
@@ -189,13 +195,13 @@ function clearLocalData() {
           <li>
             <button
               type="button"
-              class="list-row hover:bg-base-300 w-full items-center text-left transition-colors"
+              class="list-row hover:bg-base-300 w-full items-center text-left transition-colors cursor-pointer"
               @click="clearLocalData"
             >
               <div
                 class="bg-error/15 text-error flex size-9 shrink-0 items-center justify-center rounded-lg"
               >
-                <Icon name="mdi:trash-can-outline" class="size-5" />
+                <Icon name="heroicons:trash" class="size-5" />
               </div>
               <span class="text-error list-col-grow font-medium">
                 {{ $t('settings.localData.clear') }}
@@ -213,25 +219,14 @@ function clearLocalData() {
     </div>
 
     <!-- サインアウト。iOSの設定アプリに倣い、独立したグループで中央揃えの赤文字にする。 -->
-    <div class="bg-base-200 rounded-box">
-      <ul class="list">
-        <li>
-          <button
-            type="button"
-            class="hover:bg-base-300 flex w-full items-center justify-center gap-2 rounded-box p-4 transition-colors"
-            :disabled="signingOut"
-            @click="signOut"
-          >
-            <span
-              v-if="signingOut"
-              class="loading loading-spinner loading-sm"
-            />
-            <span class="text-error font-medium">
-              {{ $t('settings.signOut') }}
-            </span>
-          </button>
-        </li>
-      </ul>
-    </div>
+    <button
+      type="button"
+      class="btn btn-error btn-soft rounded-box h-12"
+      :disabled="signingOut"
+      @click="signOut"
+    >
+      <span v-if="signingOut" class="loading loading-spinner" />
+      {{ $t('settings.signOut') }}
+    </button>
   </div>
 </template>
