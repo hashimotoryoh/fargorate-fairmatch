@@ -9,8 +9,10 @@ useSeoMeta({ title: () => t('seo.settings.title') })
 
 const { user, clear } = useUserSession()
 const signingOut = ref(false)
+const signOutDialog = useTemplateRef<HTMLDialogElement>('signOutDialog')
 
 async function signOut() {
+  signOutDialog.value?.close()
   signingOut.value = true
 
   try {
@@ -21,16 +23,35 @@ async function signOut() {
   }
 }
 
+const theme = useTheme()
+
+function toggleTheme() {
+  theme.value = theme.value === 'dark' ? 'light' : 'dark'
+}
+
+const { locale } = useI18n()
+const switchLocalePath = useSwitchLocalePath()
+const localeOptions = useLocaleOptions()
+
+function changeLocale(event: Event) {
+  const code = (event.target as HTMLSelectElement).value
+  navigateTo(switchLocalePath(code))
+}
+
 const { clearRecentOpponents } = useRecentOpponents()
 const { clearRecentAccounts } = useRecentAccounts()
 const { clearGameSetup } = useGameSetup()
 const { resetMatch } = useFairSingleRace()
 
 const localDataCleared = ref(false)
+const clearLocalDataDialog = useTemplateRef<HTMLDialogElement>(
+  'clearLocalDataDialog',
+)
 
 // 消すのはこの端末に保存したデータだけ。サーバー側のAPIキャッシュは
 // 全ユーザー共有なので、個人の設定からは触らない。
 function clearLocalData() {
+  clearLocalDataDialog.value?.close()
   clearRecentOpponents()
   clearRecentAccounts()
   clearGameSetup()
@@ -98,10 +119,24 @@ function clearLocalData() {
                 {{ $t('settings.themeDescription') }}
               </p>
             </div>
-            <label class="max-sm:toggle max-sm:text-base-content sm:flex sm:cursor-pointer sm:gap-2">
-              <input type="checkbox" value="synthwave" class="sm:toggle theme-controller" />
-              <Icon name="heroicons:sun" class="size-4 sm:size-5 sm:order-first" />
-              <Icon name="heroicons:moon" class="size-4 sm:size-5 sm:order-last" />
+            <label
+              class="max-sm:toggle max-sm:text-base-content sm:flex sm:cursor-pointer sm:gap-2"
+            >
+              <input
+                type="checkbox"
+                class="sm:toggle"
+                :checked="theme === 'light'"
+                :aria-label="$t('theme.switchLabel')"
+                @change="toggleTheme"
+              />
+              <Icon
+                name="heroicons:sun"
+                class="size-4 sm:size-5 sm:order-first"
+              />
+              <Icon
+                name="heroicons:moon"
+                class="size-4 sm:size-5 sm:order-last"
+              />
             </label>
           </li>
 
@@ -117,7 +152,20 @@ function clearLocalData() {
                 {{ $t('settings.languageDescription') }}
               </p>
             </div>
-            <LocaleSwitcher />
+            <select
+              class="select select-sm w-auto"
+              :value="locale"
+              :aria-label="$t('locale.switchLabel')"
+              @change="changeLocale"
+            >
+              <option
+                v-for="item in localeOptions"
+                :key="item.code"
+                :value="item.code"
+              >
+                {{ item.flag }} {{ item.name }}
+              </option>
+            </select>
           </li>
         </ul>
       </div>
@@ -196,7 +244,7 @@ function clearLocalData() {
             <button
               type="button"
               class="list-row hover:bg-base-300 w-full items-center text-left transition-colors cursor-pointer"
-              @click="clearLocalData"
+              @click="clearLocalDataDialog?.showModal()"
             >
               <div
                 class="bg-error/15 text-error flex size-9 shrink-0 items-center justify-center rounded-lg"
@@ -218,15 +266,63 @@ function clearLocalData() {
       </p>
     </div>
 
+    <dialog ref="clearLocalDataDialog" class="modal">
+      <div class="modal-box max-w-sm">
+        <h2 class="text-lg font-bold">
+          {{ $t('settings.localData.confirmHeading') }}
+        </h2>
+        <p class="text-base-content/70 mt-2 text-sm">
+          {{ $t('settings.localData.description') }}
+        </p>
+
+        <div class="modal-action">
+          <button class="btn btn-error" type="button" @click="clearLocalData">
+            {{ $t('settings.localData.clear') }}
+          </button>
+          <form method="dialog">
+            <button class="btn">{{ $t('settings.cancel') }}</button>
+          </form>
+        </div>
+      </div>
+
+      <form method="dialog" class="modal-backdrop">
+        <button>{{ $t('settings.cancel') }}</button>
+      </form>
+    </dialog>
+
     <!-- サインアウト。iOSの設定アプリに倣い、独立したグループで中央揃えの赤文字にする。 -->
     <button
       type="button"
       class="btn btn-error btn-soft rounded-box h-12"
       :disabled="signingOut"
-      @click="signOut"
+      @click="signOutDialog?.showModal()"
     >
       <span v-if="signingOut" class="loading loading-spinner" />
       {{ $t('settings.signOut') }}
     </button>
+
+    <dialog ref="signOutDialog" class="modal">
+      <div class="modal-box max-w-sm">
+        <h2 class="text-lg font-bold">
+          {{ $t('settings.signOutConfirmHeading') }}
+        </h2>
+        <p class="text-base-content/70 mt-2 text-sm">
+          {{ $t('settings.signOutConfirmLead') }}
+        </p>
+
+        <div class="modal-action">
+          <button class="btn btn-error" type="button" @click="signOut">
+            {{ $t('settings.signOut') }}
+          </button>
+          <form method="dialog">
+            <button class="btn">{{ $t('settings.cancel') }}</button>
+          </form>
+        </div>
+      </div>
+
+      <form method="dialog" class="modal-backdrop">
+        <button>{{ $t('settings.cancel') }}</button>
+      </form>
+    </dialog>
   </div>
 </template>

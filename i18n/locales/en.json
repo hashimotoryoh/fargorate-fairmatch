@@ -302,6 +302,8 @@
     "playingAs": "You're using the app as {name} ({membershipId}).",
     "playingAsGuest": "You're using the app as {name} (guest). Your rating is self-reported and is not tied to any FargoRate record.",
     "signOut": "Sign out",
+    "signOutConfirmHeading": "Sign out?",
+    "signOutConfirmLead": "This ends your session on this device.",
     "appearanceSection": "Display",
     "theme": "Theme",
     "themeDescription": "Choose the color scheme used across the app.",
@@ -313,9 +315,11 @@
     "localData": {
       "heading": "Data stored on this device",
       "description": "Deletes data stored on this device, such as recent opponents, recently used accounts, and the game in progress. You will stay signed in.",
+      "confirmHeading": "Delete data stored on this device?",
       "clear": "Delete",
       "cleared": "Deleted."
-    }
+    },
+    "cancel": "Cancel"
   },
   "blog": {
     "heading": "Blog",
