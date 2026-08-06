@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ConfirmDialog } from '#components'
+
 const { headingKey, leadKey } = defineProps<{
   /** 確認ダイアログの文言。ブリーフィングとプレイ中で破棄する範囲が違う。 */
   headingKey: string
@@ -8,12 +10,7 @@ const { headingKey, leadKey } = defineProps<{
 // 破棄する範囲と戻り先はページごとに違うため、確定の処理は呼び出し側が持つ。
 const emit = defineEmits<{ confirm: [] }>()
 
-const dialog = useTemplateRef<HTMLDialogElement>('dialog')
-
-function confirm() {
-  dialog.value?.close()
-  emit('confirm')
-}
+const dialog = useTemplateRef<InstanceType<typeof ConfirmDialog>>('dialog')
 </script>
 
 <template>
@@ -25,23 +22,12 @@ function confirm() {
     {{ $t('games.header.quit') }}
   </button>
 
-  <dialog ref="dialog" class="modal">
-    <div class="modal-box max-w-sm">
-      <h2 class="text-lg font-bold">{{ $t(headingKey) }}</h2>
-      <p class="text-base-content/70 mt-2 text-sm">{{ $t(leadKey) }}</p>
-
-      <div class="modal-action">
-        <button class="btn btn-error" type="button" @click="confirm">
-          {{ $t('games.header.confirm') }}
-        </button>
-        <form method="dialog">
-          <button class="btn">{{ $t('games.header.cancel') }}</button>
-        </form>
-      </div>
-    </div>
-
-    <form method="dialog" class="modal-backdrop">
-      <button>{{ $t('games.header.cancel') }}</button>
-    </form>
-  </dialog>
+  <ConfirmDialog
+    ref="dialog"
+    :heading-key="headingKey"
+    :lead-key="leadKey"
+    confirm-key="games.header.confirm"
+    cancel-key="games.header.cancel"
+    @confirm="emit('confirm')"
+  />
 </template>
