@@ -64,7 +64,7 @@ useHead(() => ({
     </div>
 
     <label class="input input-bordered flex w-full items-center gap-2">
-      <Icon name="mdi:magnify" class="text-base-content/50" />
+      <Icon name="heroicons:magnifying-glass" class="text-base-content/50" />
       <input
         v-model.trim="searchQuery"
         type="search"

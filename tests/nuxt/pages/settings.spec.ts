@@ -37,6 +37,65 @@ async function useLocale(code: 'ja' | 'en') {
   navigateToMock.mockClear()
 }
 
+// サインアウトのボタンは独立したグループの中央揃えのボタンであり、
+// DOM順で最初のボタンとは限らないため、文言で特定する。表示中のロケールで
+// 探さないと、英語表示のテストで見つからなくなる。確認ダイアログの中にも
+// 同じ文言のボタンがあるため、ダイアログの外側だけを対象にする。
+function findSignOutButton(
+  component: Awaited<ReturnType<typeof mountSuspended>>,
+) {
+  const signOutLabel = useNuxtApp().$i18n.t('settings.signOut')
+  const button = component
+    .findAll('button')
+    .find(
+      (button) =>
+        button.text().includes(signOutLabel) &&
+        !button.element.closest('dialog'),
+    )
+
+  if (!button) {
+    throw new Error('サインアウトのボタンが見つかりません')
+  }
+
+  return button
+}
+
+// happy-domは<dialog>のshowModal()を実装していないため、開くきっかけを
+// 押す前にスタブへ差し替える。
+function stubDialogs(component: Awaited<ReturnType<typeof mountSuspended>>) {
+  for (const dialog of component.findAll('dialog')) {
+    const element = dialog.element as HTMLDialogElement
+    element.showModal = () => element.setAttribute('open', '')
+    element.close = () => element.removeAttribute('open')
+  }
+}
+
+async function signOutViaDialog(
+  component: Awaited<ReturnType<typeof mountSuspended>>,
+) {
+  stubDialogs(component)
+  await findSignOutButton(component).trigger('click')
+
+  const heading = useNuxtApp().$i18n.t('settings.signOutConfirmHeading')
+  const dialog = component
+    .findAll('dialog')
+    .find((dialog) => dialog.text().includes(heading))
+
+  if (!dialog) {
+    throw new Error('サインアウトの確認ダイアログが見つかりません')
+  }
+
+  const confirmButton = dialog
+    .findAll('button')
+    .find((button) => button.classes().includes('btn-error'))
+
+  if (!confirmButton) {
+    throw new Error('サインアウトの確認ボタンが見つかりません')
+  }
+
+  await confirmButton.trigger('click')
+}
+
 describe('設定ページ', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
@@ -83,13 +142,26 @@ describe('設定ページ', () => {
 
     expect(component.text()).not.toContain('Taro Yamada')
     expect(component.text()).not.toContain('9900001234567')
-    expect(component.find('button').exists()).toBe(true)
+    expect(findSignOutButton(component).exists()).toBe(true)
   })
 
-  it('サインアウトするとセッションを破棄してトップページへ移動する', async () => {
+  // 誤操作での破棄を防ぐため、確認ダイアログを経由させる。
+  it('サインアウトのボタンを押しただけではサインアウトしない', async () => {
+    const component = await mountSuspended(SettingsPage)
+    stubDialogs(component)
+
+    await findSignOutButton(component).trigger('click')
+
+    expect(clearMock).not.toHaveBeenCalled()
+    expect(component.text()).toContain(
+      jaMessage('settings.signOutConfirmHeading'),
+    )
+  })
+
+  it('確認ダイアログで確定するとセッションを破棄してトップページへ移動する', async () => {
     const component = await mountSuspended(SettingsPage)
 
-    await component.find('button').trigger('click')
+    await signOutViaDialog(component)
     await flushPromises()
 
     expect(clearMock).toHaveBeenCalledTimes(1)
@@ -102,7 +174,7 @@ describe('設定ページ', () => {
 
     const component = await mountSuspended(SettingsPage)
 
-    await component.find('button').trigger('click')
+    await signOutViaDialog(component)
     await flushPromises()
 
     expect(navigateToMock).toHaveBeenCalledWith('/en')
@@ -112,7 +184,46 @@ describe('設定ページ', () => {
     const component = await mountSuspended(SettingsPage)
 
     expect(component.text()).toContain(jaMessage('settings.theme'))
-    expect(component.findComponent(Icon).props('name')).toBe('heroicons:sun')
+    expect(
+      component
+        .findAllComponents(Icon)
+        .map((icon) => icon.props('name'))
+        .includes('heroicons:sun'),
+    ).toBe(true)
+  })
+
+  it('テーマの切り替えを操作すると配色が入れ替わる', async () => {
+    const component = await mountSuspended(SettingsPage)
+    const checkbox = component.find(
+      `input[aria-label="${jaMessage('theme.switchLabel')}"]`,
+    )
+
+    // 既定は dark なので、最初は未チェック（light ではない）。
+    expect((checkbox.element as HTMLInputElement).checked).toBe(false)
+
+    await checkbox.trigger('change')
+
+    expect((checkbox.element as HTMLInputElement).checked).toBe(true)
+  })
+
+  it('言語のセレクトボックスに現在選択中の言語を示す', async () => {
+    const component = await mountSuspended(SettingsPage)
+    const select = component.find(
+      `select[aria-label="${jaMessage('locale.switchLabel')}"]`,
+    )
+
+    expect((select.element as HTMLSelectElement).value).toBe('ja')
+  })
+
+  it('言語のセレクトボックスを切り替えるとそのロケールのURLへ移動する', async () => {
+    const component = await mountSuspended(SettingsPage)
+    const select = component.find(
+      `select[aria-label="${jaMessage('locale.switchLabel')}"]`,
+    )
+
+    await select.setValue('en')
+
+    expect(navigateToMock).toHaveBeenCalledWith('/en')
   })
 
   // 主要ナビゲーションにはタブを追加しない方針のため、設定画面がフッターと
@@ -145,12 +256,66 @@ describe('設定ページ', () => {
     )
 
     const component = await mountSuspended(SettingsPage)
-    await component.find('button').trigger('click')
+    stubDialogs(component)
+    await findSignOutButton(component).trigger('click')
 
-    expect(component.find('button').attributes('disabled')).toBeDefined()
+    const heading = jaMessage('settings.signOutConfirmHeading')
+    const dialog = component
+      .findAll('dialog')
+      .find((dialog) => dialog.text().includes(heading))
+    const confirmButton = dialog
+      ?.findAll('button')
+      .find((button) => button.classes().includes('btn-error'))
+    await confirmButton?.trigger('click')
+
+    expect(findSignOutButton(component).attributes('disabled')).toBeDefined()
     expect(component.find('.loading-spinner').exists()).toBe(true)
 
     resolveClear?.()
     await flushPromises()
+  })
+
+  // 削除ボタンを押しただけで消えてしまうと、誤操作で対戦相手の履歴などを
+  // 失いかねない。確認ダイアログを経由させる。
+  it('端末データの削除ボタンを押しただけでは削除しない', async () => {
+    const component = await mountSuspended(SettingsPage)
+    stubDialogs(component)
+
+    const trigger = component
+      .findAll('button')
+      .find((button) =>
+        button.text().includes(jaMessage('settings.localData.clear')),
+      )
+    await trigger?.trigger('click')
+
+    expect(component.text()).not.toContain(
+      jaMessage('settings.localData.cleared'),
+    )
+    expect(component.text()).toContain(
+      jaMessage('settings.localData.confirmHeading'),
+    )
+  })
+
+  it('確認ダイアログで確定すると端末に保存したデータを削除する', async () => {
+    const component = await mountSuspended(SettingsPage)
+    stubDialogs(component)
+
+    const trigger = component
+      .findAll('button')
+      .find((button) =>
+        button.text().includes(jaMessage('settings.localData.clear')),
+      )
+    await trigger?.trigger('click')
+
+    const heading = jaMessage('settings.localData.confirmHeading')
+    const dialog = component
+      .findAll('dialog')
+      .find((dialog) => dialog.text().includes(heading))
+    const confirmButton = dialog
+      ?.findAll('button')
+      .find((button) => button.classes().includes('btn-error'))
+    await confirmButton?.trigger('click')
+
+    expect(component.text()).toContain(jaMessage('settings.localData.cleared'))
   })
 })

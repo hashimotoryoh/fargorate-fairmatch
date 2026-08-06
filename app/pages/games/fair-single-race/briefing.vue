@@ -227,7 +227,7 @@ async function quitBriefing() {
                   v-if="selected.recommended"
                   class="text-warning flex items-center gap-1 text-xs font-bold"
                 >
-                  <Icon name="mdi:fire" class="size-4" />
+                  <Icon name="heroicons:fire" class="size-4" />
                   {{ $t('games.fairSingleRace.briefing.recommended') }}
                 </span>
 
@@ -293,7 +293,7 @@ async function quitBriefing() {
                   </span>
                   <Icon
                     v-if="option.recommended"
-                    name="mdi:fire"
+                    name="heroicons:fire"
                     class="text-warning size-4"
                   />
                 </button>

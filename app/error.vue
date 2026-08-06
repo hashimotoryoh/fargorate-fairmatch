@@ -43,9 +43,12 @@ function handleBackHome() {
       <div class="hero-content flex-col gap-6 text-center">
         <Icon
           :name="
-            isNotFound ? 'mdi:file-search-outline' : 'mdi:alert-circle-outline'
+            isNotFound
+              ? 'heroicons:document-magnifying-glass'
+              : 'heroicons:exclamation-circle'
           "
-          class="text-primary size-20"
+          class="size-20"
+          :class="{ 'text-warning': isNotFound, 'text-error!': !isNotFound }"
         />
 
         <div class="flex flex-col gap-2">

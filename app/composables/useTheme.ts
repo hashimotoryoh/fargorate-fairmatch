@@ -25,3 +25,11 @@ export function useTheme() {
     decode: (value) => (isTheme(value) ? value : DEFAULT_THEME),
   })
 }
+
+/**
+ * `useTheme()` の戻り値を切り替える。テーマの種類が増えたときの更新漏れを
+ * 防ぐため、切り替えの判断はここへ一本化し、呼び出し側には持たせない。
+ */
+export function toggleTheme(theme: ReturnType<typeof useTheme>) {
+  theme.value = theme.value === 'dark' ? 'light' : 'dark'
+}
