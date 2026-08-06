@@ -43,10 +43,12 @@ function handleBackHome() {
       <div class="hero-content flex-col gap-6 text-center">
         <Icon
           :name="
-            isNotFound ? 'heroicons:document-magnifying-glass' : 'heroicons:exclamation-circle'
+            isNotFound
+              ? 'heroicons:document-magnifying-glass'
+              : 'heroicons:exclamation-circle'
           "
           class="size-20"
-          :class="{'text-warning': isNotFound, 'text-error!': !isNotFound}"
+          :class="{ 'text-warning': isNotFound, 'text-error!': !isNotFound }"
         />
 
         <div class="flex flex-col gap-2">
