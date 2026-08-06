@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ConfirmDialog } from '#components'
+
 definePageMeta({ middleware: 'auth', layout: 'authenticated' })
 
 const { t } = useI18n()
@@ -9,10 +11,10 @@ useSeoMeta({ title: () => t('seo.settings.title') })
 
 const { user, clear } = useUserSession()
 const signingOut = ref(false)
-const signOutDialog = useTemplateRef<HTMLDialogElement>('signOutDialog')
+const signOutDialog =
+  useTemplateRef<InstanceType<typeof ConfirmDialog>>('signOutDialog')
 
 async function signOut() {
-  signOutDialog.value?.close()
   signingOut.value = true
 
   try {
@@ -25,8 +27,10 @@ async function signOut() {
 
 const theme = useTheme()
 
-function toggleTheme() {
-  theme.value = theme.value === 'dark' ? 'light' : 'dark'
+// テンプレート内ではrefが自動アンラップされ`theme`が値そのものになるため、
+// Refを渡す必要があるtoggleTheme()はここで一段挟んで呼ぶ。
+function onToggleTheme() {
+  toggleTheme(theme)
 }
 
 const { locale } = useI18n()
@@ -44,14 +48,13 @@ const { clearGameSetup } = useGameSetup()
 const { resetMatch } = useFairSingleRace()
 
 const localDataCleared = ref(false)
-const clearLocalDataDialog = useTemplateRef<HTMLDialogElement>(
+const clearLocalDataDialog = useTemplateRef<InstanceType<typeof ConfirmDialog>>(
   'clearLocalDataDialog',
 )
 
 // 消すのはこの端末に保存したデータだけ。サーバー側のAPIキャッシュは
 // 全ユーザー共有なので、個人の設定からは触らない。
 function clearLocalData() {
-  clearLocalDataDialog.value?.close()
   clearRecentOpponents()
   clearRecentAccounts()
   clearGameSetup()
@@ -127,7 +130,7 @@ function clearLocalData() {
                 class="sm:toggle"
                 :checked="theme === 'light'"
                 :aria-label="$t('theme.switchLabel')"
-                @change="toggleTheme"
+                @change="onToggleTheme"
               />
               <Icon
                 name="heroicons:sun"
@@ -185,6 +188,7 @@ function clearLocalData() {
               :to="localePath('/blog')"
               class="list-row rounded-b-none hover:bg-base-300 items-center transition-colors"
               target="_blank"
+              rel="noopener"
             >
               <div
                 class="bg-info text-info-content flex size-9 shrink-0 items-center justify-center rounded-lg"
@@ -209,6 +213,7 @@ function clearLocalData() {
               :to="localePath('/faq')"
               class="list-row rounded-t-none hover:bg-base-300 items-center transition-colors"
               target="_blank"
+              rel="noopener"
             >
               <div
                 class="bg-info text-info-content flex size-9 shrink-0 items-center justify-center rounded-lg"
@@ -266,29 +271,14 @@ function clearLocalData() {
       </p>
     </div>
 
-    <dialog ref="clearLocalDataDialog" class="modal">
-      <div class="modal-box max-w-sm">
-        <h2 class="text-lg font-bold">
-          {{ $t('settings.localData.confirmHeading') }}
-        </h2>
-        <p class="text-base-content/70 mt-2 text-sm">
-          {{ $t('settings.localData.description') }}
-        </p>
-
-        <div class="modal-action">
-          <button class="btn btn-error" type="button" @click="clearLocalData">
-            {{ $t('settings.localData.clear') }}
-          </button>
-          <form method="dialog">
-            <button class="btn">{{ $t('settings.cancel') }}</button>
-          </form>
-        </div>
-      </div>
-
-      <form method="dialog" class="modal-backdrop">
-        <button>{{ $t('settings.cancel') }}</button>
-      </form>
-    </dialog>
+    <ConfirmDialog
+      ref="clearLocalDataDialog"
+      heading-key="settings.localData.confirmHeading"
+      lead-key="settings.localData.description"
+      confirm-key="settings.localData.clear"
+      cancel-key="settings.cancel"
+      @confirm="clearLocalData"
+    />
 
     <!-- サインアウト。iOSの設定アプリに倣い、独立したグループで中央揃えの赤文字にする。 -->
     <button
@@ -301,28 +291,13 @@ function clearLocalData() {
       {{ $t('settings.signOut') }}
     </button>
 
-    <dialog ref="signOutDialog" class="modal">
-      <div class="modal-box max-w-sm">
-        <h2 class="text-lg font-bold">
-          {{ $t('settings.signOutConfirmHeading') }}
-        </h2>
-        <p class="text-base-content/70 mt-2 text-sm">
-          {{ $t('settings.signOutConfirmLead') }}
-        </p>
-
-        <div class="modal-action">
-          <button class="btn btn-error" type="button" @click="signOut">
-            {{ $t('settings.signOut') }}
-          </button>
-          <form method="dialog">
-            <button class="btn">{{ $t('settings.cancel') }}</button>
-          </form>
-        </div>
-      </div>
-
-      <form method="dialog" class="modal-backdrop">
-        <button>{{ $t('settings.cancel') }}</button>
-      </form>
-    </dialog>
+    <ConfirmDialog
+      ref="signOutDialog"
+      heading-key="settings.signOutConfirmHeading"
+      lead-key="settings.signOutConfirmLead"
+      confirm-key="settings.signOut"
+      cancel-key="settings.cancel"
+      @confirm="signOut"
+    />
   </div>
 </template>

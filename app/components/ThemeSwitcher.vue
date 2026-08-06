@@ -2,7 +2,7 @@
 const theme = useTheme()
 
 function toggle() {
-  theme.value = theme.value === 'dark' ? 'light' : 'dark'
+  toggleTheme(theme)
 }
 </script>
 
